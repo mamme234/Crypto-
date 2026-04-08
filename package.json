@@ -1,0 +1,14 @@
+{
+  "name": "earn-app-ultra",
+  "version": "1.0.0",
+  "main": "backend/server.js",
+  "scripts": { "start":"node backend/server.js" },
+  "dependencies": {
+    "body-parser":"^1.20.0",
+    "cors":"^2.8.5",
+    "express":"^4.18.2",
+    "mongoose":"^7.0.0",
+    "bcryptjs":"^2.4.3",
+    "jsonwebtoken":"^9.0.0"
+  }
+}

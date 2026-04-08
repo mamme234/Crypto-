@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Earn App Ultra</title>
+<title>Crypto</title>
 <style>
 body {margin:0;font-family:Arial;background:linear-gradient(to bottom,#0d0d0d,#111);color:#fff;text-align:center;}
 .screen{display:none;padding:20px;}
@@ -63,9 +63,9 @@ input{padding:12px;margin:8px;border-radius:12px;border:none;width:80%;text-alig
   </div>
   <div class="card">
     <h3>Social Tasks</h3>
-    <button class="task-btn" onclick="completeTask('Telegram')">Join Telegram (+500 coins)</button>
-    <button class="task-btn" onclick="completeTask('TikTok')">Follow TikTok (+1000 coins)</button>
-    <button class="task-btn" onclick="completeTask('YouTube')">Subscribe YouTube (+500 coins)</button>
+    <button class="task-btn button" onclick="completeTask('Telegram')">Join Telegram (+500 coins)</button>
+    <button class="task-btn button" onclick="completeTask('TikTok')">Follow TikTok (+1000 coins)</button>
+    <button class="task-btn button" onclick="completeTask('YouTube')">Subscribe YouTube (+500 coins)</button>
   </div>
 </div>
 
@@ -75,148 +75,134 @@ input{padding:12px;margin:8px;border-radius:12px;border:none;width:80%;text-alig
     <h3>Withdraw</h3>
     <p id="withdrawStatus"></p>
     <button id="withdrawButton" class="button">Withdraw</button>
+    <button id="depositButton" class="button">Deposit $5 to Unlock Withdraw</button>
   </div>
 </div>
 
 <script>
-// ✅ Live backend API URL
-const API_URL = "https://crypto-1-3gza.onrender.com";
-
-let token = null, coins = 0, usdt = 0, level = 1, referrals = 0;
+const API_URL = "https://crypto-1-3gza.onrender.com"; // Your backend URL
+let token = null, coins=0, usdt=0, level=1, referrals=0, withdrawUnlocked=false;
 
 // Navigation
-const homeNav=document.getElementById('homeNav'),
-      profileNav=document.getElementById('profileNav'),
-      withdrawNav=document.getElementById('withdrawNav');
-const homeScreen=document.getElementById('homeScreen'),
-      profileScreen=document.getElementById('profileScreen'),
-      withdrawScreen=document.getElementById('withdrawScreen');
+const homeNav=document.getElementById('homeNav'), profileNav=document.getElementById('profileNav'), withdrawNav=document.getElementById('withdrawNav');
+const homeScreen=document.getElementById('homeScreen'), profileScreen=document.getElementById('profileScreen'), withdrawScreen=document.getElementById('withdrawScreen');
 const navBar=document.getElementById('navBar');
 
-function switchScreen(screen,btn){
-  [homeScreen,profileScreen,withdrawScreen].forEach(s=>s.classList.remove('active'));
-  [homeNav,profileNav,withdrawNav].forEach(b=>b.classList.remove('active'));
-  screen.classList.add('active'); btn.classList.add('active');
-  updateWithdrawStatus();
+function switchScreen(screen,btn){ 
+  [homeScreen,profileScreen,withdrawScreen].forEach(s=>s.classList.remove('active')); 
+  [homeNav,profileNav,withdrawNav].forEach(b=>b.classList.remove('active')); 
+  screen.classList.add('active'); 
+  btn.classList.add('active'); 
+  updateWithdrawStatus(); 
 }
-
 homeNav.onclick=()=>switchScreen(homeScreen,homeNav);
 profileNav.onclick=()=>switchScreen(profileScreen,profileNav);
 withdrawNav.onclick=()=>switchScreen(withdrawScreen,withdrawNav);
 
-// Login
+// Login/Register
 document.getElementById('loginBtn').onclick=async()=>{
-  const email=document.getElementById('email').value,
-        password=document.getElementById('password').value;
-  const res=await fetch(`${API_URL}/api/login`,{
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({email,password})
-  });
+  const email=document.getElementById('email').value, password=document.getElementById('password').value;
+  const res=await fetch(`${API_URL}/api/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
   const data=await res.json();
   if(data.success){ token=data.token; navBar.style.display='flex'; fetchUserData(); switchScreen(homeScreen,homeNav); document.getElementById('loginScreen').classList.remove('active'); }
   else alert(data.message);
 };
-
-// Register with referral
-document.getElementById('registerBtn').onclick = async () => {
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-  const referral = prompt("Enter referral link (optional)"); // prompt for referral link
-  const res = await fetch(`${API_URL}/api/register`,{
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({email,password,referral})
-  });
-  const data = await res.json();
+document.getElementById('registerBtn').onclick=async()=>{
+  const email=document.getElementById('email').value, password=document.getElementById('password').value;
+  const res=await fetch(`${API_URL}/api/register`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
+  const data=await res.json();
   if(data.success){ token=data.token; navBar.style.display='flex'; fetchUserData(); switchScreen(homeScreen,homeNav); document.getElementById('loginScreen').classList.remove('active'); }
   else alert(data.message);
 };
 
 // User functions
-async function fetchUserData(){
-  const res=await fetch(`${API_URL}/api/user`,{ headers:{Authorization:`Bearer ${token}`} });
-  const data=await res.json();
-  coins=data.coins; usdt=data.usdt; level=data.level; referrals=data.referrals;
-  document.querySelector('.referral').value=data.referralLink;
-  document.getElementById('referrals').textContent = referrals;
-  updateCounters();
+async function fetchUserData(){ 
+  const res=await fetch(`${API_URL}/api/user`,{headers:{Authorization:`Bearer ${token}`}});
+  const data=await res.json(); 
+  coins=data.coins; usdt=parseFloat(data.usdt); level=data.level; referrals=data.referrals; withdrawUnlocked=data.withdrawUnlocked;
+  document.querySelector('.referral').value=data.referralLink; 
+  document.getElementById('referrals').textContent=referrals;
+  updateCounters(); 
 }
 
-async function addCoins(amount){
+async function addCoins(amount){ 
   const res=await fetch(`${API_URL}/api/user/coins`,{
-    method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
     body:JSON.stringify({coins:amount})
   });
-  const data = await res.json();
-  coins=data.coins; usdt=data.usdt; level=data.level;
-  updateCounters();
+  const data=await res.json(); 
+  coins=data.coins; usdt=parseFloat(data.usdt); level=data.level; 
+  updateCounters(); 
 }
 
-async function completeTask(task){
-  const res = await fetch(`${API_URL}/api/user/task`,{
-    method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
-    body: JSON.stringify({task})
+async function completeTask(task){ 
+  const res=await fetch(`${API_URL}/api/user/task`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
+    body:JSON.stringify({task})
   });
-  const data = await res.json();
-  coins=data.coins; referrals=data.referrals;
-  document.getElementById('referrals').textContent = referrals;
-  updateCounters();
-  alert(task+" completed!");
+  const data=await res.json(); 
+  coins=data.coins; referrals=data.referrals; 
+  document.getElementById('referrals').textContent=referrals;
+  updateCounters(); 
+  alert(task+" completed!"); 
 }
 
-// Withdraw
-async function requestWithdraw(){
-  const res = await fetch(`${API_URL}/api/user/withdraw`,{
-    method:'POST', headers:{Authorization:`Bearer ${token}`}
-  });
+async function requestWithdraw(){ 
+  const res=await fetch(`${API_URL}/api/user/withdraw`,{method:'POST',headers:{Authorization:`Bearer ${token}`}});
+  const data=await res.json(); 
+  alert(data.message); 
+  fetchUserData(); 
+}
+
+async function depositUnlock(){ 
+  const confirmDeposit = confirm("Pay $5 to unlock withdraw?");
+  if(!confirmDeposit) return;
+  const res = await fetch(`${API_URL}/api/user/depositUnlock`,{method:'POST',headers:{Authorization:`Bearer ${token}`}});
   const data = await res.json();
   alert(data.message);
   fetchUserData();
 }
 
-// Tap & counters
-const coinsElem=document.getElementById('coins'),
-      usdtElem=document.getElementById('usdt'),
-      levelElem=document.getElementById('level'),
-      coinProgress=document.getElementById('coinProgress'),
-      refProgress=document.getElementById('refProgress');
+// Tap game & counters
+const coinsElem=document.getElementById('coins'), usdtElem=document.getElementById('usdt'), levelElem=document.getElementById('level'), coinProgress=document.getElementById('coinProgress'), refProgress=document.getElementById('refProgress');
 
 document.getElementById('tapButton').onclick=(e)=>{ spawnCoin(e.clientX,e.clientY); addCoins(50); };
 document.getElementById('dailyReward').onclick=()=>addCoins(1000);
-document.getElementById('spinWheel').onclick=()=>{ let r=Math.floor(Math.random()*2000); addCoins(r); alert(`Spin Wheel: +${r} coins`); };
-
-function spawnCoin(x,y){
-  const c=document.createElement('div');
-  c.className='coin';
-  c.style.left=x+'px';
-  c.style.top=y+'px';
-  c.textContent='+50';
-  document.body.appendChild(c);
+document.getElementById('spinWheel').onclick=()=>{
+  let r=Math.floor(Math.random()*2000); addCoins(r); alert(`Spin Wheel: +${r} coins`);
+};
+function spawnCoin(x,y){ 
+  const c=document.createElement('div'); c.className='coin'; c.style.left=x+'px'; c.style.top=y+'px'; c.textContent='+50'; 
+  document.body.appendChild(c); 
   setTimeout(()=>c.remove(),1000);
 }
 
-function updateCounters(){
-  coinsElem.textContent=coins;
-  usdtElem.textContent=usdt.toFixed(2);
-  levelElem.textContent=level;
-  coinProgress.style.width=Math.min((coins/20000)*100,100)+'%';
+function updateCounters(){ 
+  coinsElem.textContent=coins; 
+  usdtElem.textContent=usdt.toFixed(2); 
+  levelElem.textContent=level; 
+  coinProgress.style.width=Math.min((coins/20000)*100,100)+'%'; 
   refProgress.style.width=Math.min((referrals/10)*100,100)+'%';
   updateWithdrawStatus();
 }
 
-const withdrawButton=document.getElementById('withdrawButton'),
-      withdrawStatus=document.getElementById('withdrawStatus');
+const withdrawButton=document.getElementById('withdrawButton'), depositButton=document.getElementById('depositButton'), withdrawStatus=document.getElementById('withdrawStatus');
 
-function updateWithdrawStatus(){
-  if(coins>=20000 && referrals>=10){
-    withdrawStatus.textContent="Eligible to withdraw!";
-    withdrawButton.disabled=false;
-  } else {
-    withdrawStatus.textContent="Withdraw locked: Reach 20,000 coins + 10 referrals";
-    withdrawButton.disabled=true;
-  }
+function updateWithdrawStatus(){ 
+  if((coins>=20000 && referrals>=10) || withdrawUnlocked){ 
+    withdrawStatus.textContent="Eligible to withdraw!"; 
+    withdrawButton.disabled=false; 
+  } else { 
+    withdrawStatus.textContent="Withdraw locked: Reach 20,000 coins + 10 referrals or deposit $5"; 
+    withdrawButton.disabled=true; 
+  } 
 }
 
 withdrawButton.onclick=()=>requestWithdraw();
+depositButton.onclick=()=>depositUnlock();
+
 </script>
 </body>
 </html>

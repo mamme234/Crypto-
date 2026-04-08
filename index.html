@@ -6,46 +6,123 @@
 <title>Crypto Ultra</title>
 
 <style>
-body{background:#000;color:#fff;text-align:center;font-family:sans-serif;}
-.tap{width:160px;height:160px;border-radius:50%;background:gold;margin:20px auto;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:bold;box-shadow:0 0 30px gold;}
-button{padding:10px;margin:5px;border:none;border-radius:10px;background:#111;color:#fff;}
-input{padding:8px;margin:5px;border-radius:10px;border:none;}
+body{margin:0;background:#0b0b0b;color:#fff;font-family:sans-serif;text-align:center}
+
+/* TOP */
+.topbar{display:flex;justify-content:space-between;padding:10px;font-size:20px}
+.menu-btn{cursor:pointer}
+
+/* MENU */
+.menu{
+position:fixed;top:0;right:-260px;width:260px;height:100%;
+background:#111;transition:0.3s;padding:20px;text-align:left;
+}
+.menu.active{right:0}
+.menu button{width:100%;padding:12px;margin:10px 0;border:none;border-radius:10px;background:#222;color:#fff}
+
+/* CARD */
+.card{background:#111;margin:10px;padding:15px;border-radius:15px}
+
+/* TAP */
+.tap{
+width:200px;height:200px;border-radius:50%;
+background:gold;margin:30px auto;
+display:flex;align-items:center;justify-content:center;
+font-size:22px;box-shadow:0 0 40px gold
+}
+
+/* NAV */
+.nav{position:fixed;bottom:0;width:100%;display:flex}
+.nav button{flex:1;padding:15px;background:#111;color:#fff;border:none}
+
+/* SOCIAL */
+.social button{
+width:100%;padding:12px;margin:5px 0;
+border:none;border-radius:10px;
+}
+
+/* REF */
+.ref-box{display:flex;margin-top:10px}
+.ref-box input{flex:1;padding:8px;border-radius:10px;border:none}
+.ref-box button{padding:8px;border-radius:10px;background:gold;border:none}
+
+/* HIDE */
+.hide{display:none}
 </style>
 </head>
 
 <body>
 
-<h2>💰 Crypto Ultra</h2>
+<!-- TOP -->
+<div class="topbar">
+<div>💰 Crypto</div>
+<div class="menu-btn" onclick="toggleMenu()">☰</div>
+</div>
 
-<div>
+<!-- MENU -->
+<div class="menu" id="menu">
+<h3>Menu</h3>
+<button onclick="depositUI()">💳 Deposit</button>
+<button onclick="alert('Send feedback to admin')">📝 Feedback</button>
+<button onclick="alert('Tap to earn coins')">❓ Help</button>
+<button onclick="alert('Crypto Ultra App')">ℹ️ About</button>
+<button onclick="alert('Coming soon...')">📡 Live</button>
+</div>
+
+<!-- HOME -->
+<div id="homeScreen">
+<div class="card">
+Level: <span id="level">1</span><br>
 Coins: <span id="coins">0</span><br>
 USDT: <span id="usdt">0.00</span>
 </div>
 
 <div class="tap" onclick="tap()">TAP</div>
+</div>
 
-<!-- SOCIAL -->
-<button onclick="task('tg')">📢 Telegram +500</button>
-<button onclick="task('tiktok')">🎵 TikTok +1000</button>
-<button onclick="task('yt')">▶️ YouTube +500</button>
+<!-- PROFILE -->
+<div id="profileScreen" class="hide">
 
-<br><br>
+<div class="card">
+User: <span id="user"></span><br>
+Referrals: <span id="refs">0</span>
+</div>
 
 <!-- REF -->
-<input id="refLink" readonly style="width:70%">
+<div class="ref-box">
+<input id="refLink" readonly>
 <button onclick="copyRef()">Copy</button>
+</div>
 
-<br><br>
+<!-- SOCIAL TASK -->
+<div class="social">
+<button onclick="task('tg')">📢 Join Telegram +500</button>
+<button onclick="task('tiktok')">🎵 Follow TikTok +1000</button>
+<button onclick="task('yt')">▶️ Subscribe YouTube +500</button>
+</div>
 
-<!-- DEPOSIT -->
-<input id="dep" placeholder="Deposit USDT">
-<button onclick="deposit()">Deposit</button>
-
-<br><br>
+</div>
 
 <!-- WITHDRAW -->
-<input id="amount" placeholder="Withdraw USDT">
-<button onclick="withdraw()">Withdraw</button>
+<div id="withdrawScreen" class="hide">
+
+<div class="card">
+<h3>Withdraw</h3>
+
+<p id="withdrawMsg"></p>
+
+<input id="amount" placeholder="USDT">
+<button onclick="withdraw()">Submit</button>
+</div>
+
+</div>
+
+<!-- NAV -->
+<div class="nav">
+<button onclick="showHome()">🏠</button>
+<button onclick="showProfile()">👤</button>
+<button onclick="showWithdraw()">💸</button>
+</div>
 
 <script>
 const API="https://crypto-qhaj.onrender.com";
@@ -53,29 +130,13 @@ const API="https://crypto-qhaj.onrender.com";
 const tg=window.Telegram.WebApp;
 tg.expand();
 
-let user=tg.initDataUnsafe?.user?.username||"guest";
-let ref=new URLSearchParams(location.search).get("start");
+let user=tg.initDataUnsafe?.user?.id || "guest";
 
 let state={coins:0,refs:0,deposit:0};
 
-// LOGIN
+// LOAD
 function load(){
 fetch(API+"/login",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({username:user,ref:ref})
-})
-.then(r=>r.json())
-.then(d=>{
-state=d.user;
-update();
-})
-.catch(()=>alert("❌ Cannot connect to backend"));
-}
-
-// TAP
-function tap(){
-fetch(API+"/tap",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({username:user})
@@ -87,63 +148,74 @@ update();
 });
 }
 
-// SOCIAL TASKS
-function task(type){
-fetch(API+"/reward",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({username:user,type:type})
-})
+// TAP
+function tap(){
+fetch(API+"/tap",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:user})})
 .then(r=>r.json())
-.then(d=>{
-state=d.user;
-update();
-});
+.then(d=>{state=d.user;update();});
 }
 
-// DEPOSIT
-function deposit(){
-let amount=document.getElementById("dep").value;
-
-fetch(API+"/deposit",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({username:user,amount})
-})
+// SOCIAL
+function task(type){
+fetch(API+"/reward",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:user,type:type})})
 .then(r=>r.json())
-.then(d=>{
-state=d.user;
-update();
-alert("✅ Deposit successful");
-});
+.then(d=>{state=d.user;update();});
+}
+
+// UPDATE
+function update(){
+coins.innerText=state.coins;
+usdt.innerText=(state.coins/100).toFixed(2);
+refs.innerText=state.refs;
+user.innerText=user;
+refLink.value=location.origin+"?start="+user;
+}
+
+// NAV
+function showHome(){homeScreen.style.display="block";profileScreen.style.display="none";withdrawScreen.style.display="none";}
+function showProfile(){homeScreen.style.display="none";profileScreen.style.display="block";withdrawScreen.style.display="none";}
+
+function showWithdraw(){
+homeScreen.style.display="none";
+profileScreen.style.display="none";
+withdrawScreen.style.display="block";
+
+// LOGIC
+if(state.coins>=20000 && state.refs>=10){
+withdrawMsg.innerText="✅ You can withdraw";
+}else if(state.deposit>=5){
+withdrawMsg.innerText="✅ Deposit unlocked withdrawal";
+}else{
+withdrawMsg.innerText="❌ Need 20,000 coins + 10 referrals OR deposit 5 USDT";
+}
+}
+
+// MENU
+function toggleMenu(){menu.classList.toggle("active");}
+
+// DEPOSIT UI
+function depositUI(){
+let amount=prompt("Enter deposit USDT");
+if(!amount) return;
+
+fetch(API+"/deposit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:user,amount})})
+.then(r=>r.json())
+.then(d=>{state=d.user;update();alert("Deposit success");});
+}
+
+// COPY
+function copyRef(){
+navigator.clipboard.writeText(refLink.value);
+alert("Copied!");
 }
 
 // WITHDRAW
 function withdraw(){
 let amount=document.getElementById("amount").value;
 
-fetch(API+"/withdraw",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({username:user,amount})
-})
+fetch(API+"/withdraw",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:user,amount})})
 .then(r=>r.json())
-.then(d=>{
-alert(d.error || d.message);
-});
-}
-
-// UPDATE UI
-function update(){
-document.getElementById("coins").innerText=state.coins;
-document.getElementById("usdt").innerText=(state.coins/100).toFixed(2);
-document.getElementById("refLink").value=location.origin+"?start="+user;
-}
-
-// COPY REF
-function copyRef(){
-navigator.clipboard.writeText(document.getElementById("refLink").value);
-alert("📋 Copied!");
+.then(d=>alert(d.error||d.message));
 }
 
 // START
@@ -151,4 +223,4 @@ load();
 </script>
 
 </body>
-</html>
+  </html>

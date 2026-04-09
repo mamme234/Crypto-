@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
   usdt: { type: Number, default: 0 },
   level: { type: Number, default: 1 },
   referrals: { type: Number, default: 0 },
-  withdrawUnlocked: { type: Boolean, default: false } // deposit override
+  withdrawUnlocked: { type: Boolean, default: false }
 });
 
 module.exports = mongoose.model('User', userSchema);

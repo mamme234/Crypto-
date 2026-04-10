@@ -7,10 +7,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('./models/user');
 const app = express();
-app.use(cors());
-app.use(express.json());
-
-// ✅ FIXED (lowercase to match file: models/user.js)
 const User = require('./models/user');
 
 const SECRET = process.env.JWT_SECRET;

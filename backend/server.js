@@ -3,31 +3,30 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-// ✅ FIXED IMPORT (IMPORTANT)
+// ✅ FIXED (lowercase to match file: models/user.js)
 const User = require('./models/user');
 
 const SECRET = process.env.JWT_SECRET;
 
-// ROOT
+/* ---------------- ROOT ---------------- */
 app.get('/', (req, res) => {
   res.send("Crypto backend is running 🚀");
 });
 
-// CONNECT MONGO
+/* ---------------- DB ---------------- */
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
   .catch(err => console.log("MongoDB error:", err));
 
-// AUTH MIDDLEWARE
-const authMiddleware = async (req, res, next) => {
+/* ---------------- AUTH ---------------- */
+const auth = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
 
   if (!token) {
@@ -43,7 +42,6 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-// TOKEN
 const createToken = (id) =>
   jwt.sign({ id }, SECRET, { expiresIn: '7d' });
 
@@ -55,8 +53,8 @@ app.post('/api/register', async (req, res) => {
     return res.json({ success: false, message: "Missing fields" });
   }
 
-  const existing = await User.findOne({ email });
-  if (existing) {
+  const exist = await User.findOne({ email });
+  if (exist) {
     return res.json({ success: false, message: "Email exists" });
   }
 
@@ -72,7 +70,6 @@ app.post('/api/register', async (req, res) => {
   // referral system
   if (referral) {
     const refUser = await User.findOne({ referralLink: referral });
-
     if (refUser) {
       refUser.referrals += 1;
       await refUser.save();
@@ -80,7 +77,6 @@ app.post('/api/register', async (req, res) => {
   }
 
   const token = createToken(user._id);
-
   res.json({ success: true, token });
 });
 
@@ -89,24 +85,21 @@ app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
-
   if (!user) {
     return res.json({ success: false, message: "User not found" });
   }
 
   const match = await bcrypt.compare(password, user.password);
-
   if (!match) {
     return res.json({ success: false, message: "Wrong password" });
   }
 
   const token = createToken(user._id);
-
   res.json({ success: true, token });
 });
 
 /* ---------------- USER DATA ---------------- */
-app.get('/api/user', authMiddleware, async (req, res) => {
+app.get('/api/user', auth, async (req, res) => {
   const u = req.user;
 
   res.json({
@@ -120,11 +113,10 @@ app.get('/api/user', authMiddleware, async (req, res) => {
 });
 
 /* ---------------- ADD COINS ---------------- */
-app.post('/api/user/coins', authMiddleware, async (req, res) => {
+app.post('/api/user/coins', auth, async (req, res) => {
   const { coins } = req.body;
 
   req.user.coins += Number(coins || 0);
-
   req.user.usdt = req.user.coins / 1000;
 
   await req.user.save();
@@ -136,8 +128,8 @@ app.post('/api/user/coins', authMiddleware, async (req, res) => {
   });
 });
 
-/* ---------------- TASK REWARD ---------------- */
-app.post('/api/user/task', authMiddleware, async (req, res) => {
+/* ---------------- TASK ---------------- */
+app.post('/api/user/task', auth, async (req, res) => {
   const { task } = req.body;
 
   let reward = 0;
@@ -157,10 +149,11 @@ app.post('/api/user/task', authMiddleware, async (req, res) => {
 });
 
 /* ---------------- WITHDRAW ---------------- */
-app.post('/api/user/withdraw', authMiddleware, async (req, res) => {
+app.post('/api/user/withdraw', auth, async (req, res) => {
   const u = req.user;
 
   if ((u.coins >= 20000 && u.referrals >= 10) || u.withdrawUnlocked) {
+
     u.coins = 0;
     u.usdt = 0;
     u.withdrawUnlocked = false;
@@ -180,7 +173,7 @@ app.post('/api/user/withdraw', authMiddleware, async (req, res) => {
 });
 
 /* ---------------- DEPOSIT UNLOCK ---------------- */
-app.post('/api/user/depositUnlock', authMiddleware, async (req, res) => {
+app.post('/api/user/depositUnlock', auth, async (req, res) => {
   req.user.withdrawUnlocked = true;
   await req.user.save();
 

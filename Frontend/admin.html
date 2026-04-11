@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin</title>
+</head>
+<body style="background:black;color:white;text-align:center">
+
+<h2>Admin Panel</h2>
+
+<input id="token" placeholder="Paste Admin Token"><br>
+<button onclick="getUsers()">Get Users</button>
+
+<div id="users"></div>
+
+<script>
+const API="https://crypto-4bbj.onrender.com";
+
+async function getUsers(){
+const token=document.getElementById("token").value;
+
+const res=await fetch(API+"/api/user",{
+headers:{Authorization:"Bearer "+token}
+});
+const data=await res.json();
+
+document.getElementById("users").innerText=JSON.stringify(data,null,2);
+}
+</script>
+
+</body>
+</html>

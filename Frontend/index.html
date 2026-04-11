@@ -1,333 +1,189 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Crypto Earn App</title>
-
+<title>Crypto App</title>
 <style>
-body {
-  margin:0;
-  font-family:Arial;
-  background:linear-gradient(to bottom,#0d0d0d,#111);
-  color:#fff;
-  text-align:center;
-}
-
-.screen {display:none;padding:20px;}
-.screen.active {display:block;}
-
-input {
-  padding:12px;
-  margin:8px;
-  border-radius:12px;
-  border:none;
-  width:80%;
-  text-align:center;
-}
-
-.button {
-  background:#ff9800;
-  color:#fff;
-  border:none;
-  padding:15px 25px;
-  border-radius:20px;
-  margin:10px;
-  font-size:16px;
-  cursor:pointer;
-}
-
-.button:hover {transform:scale(1.05);}
-
-.nav {
-  display:flex;
-  justify-content:space-around;
-  background:#111;
-  padding:10px 0;
-}
-
-.nav button {
-  background:#222;
-  color:#fff;
-  border:none;
-  padding:10px 20px;
-  border-radius:20px;
-}
-
-.nav button.active {background:#ff9800;}
-
-.card {
-  background:#222;
-  padding:20px;
-  margin:15px 0;
-  border-radius:20px;
-}
-
-.counter {font-size:22px;margin:10px 0;font-weight:bold;}
-
-.progress-container {
-  background:#333;
-  height:15px;
-  border-radius:10px;
-  overflow:hidden;
-}
-
-.progress-bar {
-  height:100%;
-  background:#ff9800;
-  width:0%;
-  transition:0.4s;
-}
-
-.coin {
-  position:absolute;
-  color:gold;
-  animation:floatUp 1s ease-out forwards;
-}
-
-@keyframes floatUp {
-  0%{opacity:1;transform:translateY(0);}
-  100%{opacity:0;transform:translateY(-80px);}
-}
+body{margin:0;font-family:Arial;background:#000;color:#fff;text-align:center;}
+.screen{display:none;padding:20px;}
+.active{display:block;}
+button{padding:15px;border:none;border-radius:20px;background:#ff9800;color:#fff;margin:10px;}
+.card{background:#111;padding:20px;border-radius:20px;margin:10px;}
 </style>
 </head>
-
 <body>
 
 <!-- LOGIN -->
-<div id="loginScreen" class="screen active">
-  <h2>Login / Register</h2>
-  <input id="email" type="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
-  <br>
-  <button class="button" id="loginBtn">Login</button>
-  <button class="button" id="registerBtn">Register</button>
-</div>
-
-<!-- NAV -->
-<div class="nav" id="navBar" style="display:none;">
-  <button id="homeNav" class="active">Home</button>
-  <button id="profileNav">Profile</button>
-  <button id="withdrawNav">Withdraw</button>
+<div id="login" class="screen active">
+<h2>Login</h2>
+<input id="email" placeholder="Email"><br>
+<input id="password" type="password" placeholder="Password"><br>
+<button onclick="login()">Login</button>
+<button onclick="register()">Register</button>
 </div>
 
 <!-- HOME -->
-<div id="homeScreen" class="screen">
-  <div class="card">
-    <div>Level: <span id="level">1</span></div>
-    <div class="counter">Coins: <span id="coins">0</span></div>
-    <div class="counter">USDT: $<span id="usdt">0</span></div>
-
-    <div class="progress-container">
-      <div id="coinProgress" class="progress-bar"></div>
-    </div>
-  </div>
-
-  <button class="button" id="tapBtn">Tap Tap!</button>
-  <button class="button" id="dailyBtn">Daily Reward</button>
-  <button class="button" id="spinBtn">Spin Wheel</button>
+<div id="home" class="screen">
+<div class="card">
+Coins: <span id="coins">0</span><br>
+USDT: <span id="usdt">0</span>
 </div>
 
-<!-- PROFILE -->
-<div id="profileScreen" class="screen">
-  <div class="card">
-    <h3>Referral Link</h3>
-    <input id="refLink" readonly>
-    <div>Referrals: <span id="referrals">0</span></div>
-  </div>
+<button onclick="tap()">Tap (+50)</button>
+<button onclick="daily()">Daily (+1000)</button>
 
-  <div class="card">
-    <h3>Tasks</h3>
-    <button class="button" onclick="task('Telegram')">Join Telegram (+500)</button>
-    <button class="button" onclick="task('TikTok')">Follow TikTok (+1000)</button>
-    <button class="button" onclick="task('YouTube')">Subscribe YouTube (+500)</button>
-  </div>
+<div class="card">
+<button onclick="task('Telegram')">Telegram +500</button>
+<button onclick="task('TikTok')">TikTok +1000</button>
+<button onclick="task('YouTube')">YouTube +500</button>
+</div>
+
+<button onclick="goWithdraw()">Withdraw</button>
 </div>
 
 <!-- WITHDRAW -->
-<div id="withdrawScreen" class="screen">
-  <div class="card">
-    <h3>Withdraw</h3>
-    <p id="withdrawText"></p>
-    <button class="button" id="withdrawBtn">Withdraw</button>
-    <button class="button" id="depositBtn">Deposit $5 Unlock</button>
-  </div>
+<div id="withdraw" class="screen">
+<h2>Withdraw</h2>
+<p id="status"></p>
+<button onclick="withdraw()">Withdraw</button>
+<button onclick="deposit()">Unlock ($5)</button>
+<button onclick="back()">Back</button>
 </div>
 
 <script>
 const API = "https://crypto-4bbj.onrender.com";
 
-let token="", coins=0, usdt=0, level=1, referrals=0, withdrawUnlocked=false;
-
-// NAV
-function show(screen){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  screen.classList.add('active');
-}
-
-homeNav.onclick=()=>show(homeScreen);
-profileNav.onclick=()=>show(profileScreen);
-withdrawNav.onclick=()=>show(withdrawScreen);
+let token=null, coins=0, usdt=0, referrals=0, unlock=false;
 
 // LOGIN
-loginBtn.onclick=async()=>{
-  const res=await fetch(API+"/api/login",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({email:email.value,password:password.value})
-  });
+async function login(){
+const email=document.getElementById('email').value;
+const password=document.getElementById('password').value;
 
-  const data=await res.json();
-  if(data.success){
-    token=data.token;
-    afterLogin();
-    loadUser();
-  } else alert(data.message);
-};
+const res=await fetch(API+"/api/login",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({email,password})
+});
+const data=await res.json();
+
+if(data.success){
+token=data.token;
+load();
+show("home");
+}else alert(data.message);
+}
 
 // REGISTER
-registerBtn.onclick=async()=>{
-  const res=await fetch(API+"/api/register",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({email:email.value,password:password.value})
-  });
+async function register(){
+const email=document.getElementById('email').value;
+const password=document.getElementById('password').value;
 
-  const data=await res.json();
-  if(data.success){
-    token=data.token;
-    afterLogin();
-    loadUser();
-  } else alert(data.message);
-};
+const res=await fetch(API+"/api/register",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({email,password})
+});
+const data=await res.json();
 
-function afterLogin(){
-  loginScreen.classList.remove('active');
-  navBar.style.display="flex";
-  show(homeScreen);
+if(data.success){
+token=data.token;
+load();
+show("home");
+}else alert(data.message);
 }
 
 // LOAD USER
-async function loadUser(){
-  const res=await fetch(API+"/api/user",{
-    headers:{Authorization:"Bearer "+token}
-  });
+async function load(){
+const res=await fetch(API+"/api/user",{
+headers:{Authorization:"Bearer "+token}
+});
+const data=await res.json();
 
-  const d=await res.json();
+coins=data.coins;
+usdt=data.usdt;
+referrals=data.referrals;
+unlock=data.withdrawUnlocked;
 
-  coins=d.coins||0;
-  usdt=d.usdt||0;
-  level=d.level||1;
-  referrals=d.referrals||0;
-  withdrawUnlocked=d.withdrawUnlocked;
-
-  refLink.value=d.referralLink;
-  updateUI();
+update();
 }
 
-// ADD COINS
-async function addCoins(n){
-  const res=await fetch(API+"/api/user/coins",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      Authorization:"Bearer "+token
-    },
-    body:JSON.stringify({coins:n})
-  });
+// TAP
+async function tap(){ add(50); }
 
-  const d=await res.json();
-  coins=d.coins;
-  usdt=d.usdt;
-  level=d.level;
-  updateUI();
+// DAILY
+async function daily(){ add(1000); }
+
+// ADD COINS
+async function add(c){
+const res=await fetch(API+"/api/user/coins",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+Authorization:"Bearer "+token
+},
+body:JSON.stringify({coins:c})
+});
+const data=await res.json();
+coins=data.coins;
+usdt=data.usdt;
+update();
 }
 
 // TASK
 async function task(t){
-  const res=await fetch(API+"/api/user/task",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      Authorization:"Bearer "+token
-    },
-    body:JSON.stringify({task:t})
-  });
-
-  const d=await res.json();
-  coins=d.coins;
-  referrals=d.referrals;
-  updateUI();
-  alert(t+" done!");
+const res=await fetch(API+"/api/user/task",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+Authorization:"Bearer "+token
+},
+body:JSON.stringify({task:t})
+});
+const data=await res.json();
+coins=data.coins;
+update();
 }
 
 // WITHDRAW
-withdrawBtn.onclick=async()=>{
-  const res=await fetch(API+"/api/user/withdraw",{
-    method:"POST",
-    headers:{Authorization:"Bearer "+token}
-  });
-
-  const d=await res.json();
-  alert(d.message);
-  loadUser();
-};
+async function withdraw(){
+const res=await fetch(API+"/api/user/withdraw",{
+method:"POST",
+headers:{Authorization:"Bearer "+token}
+});
+const data=await res.json();
+alert(data.message);
+load();
+}
 
 // DEPOSIT
-depositBtn.onclick=async()=>{
-  if(!confirm("Pay $5 to unlock?"))return;
-
-  await fetch(API+"/api/user/depositUnlock",{
-    method:"POST",
-    headers:{Authorization:"Bearer "+token}
-  });
-
-  loadUser();
-};
-
-// TAP
-tapBtn.onclick=(e)=>{
-  spawn(e.clientX,e.clientY);
-  addCoins(50);
-};
-
-dailyBtn.onclick=()=>addCoins(1000);
-
-spinBtn.onclick=()=>{
-  let r=Math.floor(Math.random()*2000);
-  addCoins(r);
-  alert("+"+r);
-};
+async function deposit(){
+await fetch(API+"/api/user/depositUnlock",{
+method:"POST",
+headers:{Authorization:"Bearer "+token}
+});
+alert("Unlocked!");
+load();
+}
 
 // UI
-function updateUI(){
-  coinsEl.textContent=coins;
-  usdtEl.textContent=Number(usdt).toFixed(2);
-  levelEl.textContent=level;
-  referralsEl.textContent=referrals;
-
-  coinProgress.style.width=Math.min(coins/20000*100,100)+"%";
-
-  if((coins>=20000 && referrals>=10)||withdrawUnlocked){
-    withdrawText.textContent="You can withdraw!";
-    withdrawBtn.disabled=false;
-  } else {
-    withdrawText.textContent="Need 20k coins + 10 referrals or $5";
-    withdrawBtn.disabled=true;
-  }
+function update(){
+document.getElementById("coins").innerText=coins;
+document.getElementById("usdt").innerText=parseFloat(usdt).toFixed(2);
+document.getElementById("status").innerText=
+(coins>=20000 && referrals>=10)||unlock
+?"Ready to withdraw"
+:"Need 20000 coins + 10 referrals";
 }
 
-// EFFECT
-function spawn(x,y){
-  let d=document.createElement("div");
-  d.className="coin";
-  d.style.left=x+"px";
-  d.style.top=y+"px";
-  d.innerText="+50";
-  document.body.appendChild(d);
-  setTimeout(()=>d.remove(),1000);
+function show(id){
+document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
 }
+
+function goWithdraw(){ show("withdraw"); }
+function back(){ show("home"); }
+
 </script>
-
 </body>
-  </html>
+</html>

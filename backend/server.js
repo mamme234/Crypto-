@@ -5,100 +5,65 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-const User = require("./models/User");
-
 const app = express();
+
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-/* ======================
-   🔥 DEBUG ENV (IMPORTANT)
-====================== */
-console.log("MONGO_URI:", process.env.MONGO_URI ? "Loaded ✅" : "Missing ❌");
-console.log("JWT_SECRET:", process.env.JWT_SECRET ? "Loaded ✅" : "Missing ❌");
+// ======================
+// 1. MONGO DB CONNECT
+// ======================
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB connected ✅"))
+  .catch((err) => console.log("MongoDB Error ❌", err));
 
-/* ======================
-   🔥 MONGODB CONNECT
-====================== */
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log("✅ MongoDB Connected"))
-.catch(err => {
-  console.log("❌ MongoDB Error:", err.message);
-  process.exit(1); // stop app if DB fails
+// ======================
+// 2. USER MODEL
+// ======================
+const userSchema = new mongoose.Schema({
+  username: String,
+  password: String,
+  coins: { type: Number, default: 0 },
+  usdt: { type: Number, default: 0 },
 });
 
-/* ======================
-   🔐 AUTH MIDDLEWARE
-====================== */
-function auth(req, res, next) {
-  const header = req.headers.authorization;
+const User = mongoose.model("User", userSchema);
 
-  if (!header) {
-    return res.status(401).json({ message: "No token" });
-  }
-
-  const token = header.split(" ")[1];
-
+// ======================
+// 3. REGISTER
+// ======================
+app.post("/register", async (req, res) => {
   try {
-    const data = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = data;
-    next();
-  } catch (err) {
-    return res.status(401).json({ message: "Invalid token" });
-  }
-}
+    const { username, password } = req.body;
 
-/* ======================
-   👤 REGISTER
-====================== */
-app.post("/api/register", async (req, res) => {
-  try {
-    const { email, password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    const exist = await User.findOne({ email });
-    if (exist) {
-      return res.json({ success: false, message: "User exists" });
-    }
-
-    const hash = await bcrypt.hash(password, 10);
-
-    const user = await User.create({
-      email,
-      password: hash
+    const user = new User({
+      username,
+      password: hashedPassword,
     });
 
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    await user.save();
 
-    res.json({ success: true, token });
-
+    res.json({ message: "User created ✅" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
-/* ======================
-   🔐 LOGIN
-====================== */
-app.post("/api/login", async (req, res) => {
+// ======================
+// 4. LOGIN
+// ======================
+app.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { username, password } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.json({ success: false, message: "User not found" });
-    }
+    const user = await User.findOne({ username });
+    if (!user) return res.status(400).json({ message: "User not found ❌" });
 
-    const ok = await bcrypt.compare(password, user.password);
-    if (!ok) {
-      return res.json({ success: false, message: "Wrong password" });
-    }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ message: "Wrong password ❌" });
 
     const token = jwt.sign(
       { id: user._id },
@@ -106,130 +71,59 @@ app.post("/api/login", async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res.json({ success: true, token });
-
+    res.json({ token, user });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
-/* ======================
-   👤 GET USER
-====================== */
-app.get("/api/user", auth, async (req, res) => {
+// ======================
+// 5. GET USER PROFILE
+// ======================
+app.get("/profile", async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const token = req.headers.authorization;
+
+    if (!token) return res.status(401).json({ message: "No token ❌" });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await User.findById(decoded.id);
+
     res.json(user);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
-/* ======================
-   🪙 TAP
-====================== */
-app.post("/api/user/tap", auth, async (req, res) => {
+// ======================
+// 6. TAP / COIN INCREASE (YOUR APP CORE)
+// ======================
+app.post("/tap", async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const { userId } = req.body;
 
-    user.coins += 50;
-    user.usdt = user.coins / 1000;
+    const user = await User.findById(userId);
+
+    user.coins += 1;
+    user.usdt = user.coins / 1000; // example conversion
 
     await user.save();
-    res.json(user);
 
+    res.json({
+      coins: user.coins,
+      usdt: user.usdt,
+    });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
-/* ======================
-   🎁 DAILY
-====================== */
-app.post("/api/user/daily", auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id);
-
-    user.coins += 1000;
-    user.usdt = user.coins / 1000;
-
-    await user.save();
-    res.json(user);
-
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-/* ======================
-   📱 TASKS
-====================== */
-app.post("/api/user/task", auth, async (req, res) => {
-  try {
-    const { task } = req.body;
-    const user = await User.findById(req.user.id);
-
-    if (task === "Telegram") user.coins += 500;
-    if (task === "TikTok") user.coins += 1000;
-    if (task === "YouTube") user.coins += 500;
-
-    user.usdt = user.coins / 1000;
-
-    await user.save();
-    res.json(user);
-
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-/* ======================
-   💸 WITHDRAW
-====================== */
-app.post("/api/user/withdraw", auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id);
-
-    if (user.coins < 20000 || user.referrals < 10) {
-      return res.json({ message: "Need 20000 coins + 10 referrals" });
-    }
-
-    if (!user.withdrawUnlocked) {
-      return res.json({ message: "Locked. Deposit $5 to unlock" });
-    }
-
-    user.coins = 0;
-    await user.save();
-
-    res.json({ message: "Withdraw successful" });
-
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-/* ======================
-   🔓 UNLOCK
-====================== */
-app.post("/api/user/depositUnlock", auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id);
-
-    user.withdrawUnlocked = true;
-    await user.save();
-
-    res.json({ success: true });
-
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-/* ======================
-   🚀 START SERVER
-====================== */
-const PORT = process.env.PORT || 3000;
+// ======================
+// 7. START SERVER
+// ======================
+const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
-  console.log("🚀 Server running on port " + PORT);
+  console.log("🚀 Server running on port", PORT);
 });

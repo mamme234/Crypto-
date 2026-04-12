@@ -1,58 +1,283 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Login</title>
-</head>
-<body style="background:black;color:white;text-align:center;">
+<meta charset="UTF-8">
+<title>Crypto App</title>
 
-<h2>Login</h2>
-
-<input id="username" placeholder="Username"><br><br>
-<input id="password" type="password" placeholder="Password"><br><br>
-
-<button onclick="login()">Login</button>
-<button onclick="register()">Register</button>
-
-<script>
-const BASE_URL = "https://crypto-4bbj.onrender.com";
-
-async function register() {
-  const username = usernameInput.value;
-  const password = passwordInput.value;
-
-  const res = await fetch(BASE_URL + "/register", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({ username, password })
-  });
-
-  const data = await res.json();
-  alert(data.message);
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#000;
+  color:#fff;
+  text-align:center;
 }
 
-async function login() {
-  const username = usernameInput.value;
-  const password = passwordInput.value;
+.screen{display:none;padding:20px;}
+.active{display:block;}
 
-  const res = await fetch(BASE_URL + "/login", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({ username, password })
-  });
+button{
+  padding:12px;
+  margin:6px;
+  border:none;
+  border-radius:12px;
+  background:#ff9800;
+  color:#fff;
+  cursor:pointer;
+}
 
-  const data = await res.json();
+input{
+  padding:10px;
+  margin:5px;
+  width:200px;
+  border-radius:8px;
+  border:none;
+}
 
-  if (data.token) {
-    localStorage.setItem("userId", data.user._id);
-    window.location.href = "home.html";
-  } else {
-    alert("Login failed");
+.card{
+  background:#111;
+  padding:15px;
+  margin:10px;
+  border-radius:15px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="login" class="screen active">
+  <h2>Login</h2>
+  <input id="email" placeholder="Email"><br>
+  <input id="password" type="password" placeholder="Password"><br>
+  <button onclick="login()">Login</button>
+  <button onclick="register()">Register</button>
+</div>
+
+<!-- HOME -->
+<div id="home" class="screen">
+
+  <div class="card">
+    <h3>Coins: <span id="coins">0</span></h3>
+    <h3>USDT: <span id="usdt">0</span></h3>
+  </div>
+
+  <button onclick="tap()">Tap +50</button>
+  <button onclick="daily()">Daily +1000</button>
+
+  <div class="card">
+    <h3>Tasks</h3>
+    <button onclick="task('Telegram')">Telegram +500</button>
+    <button onclick="task('TikTok')">TikTok +1000</button>
+    <button onclick="task('YouTube')">YouTube +500</button>
+  </div>
+
+  <button onclick="goWithdraw()">Withdraw</button>
+</div>
+
+<!-- WITHDRAW -->
+<div id="withdraw" class="screen">
+
+  <h2>Withdraw</h2>
+
+  <p id="status">Loading...</p>
+
+  <button onclick="withdraw()">Withdraw</button>
+  <button onclick="deposit()">Unlock $5</button>
+  <button onclick="back()">Back</button>
+
+</div>
+
+<script>
+
+const API = "https://crypto-4bbj.onrender.com"; // change if local
+let token = null;
+
+// user data
+let coins = 0;
+let usdt = 0;
+let referrals = 0;
+let unlock = false;
+
+// SAFE FETCH (IMPORTANT)
+async function safeFetch(url, options){
+  const res = await fetch(url, options);
+  const text = await res.text();
+
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error("Server error: " + text);
+  }
+
+  if(!res.ok){
+    throw new Error(data.message || "Request failed");
+  }
+
+  return data;
+}
+
+// SCREEN SWITCH
+function show(id){
+  document.querySelectorAll(".screen")
+    .forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+// LOGIN
+async function login(){
+  try{
+    const data = await safeFetch(API+"/api/login",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        email:email.value,
+        password:password.value
+      })
+    });
+
+    token = data.token;
+    await load();
+    show("home");
+
+  }catch(e){
+    alert(e.message);
   }
 }
 
-const usernameInput = document.getElementById("username");
-const passwordInput = document.getElementById("password");
+// REGISTER
+async function register(){
+  try{
+    const data = await safeFetch(API+"/api/register",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        email:email.value,
+        password:password.value
+      })
+    });
+
+    token = data.token;
+    await load();
+    show("home");
+
+  }catch(e){
+    alert(e.message);
+  }
+}
+
+// LOAD USER
+async function load(){
+  try{
+    const data = await safeFetch(API+"/api/user",{
+      headers:{Authorization:"Bearer "+token}
+    });
+
+    coins = data.coins || 0;
+    usdt = data.usdt || 0;
+    referrals = data.referrals || 0;
+    unlock = data.withdrawUnlocked || false;
+
+    updateUI();
+
+  }catch(e){
+    alert(e.message);
+  }
+}
+
+// TAP
+async function tap(){
+  try{
+    const data = await safeFetch(API+"/api/user/tap",{
+      method:"POST",
+      headers:{Authorization:"Bearer "+token}
+    });
+
+    coins = data.coins;
+    usdt = data.usdt;
+    updateUI();
+
+  }catch(e){ alert(e.message); }
+}
+
+// DAILY
+async function daily(){
+  try{
+    const data = await safeFetch(API+"/api/user/daily",{
+      method:"POST",
+      headers:{Authorization:"Bearer "+token}
+    });
+
+    coins = data.coins;
+    usdt = data.usdt;
+    updateUI();
+
+  }catch(e){ alert(e.message); }
+}
+
+// TASK
+async function task(name){
+  try{
+    const data = await safeFetch(API+"/api/user/task",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        Authorization:"Bearer "+token
+      },
+      body:JSON.stringify({task:name})
+    });
+
+    coins = data.coins;
+    updateUI();
+
+  }catch(e){ alert(e.message); }
+}
+
+// WITHDRAW
+async function withdraw(){
+  try{
+    const data = await safeFetch(API+"/api/user/withdraw",{
+      method:"POST",
+      headers:{Authorization:"Bearer "+token}
+    });
+
+    alert(data.message);
+    await load();
+
+  }catch(e){ alert(e.message); }
+}
+
+// UNLOCK
+async function deposit(){
+  try{
+    await safeFetch(API+"/api/user/depositUnlock",{
+      method:"POST",
+      headers:{Authorization:"Bearer "+token}
+    });
+
+    alert("Unlocked!");
+    await load();
+
+  }catch(e){ alert(e.message); }
+}
+
+// UI UPDATE
+function updateUI(){
+  document.getElementById("coins").innerText = coins;
+  document.getElementById("usdt").innerText = usdt.toFixed(2);
+
+  document.getElementById("status").innerText =
+    (coins >= 20000 && referrals >= 10) || unlock
+    ? "✅ Ready to withdraw"
+    : "❌ Need 20000 coins + 10 referrals";
+}
+
+// NAV
+function goWithdraw(){ show("withdraw"); }
+function back(){ show("home"); }
+
 </script>
 
 </body>
-</html>
+    </html>

@@ -21,7 +21,6 @@ background:rgba(255,255,255,0.06);
 padding:15px;
 margin:10px;
 border-radius:16px;
-backdrop-filter: blur(10px);
 }
 
 .grid{
@@ -37,6 +36,7 @@ font-size:22px;
 color:#ff9800;
 }
 
+/* 🔥 TAP BUTTON */
 .tap{
 width:260px;
 height:260px;
@@ -50,12 +50,33 @@ justify-content:center;
 font-size:28px;
 font-weight:bold;
 cursor:pointer;
-transition:0.1s;
 position:relative;
 }
 
-.tap:active{
-transform:scale(0.92);
+/* 💥 PULSE ANIMATION */
+.tap.active{
+animation:pulse 0.25s ease;
+}
+
+@keyframes pulse{
+0%{transform:scale(1);}
+50%{transform:scale(0.9);}
+100%{transform:scale(1);}
+}
+
+/* ✨ COIN POP */
+.coin-pop{
+position:absolute;
+color:#ff9800;
+font-weight:bold;
+font-size:18px;
+animation:pop 0.6s forwards;
+pointer-events:none;
+}
+
+@keyframes pop{
+0%{opacity:1;transform:translateY(0);}
+100%{opacity:0;transform:translateY(-60px);}
 }
 
 .small{
@@ -65,21 +86,7 @@ font-size:13px;
 margin-top:-10px;
 }
 
-/* coin animation */
-.coin-pop{
-position:absolute;
-color:#ff9800;
-font-weight:bold;
-animation:pop 0.6s forwards;
-pointer-events:none;
-}
-
-@keyframes pop{
-0%{opacity:1;transform:translateY(0);}
-100%{opacity:0;transform:translateY(-50px);}
-}
-
-/* wallet UI */
+/* wallet */
 .wallet-box{
 background:linear-gradient(135deg,#00c6ff,#0072ff);
 padding:15px;
@@ -97,7 +104,6 @@ border-radius:10px;
 margin-top:10px;
 background:#229ED9;
 color:white;
-font-weight:bold;
 }
 
 .nav{
@@ -131,46 +137,17 @@ background:#020617;
 
 <!-- PROFILE -->
 <div id="profile" class="screen">
-
 <div class="card" style="text-align:center">
-<img id="photo" style="width:80px;height:80px;border-radius:50%">
 <h3 id="name"></h3>
 </div>
-
-<div class="card">
-<h3>🔗 Referral Link</h3>
-<p id="refLink"></p>
-<button onclick="copyLink()">Copy</button>
-</div>
-
-<div class="card">
-<h3>🎯 Social Tasks</h3>
-<button onclick="task('telegram')">Telegram (+500)</button>
-<button onclick="task('tiktok')">TikTok (+700)</button>
-<button onclick="task('youtube')">YouTube (+1000)</button>
-</div>
-
-<div class="card">
-<h3>🏆 Leaderboard</h3>
-<div id="board"></div>
-</div>
-
 </div>
 
 <!-- WITHDRAW -->
 <div id="withdraw" class="screen">
-
 <div class="card">
 <h3>💸 Deposit Wallet</h3>
 <div class="wallet-box" id="wallet"></div>
-<button onclick="copyWallet()">Copy</button>
 </div>
-
-<div class="card">
-<button onclick="unlock()">Unlock (5 USDT)</button>
-<button onclick="withdraw()">Withdraw</button>
-</div>
-
 </div>
 
 <!-- NAV -->
@@ -189,13 +166,13 @@ let token=localStorage.getItem("token");
 
 let coinsVal=0, usdtVal=0, refsVal=0;
 
-// screen switch
+// screen
 function show(s){
 document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
 }
 
-// telegram login
+// telegram
 const tg=window.Telegram.WebApp;
 tg.expand();
 
@@ -207,8 +184,7 @@ method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
 id:user.id,
-name:user.first_name,
-photo:user.photo_url
+name:user.first_name
 })
 })
 .then(r=>r.json())
@@ -218,7 +194,7 @@ location.reload();
 });
 }
 
-// load user
+// load
 async function load(){
 const u=await fetch(API+"/api/user",{headers:{Authorization:"Bearer "+token}}).then(r=>r.json());
 
@@ -227,22 +203,15 @@ usdtVal=u.usdt;
 refsVal=u.referrals;
 
 updateUI();
-
 name.innerText=u.name;
-refLink.innerText=`👤 ${u.name}\nhttps://t.me/Studybuddy_2025Bot?start=${tg.initDataUnsafe.user.id}`;
 
 const w=await fetch(API+"/api/wallet").then(r=>r.json());
 wallet.innerText=w.ton;
-
-const lb=await fetch(API+"/api/leaderboard").then(r=>r.json());
-board.innerHTML=lb.map(x=>`<div>${x.name} - ${x.coins}</div>`).join("");
-
-if(u.photo) photo.src=u.photo;
 }
 
 function updateUI(){
 coins.innerText=coinsVal;
-usdt.innerText=Number(usdtVal).toFixed(3);
+usdt.innerText=usdtVal;
 refs.innerText=refsVal;
 level.innerText=Math.floor((coinsVal+usdtVal*1000)/1000)+1;
 }
@@ -263,23 +232,33 @@ document.body.appendChild(c);
 setTimeout(()=>c.remove(),600);
 }
 
-// REAL TAP
+// TAP SYSTEM
 let tapping=false;
 
-document.getElementById("tapArea").addEventListener("touchstart", async function(e){
+const tapArea=document.getElementById("tapArea");
+
+tapArea.addEventListener("touchstart", handleTap);
+
+async function handleTap(e){
 
 if(tapping) return;
 tapping=true;
 
-let fingers = e.touches.length;
-if(fingers > 4) fingers = 4;
+let fingers=e.touches.length;
+if(fingers>4) fingers=4;
 
+// 💥 pulse animation
+tapArea.classList.add("active");
+setTimeout(()=>tapArea.classList.remove("active"),200);
+
+// vibration
 vibrate();
 
+// coin pop
 showCoin(e.touches[0].clientX,e.touches[0].clientY,fingers);
 
 try{
-const res = await fetch(API+"/api/tap",{
+const res=await fetch(API+"/api/tap",{
 method:"POST",
 headers:{
 "Content-Type":"application/json",
@@ -288,7 +267,7 @@ Authorization:"Bearer "+token
 body:JSON.stringify({multi:fingers})
 });
 
-const data = await res.json();
+const data=await res.json();
 
 coinsVal=data.coins;
 usdtVal=data.usdt;
@@ -297,66 +276,7 @@ updateUI();
 
 }catch{}
 
-tapping=false;
-
-});
-
-// tasks
-async function task(type){
-
-let url =
-type==="telegram"
-? "https://t.me/gangs234"
-: type==="tiktok"
-? "https://tiktok.com/@mammeliyas"
-: "https://youtube.com/@Mamme234";
-
-window.open(url,"_blank");
-
-const r = await fetch(API+"/api/task",{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-Authorization:"Bearer "+token
-},
-body:JSON.stringify({type})
-});
-
-alert((await r.json()).message);
-load();
-}
-
-// copy
-function copyLink(){
-navigator.clipboard.writeText(refLink.innerText);
-alert("Copied");
-}
-
-function copyWallet(){
-navigator.clipboard.writeText(wallet.innerText);
-alert("Wallet copied");
-}
-
-// withdraw
-async function unlock(){
-alert((await fetch(API+"/api/unlock",{method:"POST",headers:{Authorization:"Bearer "+token}}).then(r=>r.json())).message);
-load();
-}
-
-async function withdraw(){
-const a=prompt("Address");
-const b=prompt("Amount");
-
-alert((await fetch(API+"/api/withdraw",{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-Authorization:"Bearer "+token
-},
-body:JSON.stringify({address:a,amount:b})
-}).then(r=>r.json())).message);
-
-load();
+setTimeout(()=>tapping=false,80);
 }
 
 load();

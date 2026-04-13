@@ -1,82 +1,308 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Crypto App</title>
+<meta charset="UTF-8">
+<title>Crypto</title>
+
 <style>
-body{margin:0;font-family:Arial;background:#0b1220;color:#fff}
-.screen{display:none;padding:15px}
-.active{display:block}
-.card{background:#111827;padding:15px;margin:10px;border-radius:10px}
-button{width:100%;padding:10px;margin-top:10px}
-.nav{position:fixed;bottom:0;width:100%;display:flex}
-.nav button{flex:1}
+body{
+  margin:0;
+  font-family:'Segoe UI', sans-serif;
+  background:linear-gradient(180deg,#0b1220,#020617);
+  color:#fff;
+}
+
+/* HEADER */
+.header{
+  padding:18px;
+  text-align:center;
+  font-size:22px;
+  font-weight:bold;
+}
+
+/* SCREENS */
+.screen{
+  display:none;
+  padding:15px;
+  animation:fade 0.3s ease;
+}
+.active{display:block;}
+
+@keyframes fade{
+  from{opacity:0;transform:translateY(10px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+/* CARD */
+.card{
+  background:rgba(255,255,255,0.06);
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:12px;
+  backdrop-filter: blur(10px);
+}
+
+/* GRID */
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.stat{text-align:center;}
+.stat strong{display:block;font-size:20px;color:#ff9800;}
+
+/* TAP */
+.tap{
+  width:170px;
+  height:170px;
+  border-radius:50%;
+  margin:25px auto;
+  background:radial-gradient(circle,#ff9800,#ff5722);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  user-select:none;
+  box-shadow:0 0 30px rgba(255,152,0,0.4);
+}
+
+/* BUTTON */
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  margin-top:10px;
+  font-weight:bold;
+  background:linear-gradient(90deg,#ff9800,#ff5722);
+  color:#fff;
+}
+
+/* TASK */
+.task{
+  background:#0f172a;
+  padding:10px;
+  margin-top:10px;
+  border-radius:12px;
+  display:flex;
+  justify-content:space-between;
+}
+
+/* NAV */
+.nav{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  background:#020617;
+  display:flex;
+  justify-content:space-around;
+  padding:10px;
+}
+
+/* LOADER */
+.loader{
+  display:none;
+  text-align:center;
+  padding:10px;
+  color:#aaa;
+}
 </style>
 </head>
 
 <body>
 
+<div class="header">💰 Crypto</div>
+
+<div class="loader" id="loader">Loading...</div>
+
+<!-- HOME -->
 <div id="home" class="screen active">
-<h2>Home</h2>
-<p>Coins: <span id="c">0</span></p>
-<button onclick="tap()">Tap</button>
+
+  <div class="card grid">
+    <div class="stat">Coins<strong id="coins">0</strong></div>
+    <div class="stat">USDT<strong id="usdt">0</strong></div>
+    <div class="stat">Level<strong id="level">1</strong></div>
+    <div class="stat">Refs<strong id="refs">0</strong></div>
+  </div>
+
+  <!-- COIN IMAGE TAP -->
+  <div class="tap" onclick="tap()">
+    <img src="https://cdn-icons-png.flaticon.com/512/825/825540.png"
+         style="width:90px;height:90px;">
+  </div>
+
 </div>
 
+<!-- PROFILE -->
 <div id="profile" class="screen">
-<h2>Profile</h2>
-<button onclick="task()">Task +500</button>
+
+  <div class="card">
+    <h3>💎 Premium</h3>
+    <p id="premium">Not Active</p>
+    <button onclick="deposit()">Unlock $5</button>
+  </div>
+
+  <div class="card">
+    <h3>📋 Tasks</h3>
+    <div id="tasks"></div>
+  </div>
+
+  <div class="card">
+    <h3>🏆 Leaderboard</h3>
+    <div id="board"></div>
+  </div>
+
 </div>
 
+<!-- WITHDRAW -->
 <div id="withdraw" class="screen">
-<h2>Withdraw</h2>
-<input id="addr" placeholder="address">
-<input id="amt" placeholder="amount">
-<button onclick="withdraw()">Send</button>
+
+  <div class="card">
+    <h3>💸 Withdraw</h3>
+    <p id="status"></p>
+  </div>
+
+  <button onclick="withdraw()">Withdraw</button>
+
 </div>
 
+<!-- NAV -->
 <div class="nav">
-<button onclick="show('home')">Home</button>
-<button onclick="show('profile')">Profile</button>
-<button onclick="show('withdraw')">Withdraw</button>
+  <button onclick="nav('home')">🏠</button>
+  <button onclick="nav('profile')">👤</button>
+  <button onclick="nav('withdraw')">💸</button>
 </div>
 
 <script>
+
 const API="";
 let token=localStorage.getItem("token");
 
-function show(id){
-document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-document.getElementById(id).classList.add("active");
+let refs=0;
+let premium=false;
+
+/* NAV */
+function nav(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
 }
 
-async function tap(){
-await fetch(API+"/api/tap",{method:"POST",headers:{Authorization:"Bearer "+token}});
-load();
+/* LOADER */
+function showLoad(v){
+  document.getElementById("loader").style.display=v?"block":"none";
 }
 
-async function task(){
-await fetch(API+"/api/task",{method:"POST",headers:{Authorization:"Bearer "+token}});
-load();
+/* SAFE API */
+async function api(url,method="GET",body){
+  try{
+    showLoad(true);
+
+    const res=await fetch(API+url,{
+      method,
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer "+token
+      },
+      body:body?JSON.stringify(body):null
+    });
+
+    const data=await res.json();
+    showLoad(false);
+    return data;
+
+  }catch(e){
+    showLoad(false);
+    alert("Server error");
+  }
 }
 
-async function withdraw(){
-await fetch(API+"/api/withdraw",{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-Authorization:"Bearer "+token
-},
-body:JSON.stringify({amount:amt.value,address:addr.value})
-});
-}
-
+/* LOAD */
 async function load(){
-const r=await fetch(API+"/api/user",{headers:{Authorization:"Bearer "+token}});
-const d=await r.json();
-document.getElementById("c").innerText=d.coins;
+
+  const u=await api("/api/user");
+
+  refs=u.referrals;
+  premium=u.depositVerified;
+
+  document.getElementById("coins").innerText=u.coins;
+  document.getElementById("usdt").innerText=u.usdt;
+  document.getElementById("refs").innerText=refs;
+  document.getElementById("level").innerText=Math.floor(u.coins/5000)+1;
+
+  document.getElementById("premium").innerText=
+    premium ? "✅ Active" : "❌ Not Active";
+
+  /* TASKS */
+  const tasks=await fetch("/api/tasks").then(r=>r.json());
+
+  document.getElementById("tasks").innerHTML=
+    tasks.map(t=>`
+      <div class="task">
+        <span>${t.title}</span>
+        <button onclick="openTask('${t._id}')">+${t.reward}</button>
+      </div>
+    `).join("");
+
+  /* LEADERBOARD */
+  const board=await fetch("/api/leaderboard").then(r=>r.json());
+
+  document.getElementById("board").innerHTML=
+    board.map((u,i)=>`
+      <div style="padding:8px;margin:5px;background:#0f172a;border-radius:10px;">
+        #${i+1} ${u.email} ⭐ ${u.coins}
+      </div>
+    `).join("");
+
+  /* WITHDRAW RULE */
+  const canWithdraw = refs>=10 || premium;
+
+  document.getElementById("status").innerText=
+    canWithdraw
+      ? "✅ Withdraw Enabled (1/day limit)"
+      : "🔒 Need 10 refs OR Premium";
+}
+
+/* TAP */
+async function tap(){
+  await api("/api/user/tap","POST");
+  load();
+}
+
+/* SOCIAL TASK */
+function openTask(id){
+
+  let link="";
+  if(id==="tg") link="https://t.me/gangs234";
+  if(id==="tt") link="https://www.tiktok.com/@mammeliyas";
+  if(id==="yt") link="https://youtube.com/@Mamme234";
+
+  window.open(link,"_blank");
+
+  setTimeout(async ()=>{
+    await api("/api/user/task","POST",{taskId:id});
+    load();
+  },4000);
+}
+
+/* DEPOSIT */
+async function deposit(){
+  await api("/api/user/deposit","POST");
+  alert("Premium request sent (admin approval)");
+  load();
+}
+
+/* WITHDRAW */
+async function withdraw(){
+  const address=prompt("Address");
+  const amount=prompt("Amount");
+
+  const res=await api("/api/user/withdraw","POST",{address,amount});
+  alert(res.message);
 }
 
 load();
+
 </script>
 
 </body>
-</html>
+  </html>

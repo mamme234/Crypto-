@@ -12,22 +12,10 @@ body{
   color:#fff;
 }
 
-/* HEADER */
-.header{
-  padding:18px;
-  text-align:center;
-  font-size:22px;
-  font-weight:bold;
-}
-
 /* SCREENS */
-.screen{
-  display:none;
-  padding:15px;
-}
+.screen{display:none;padding:15px;}
 .active{display:block;}
 
-/* CARD */
 .card{
   background:rgba(255,255,255,0.06);
   border-radius:18px;
@@ -35,15 +23,13 @@ body{
   margin-bottom:12px;
 }
 
-/* GRID */
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
+input{
+  width:100%;
+  padding:10px;
+  margin-top:8px;
+  border-radius:10px;
+  border:none;
 }
-
-.stat{text-align:center;}
-.stat strong{display:block;font-size:20px;color:#ff9800;}
 
 /* TAP */
 .tap{
@@ -56,6 +42,7 @@ body{
   align-items:center;
   justify-content:center;
   user-select:none;
+  position:relative;
 }
 
 /* BUTTON */
@@ -70,62 +57,71 @@ button{
   color:#fff;
 }
 
-/* TASK */
-.task{
-  background:#0f172a;
-  padding:10px;
-  margin-top:10px;
-  border-radius:12px;
-  display:flex;
-  justify-content:space-between;
-}
-
 /* NAV */
 .nav{
   position:fixed;
   bottom:0;
   width:100%;
-  background:#020617;
   display:flex;
   justify-content:space-around;
+  background:#020617;
   padding:10px;
 }
 
-.nav button{
-  width:auto;
-  background:none;
+/* FLOAT ANIMATION */
+.floating{
+  position:absolute;
+  color:#fff;
+  font-weight:bold;
+  animation:up 1s linear forwards;
 }
 
-/* LOADER */
-.loader{
-  display:none;
-  text-align:center;
-  padding:10px;
-  color:#aaa;
+@keyframes up{
+  0%{transform:translateY(0);opacity:1;}
+  100%{transform:translateY(-80px);opacity:0;}
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">💰 Crypto</div>
+<!-- LOGIN -->
+<div id="login" class="screen active">
+  <div class="card">
+    <h2>Login</h2>
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <button onclick="show('register')">Create Account</button>
+  </div>
+</div>
 
-<div class="loader" id="loader">Loading...</div>
+<!-- REGISTER -->
+<div id="register" class="screen">
+  <div class="card">
+    <h2>Register</h2>
+    <input id="remail" placeholder="Email">
+    <input id="rpassword" type="password" placeholder="Password">
+    <button onclick="register()">Register</button>
+    <button onclick="show('login')">Back</button>
+  </div>
+</div>
 
 <!-- HOME -->
-<div id="home" class="screen active">
+<div id="home" class="screen">
 
-  <div class="card grid">
-    <div class="stat">Coins<strong id="coins">0</strong></div>
-    <div class="stat">USDT<strong id="usdt">0</strong></div>
-    <div class="stat">Level<strong id="level">1</strong></div>
-    <div class="stat">Refs<strong id="refs">0</strong></div>
+  <div class="card">
+    <h3>Coins: <span id="coins">0</span></h3>
+    <h3>USDT: <span id="usdt">0</span></h3>
+    <h3>Refs: <span id="refs">0</span></h3>
+    <h3>Deposit: <span id="dep">NO</span></h3>
   </div>
 
   <div class="tap" onclick="tap()">
-    <img src="https://cdn-icons-png.flaticon.com/512/825/825540.png"
-         style="width:90px;height:90px;">
+    🪙 TAP
   </div>
+
+  <button onclick="copyRef()">Copy Referral Link</button>
 
 </div>
 
@@ -133,12 +129,12 @@ button{
 <div id="profile" class="screen">
 
   <div class="card">
-    <h3>📋 Tasks</h3>
+    <h3>Tasks</h3>
     <div id="tasks"></div>
   </div>
 
   <div class="card">
-    <h3>🏆 Leaderboard</h3>
+    <h3>Leaderboard</h3>
     <div id="board"></div>
   </div>
 
@@ -148,7 +144,7 @@ button{
 <div id="withdraw" class="screen">
 
   <div class="card">
-    <h3>💸 Withdraw</h3>
+    <h3>Withdraw</h3>
     <p id="status"></p>
   </div>
 
@@ -159,9 +155,9 @@ button{
 
 <!-- NAV -->
 <div class="nav">
-  <button onclick="nav('home')">🏠</button>
-  <button onclick="nav('profile')">👤</button>
-  <button onclick="nav('withdraw')">💸</button>
+  <button onclick="show('home')">Home</button>
+  <button onclick="show('profile')">Profile</button>
+  <button onclick="show('withdraw')">Withdraw</button>
 </div>
 
 <script>
@@ -169,46 +165,118 @@ button{
 const API="https://YOUR-BACKEND.onrender.com";
 let token=localStorage.getItem("token");
 
-let coins=0, usdt=0, refs=0;
+let coins=0, usdt=0, refs=0, deposit=false;
 
-function nav(id){
+/* NAV */
+function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
 
-function showLoad(v){
-  document.getElementById("loader").style.display=v?"block":"none";
+/* API */
+async function api(url,method="GET",body){
+
+  if(!token){
+    alert("Login first");
+    show("login");
+    return;
+  }
+
+  const res=await fetch(API+url,{
+    method,
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":"Bearer "+token
+    },
+    body:body?JSON.stringify(body):null
+  });
+
+  return res.json();
 }
 
-/* SAFE API */
-async function api(url,method="GET",body){
-  try{
+/* LOGIN */
+async function login(){
+  const res=await fetch(API+"/api/login",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      email:email.value,
+      password:password.value
+    })
+  });
 
-    if(!token){
-      alert("Please login first");
-      return;
-    }
+  const data=await res.json();
 
-    showLoad(true);
-
-    const res=await fetch(API+url,{
-      method,
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":"Bearer "+token
-      },
-      body:body?JSON.stringify(body):null
-    });
-
-    const data=await res.json();
-
-    showLoad(false);
-    return data;
-
-  }catch(e){
-    showLoad(false);
-    alert("Server error");
+  if(data.token){
+    token=data.token;
+    localStorage.setItem("token",token);
+    show("home");
+    load();
   }
+}
+
+/* REGISTER */
+async function register(){
+  const res=await fetch(API+"/api/register",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      email:remail.value,
+      password:rpassword.value
+    })
+  });
+
+  const data=await res.json();
+
+  if(data.token){
+    token=data.token;
+    localStorage.setItem("token",token);
+    show("home");
+    load();
+  }
+}
+
+/* TAP + ANIMATION */
+async function tap(){
+
+  const res=await api("/api/tap","POST");
+  if(!res) return;
+
+  load();
+
+  const coin=document.createElement("div");
+  coin.className="floating";
+  coin.innerText="+50 🪙";
+
+  const t=document.querySelector(".tap");
+  coin.style.left="60px";
+  coin.style.top="60px";
+
+  t.appendChild(coin);
+
+  setTimeout(()=>coin.remove(),1000);
+}
+
+/* COPY REF */
+function copyRef(){
+  const link = API+"/register?ref="+token;
+  navigator.clipboard.writeText(link);
+  alert("Referral copied!");
+}
+
+/* WITHDRAW */
+async function withdraw(){
+  const address=prompt("Address");
+  const amount=prompt("Amount");
+
+  const res=await api("/api/withdraw","POST",{address,amount});
+  alert(res.message);
+}
+
+/* DEPOSIT */
+async function deposit(){
+  const res=await api("/api/deposit","POST");
+  alert("Deposit request sent");
 }
 
 /* LOAD */
@@ -220,48 +288,37 @@ async function load(){
   coins=u.coins;
   usdt=u.usdt;
   refs=u.referrals;
+  deposit=u.depositVerified;
 
   document.getElementById("coins").innerText=coins;
   document.getElementById("usdt").innerText=usdt;
   document.getElementById("refs").innerText=refs;
-
-  document.getElementById("level").innerText=Math.floor(coins/5000)+1;
+  document.getElementById("dep").innerText=deposit?"YES":"NO";
 
   const tasks=await fetch(API+"/api/tasks").then(r=>r.json());
 
   document.getElementById("tasks").innerHTML=
     tasks.map(t=>`
-      <div class="task">
-        <span>${t.title}</span>
-        <button onclick="doTask('${t._id}')">+${t.reward}</button>
-      </div>
+      <div>${t.title}<button onclick="task('${t._id}')">+${t.reward}</button></div>
     `).join("");
 
   const board=await fetch(API+"/api/leaderboard").then(r=>r.json());
 
   document.getElementById("board").innerHTML=
     board.map((u,i)=>`
-      <div style="padding:8px;margin:5px;background:#0f172a;border-radius:10px;">
-        #${i+1} ${u.email} ⭐ ${u.coins}
-      </div>
+      <div>#${i+1} ${u.email} ⭐ ${u.coins}</div>
     `).join("");
 
   document.getElementById("status").innerText=
-    (refs>=10) ? "✅ Ready to withdraw" : "❌ Need 10 referrals";
+    (refs>=10 || deposit)
+    ? "Ready to withdraw"
+    : "Need 10 refs OR $5 deposit";
 }
 
-/* ACTIONS */
-async function tap(){ await api("/api/tap","POST"); load(); }
-async function doTask(id){ await api("/api/task","POST",{taskId:id}); load(); }
-async function withdraw(){
-  const address=prompt("Address");
-  const amount=prompt("Amount");
-  const res=await api("/api/withdraw","POST",{address,amount});
-  alert(res.message);
-}
-async function deposit(){
-  const res=await api("/api/deposit","POST");
-  alert("Request sent");
+/* TASK */
+async function task(id){
+  await api("/api/task","POST",{taskId:id});
+  load();
 }
 
 load();
@@ -269,4 +326,4 @@ load();
 </script>
 
 </body>
-      </html>
+                                                  </html>

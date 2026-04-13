@@ -12,12 +12,12 @@ const MONGO_URL = process.env.MONGO_URL;
 const JWT_SECRET = process.env.JWT_SECRET;
 const BOT_TOKEN = process.env.BOT_TOKEN;
 
-// DB
+// ================= DB =================
 mongoose.connect(MONGO_URL)
 .then(()=>console.log("MongoDB Connected"))
 .catch(err=>console.log(err));
 
-// USER MODEL
+// ================= USER MODEL =================
 const User = mongoose.model("User", new mongoose.Schema({
 telegramId:String,
 name:String,
@@ -28,7 +28,7 @@ referrals:{type:Number,default:0},
 withdrawRequests:{type:Array,default:[]}
 }));
 
-// AUTH
+// ================= AUTH =================
 function auth(req,res,next){
 const token=req.headers.authorization;
 if(!token) return res.json({message:"No token"});
@@ -42,66 +42,59 @@ res.json({message:"Invalid token"});
 }
 }
 
-// =====================
-// TELEGRAM LOGIN FIXED
-// =====================
+// ================= TELEGRAM LOGIN =================
 app.get("/api/auth/telegram", async (req,res)=>{
 
-const data = req.query;
+const data=req.query;
 
 // verify telegram hash
 const checkString = Object.keys(data)
-.filter(k => k !== "hash")
+.filter(k=>k!=="hash")
 .sort()
-.map(k => `${k}=${data[k]}`)
+.map(k=>`${k}=${data[k]}`)
 .join("\n");
 
 const secret = crypto.createHash("sha256")
 .update(BOT_TOKEN)
 .digest();
 
-const hash = crypto.createHmac("sha256", secret)
+const hash = crypto.createHmac("sha256",secret)
 .update(checkString)
 .digest("hex");
 
-if(hash !== data.hash){
+if(hash!==data.hash){
 return res.send("Invalid login");
 }
 
-// SAFE DATA (NO username required)
-const tgId = data.id;
+// SAFE DATA (NO username dependency)
+const tgId=data.id;
 
-const name =
-data.first_name ||
-"user_" + tgId;
+const name=data.first_name || "user_"+tgId;
+const photo=data.photo_url || "";
 
-const photo = data.photo_url || "";
-
-// find or create user
-let user = await User.findOne({telegramId:tgId});
+let user=await User.findOne({telegramId:tgId});
 
 if(!user){
-user = await User.create({
+user=await User.create({
 telegramId:tgId,
 name,
 photo
 });
-} else {
-user.name = name;
-user.photo = photo;
+}else{
+user.name=name;
+user.photo=photo;
 await user.save();
 }
 
-const token = jwt.sign({id:user._id},JWT_SECRET);
+const token=jwt.sign({id:user._id},JWT_SECRET);
 
-res.redirect(`https://YOUR-FRONTEND.com?token=${token}`);
+// redirect back
+res.redirect(`https://myapp1-khaki.vercel.app?token=${token}`);
 });
 
-// =====================
-// USER INFO
-// =====================
-app.get("/api/user", auth, async (req,res)=>{
-const u = await User.findById(req.userId);
+// ================= USER =================
+app.get("/api/user",auth,async(req,res)=>{
+const u=await User.findById(req.userId);
 
 res.json({
 telegramId:u.telegramId,
@@ -113,28 +106,20 @@ referrals:u.referrals
 });
 });
 
-// TAP
-app.post("/api/tap", auth, async (req,res)=>{
-const u = await User.findById(req.userId);
-u.coins += 50;
+// ================= TAP =================
+app.post("/api/tap",auth,async(req,res)=>{
+const u=await User.findById(req.userId);
+u.coins+=50;
 await u.save();
 res.json({coins:u.coins});
 });
 
-// TASK
-app.post("/api/task", auth, async (req,res)=>{
-const u = await User.findById(req.userId);
-u.coins += 500;
-await u.save();
-res.json({coins:u.coins});
-});
+// ================= WITHDRAW =================
+app.post("/api/withdraw",auth,async(req,res)=>{
+const {amount,address}=req.body;
+const u=await User.findById(req.userId);
 
-// WITHDRAW REQUEST
-app.post("/api/withdraw", auth, async (req,res)=>{
-const {amount,address} = req.body;
-const u = await User.findById(req.userId);
-
-if(u.usdt < amount){
+if(u.usdt<amount){
 return res.json({message:"Not enough USDT"});
 }
 
@@ -150,15 +135,15 @@ await u.save();
 res.json({message:"Withdraw request sent"});
 });
 
-// LEADERBOARD
-app.get("/api/leaderboard", async (req,res)=>{
-const users = await User.find().sort({coins:-1}).limit(10);
+// ================= LEADERBOARD =================
+app.get("/api/leaderboard",async(req,res)=>{
+const users=await User.find().sort({coins:-1}).limit(10);
 res.json(users);
 });
 
-// ADMIN WITHDRAW LIST
-app.get("/api/admin/withdraws", async (req,res)=>{
-const users = await User.find();
+// ================= ADMIN WITHDRAW =================
+app.get("/api/admin/withdraws",async(req,res)=>{
+const users=await User.find();
 
 let all=[];
 
@@ -178,24 +163,27 @@ index:i,
 res.json(all);
 });
 
-// ADMIN APPROVE
-app.post("/api/admin/approve", async (req,res)=>{
-const {userId,index} = req.body;
+// ================= ADMIN APPROVE =================
+app.post("/api/admin/approve",async(req,res)=>{
+const {userId,index}=req.body;
 
-const u = await User.findById(userId);
+const u=await User.findById(userId);
 
-const w = u.withdrawRequests[index];
+const w=u.withdrawRequests[index];
 
-if(!w || w.status!=="pending"){
+if(!w||w.status!=="pending"){
 return res.json({message:"Already processed"});
 }
 
-u.usdt -= w.amount;
+u.usdt-=w.amount;
 u.withdrawRequests[index].status="paid";
 
 await u.save();
 
-res.json({message:"Paid successfully"});
+res.json({message:"Paid"});
 });
 
-app.listen(3000,()=>console.log("Server running"));
+// ================= SERVER =================
+app.listen(3000,()=>{
+console.log("Server running");
+});

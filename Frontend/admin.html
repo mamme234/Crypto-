@@ -1,59 +1,24 @@
 <!DOCTYPE html>
 <html>
-<body style="background:#000;color:#fff;text-align:center">
+<head>
+<title>Admin</title>
+</head>
+<body>
 
-<h2>Admin Login</h2>
-<input id="email"><br>
-<input id="pass" type="password"><br>
-<button onclick="login()">Login</button>
-
-<div id="panel"></div>
+<h2>Users</h2>
+<div id="users"></div>
 
 <script>
-let key="";
-
-function login(){
-fetch("/api/admin/login",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({email:email.value,password:pass.value})
-}).then(()=>{
-key=pass.value;
-load();
-});
-}
-
-function load(){
-fetch("/api/admin/withdraws",{headers:{key}})
+fetch("/api/admin/users")
 .then(r=>r.json())
 .then(data=>{
-panel.innerHTML=data.map(u=>u.withdrawRequests.map((w,i)=>`
-<div>
-<p>${u.email}</p>
-<p>${w.amount}</p>
-<p>${w.address}</p>
-<button onclick="pay('${u._id}',${i})">Paid</button>
-<button onclick="confirm('${u._id}')">Confirm Deposit</button>
+document.getElementById("users").innerHTML=
+data.map(u=>`
+<div style="margin:10px;padding:10px;background:#111;color:#fff">
+${u.email} - ${u.coins}
 </div>
-`).join("")).join("");
+`).join("");
 });
-}
-
-function pay(id,i){
-fetch("/api/admin/mark-paid",{
-method:"POST",
-headers:{"Content-Type":"application/json",key},
-body:JSON.stringify({userId:id,index:i})
-}).then(load);
-}
-
-function confirm(id){
-fetch("/api/admin/confirm-deposit",{
-method:"POST",
-headers:{"Content-Type":"application/json",key},
-body:JSON.stringify({userId:id})
-}).then(load);
-}
 </script>
 
 </body>

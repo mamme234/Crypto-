@@ -1,54 +1,216 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
 <title>Earn App</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#000;
+  color:#fff;
+  text-align:center;
+}
+
+.screen{display:none;padding:20px;}
+.active{display:block;}
+
+.nav{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  display:flex;
+  justify-content:space-around;
+  background:#111;
+  padding:10px;
+}
+
+button{
+  padding:12px;
+  margin:5px;
+  border:none;
+  border-radius:10px;
+  background:#ff9800;
+  color:#fff;
+}
+
+.card{
+  background:#111;
+  margin:10px;
+  padding:15px;
+  border-radius:10px;
+}
+
+.circle{
+  width:150px;
+  height:150px;
+  border-radius:50%;
+  background:#ff9800;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:20px auto;
+  font-size:20px;
+}
+</style>
 </head>
-<body style="background:#000;color:#fff;text-align:center">
 
-<h2>Coins: <span id="coins">0</span></h2>
-<h2>USDT: <span id="usdt">0</span></h2>
+<body>
 
-<button onclick="tap()">Tap</button>
-<button onclick="daily()">Daily</button>
-<button onclick="convert()">Convert</button>
-<button onclick="deposit()">Unlock $5</button>
-<button onclick="withdraw()">Withdraw</button>
+<!-- HOME -->
+<div id="home" class="screen active">
+  <div class="card">
+    <h3>Coins: <span id="coins">0</span></h3>
+    <h3>USDT: <span id="usdt">0</span></h3>
+    <h3>Level: <span id="level">1</span></h3>
+  </div>
+
+  <div class="circle" onclick="tap()">TAP</div>
+</div>
+
+<!-- PROFILE -->
+<div id="profile" class="screen">
+  <div class="card">
+    <h3>Daily Reward</h3>
+    <button onclick="daily()">Claim +1000</button>
+  </div>
+
+  <div class="card">
+    <h3>Tasks</h3>
+    <div id="tasks"></div>
+  </div>
+
+  <div class="card">
+    <h3>Referral</h3>
+    <p>Your referrals: <span id="refs">0</span></p>
+  </div>
+</div>
+
+<!-- WITHDRAW -->
+<div id="withdraw" class="screen">
+  <div class="card">
+    <h3>Withdraw</h3>
+    <p id="status"></p>
+  </div>
+
+  <button onclick="convert()">Convert Coins → USDT</button>
+  <button onclick="withdraw()">Withdraw</button>
+  <button onclick="deposit()">Unlock ($5)</button>
+</div>
+
+<!-- NAVIGATION -->
+<div class="nav">
+  <button onclick="show('home')">Home</button>
+  <button onclick="show('profile')">Profile</button>
+  <button onclick="show('withdraw')">Withdraw</button>
+</div>
 
 <script>
+
 const API="";
 let token=localStorage.getItem("token");
 
+let coins=0;
+let usdt=0;
+let refs=0;
+
+/* SCREEN SWITCH */
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+/* API */
 async function api(url,method="GET",body){
-const res=await fetch(API+url,{
-method,
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+token
-},
-body:body?JSON.stringify(body):null
-});
-return res.json();
+  const res=await fetch(API+url,{
+    method,
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":"Bearer "+token
+    },
+    body:body?JSON.stringify(body):null
+  });
+  return res.json();
 }
 
+/* LOAD */
 async function load(){
-const d=await api("/api/user");
-coins.innerText=d.coins;
-usdt.innerText=d.usdt;
+  const u=await api("/api/user");
+
+  coins=u.coins;
+  usdt=u.usdt;
+  refs=u.referrals;
+
+  document.getElementById("coins").innerText=coins;
+  document.getElementById("usdt").innerText=usdt;
+  document.getElementById("refs").innerText=refs;
+
+  document.getElementById("level").innerText =
+    Math.floor(coins/5000)+1;
+
+  const tasks=await fetch("/api/tasks").then(r=>r.json());
+
+  document.getElementById("tasks").innerHTML =
+    tasks.map(t=>`
+      <button onclick="doTask('${t._id}')">
+        ${t.title} +${t.reward}
+      </button>
+    `).join("");
+
+  updateStatus();
 }
 
-async function tap(){await api("/api/user/tap","POST");load();}
-async function daily(){await api("/api/user/daily","POST");load();}
-async function convert(){await api("/api/user/convert","POST");load();}
-async function deposit(){await api("/api/user/deposit","POST");alert("Wait admin");}
+/* TAP */
+async function tap(){
+  await api("/api/user/tap","POST");
+  load();
+}
+
+/* DAILY */
+async function daily(){
+  await api("/api/user/daily","POST");
+  load();
+}
+
+/* TASK */
+async function doTask(id){
+  await api("/api/user/task","POST",{taskId:id});
+  load();
+}
+
+/* CONVERT */
+async function convert(){
+  await api("/api/user/convert","POST");
+  load();
+}
+
+/* WITHDRAW */
 async function withdraw(){
-const addr=prompt("Binance address");
-const amt=prompt("Amount");
-await api("/api/user/withdraw","POST",{amount:amt,address:addr});
-alert("Request sent");
+  const address=prompt("Enter Binance address");
+  const amount=Number(prompt("Enter USDT amount"));
+
+  const d=await api("/api/user/withdraw","POST",{amount,address});
+  alert(d.message);
+}
+
+/* DEPOSIT */
+async function deposit(){
+  await api("/api/user/deposit","POST");
+  alert("Send 5 USDT and wait admin confirm");
+}
+
+/* STATUS */
+function updateStatus(){
+  document.getElementById("status").innerText =
+    (refs>=10)
+    ? "✅ Ready to withdraw"
+    : "❌ Need 10 referrals OR deposit $5";
 }
 
 load();
+
 </script>
 
 </body>
-</html>
+  </html>

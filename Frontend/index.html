@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Mini Tap Earn</title>
+<title>Mini Earn App</title>
 
 <style>
 body{
@@ -37,7 +37,7 @@ font-size:22px;
 color:#ff9800;
 }
 
-/* TAP BUTTON */
+/* TAP */
 .tap{
 width:270px;
 height:270px;
@@ -54,7 +54,7 @@ position:relative;
 overflow:hidden;
 }
 
-/* SHOCKWAVE */
+/* TAP ANIMATION */
 .wave{
 position:absolute;
 border:2px solid #fff;
@@ -70,7 +70,7 @@ animation:wave 0.6s ease-out forwards;
 100%{transform:scale(8);opacity:0;}
 }
 
-/* FLY COIN */
+/* COIN POP */
 .fly-coin{
 position:fixed;
 color:#ffcc00;
@@ -81,8 +81,8 @@ pointer-events:none;
 }
 
 @keyframes fly{
-0%{transform:translate(0,0) scale(1);opacity:1;}
-100%{transform:translate(120px,-220px) scale(0.4);opacity:0;}
+0%{transform:translate(0,0);opacity:1;}
+100%{transform:translate(100px,-200px);opacity:0;}
 }
 
 /* NAV */
@@ -101,6 +101,23 @@ border:none;
 background:#111;
 color:white;
 }
+
+/* WALLET */
+.wallet-box{
+background:linear-gradient(135deg,#00c6ff,#0072ff);
+padding:15px;
+border-radius:12px;
+text-align:center;
+word-break:break-all;
+}
+
+/* SAFE FIX */
+.withdraw-card{
+background:rgba(255,255,255,0.06);
+padding:15px;
+margin:10px;
+border-radius:16px;
+}
 </style>
 </head>
 
@@ -117,6 +134,7 @@ color:white;
 </div>
 
 <div class="tap" id="tapArea">TAP</div>
+
 <div style="text-align:center;color:#aaa;font-size:13px">
 Max tap: 4 fingers
 </div>
@@ -127,7 +145,14 @@ Max tap: 4 fingers
 <div id="profile" class="screen">
 
 <div class="card">
-<h3 id="name"></h3>
+<h3>User Info</h3>
+<p id="username"></p>
+<p id="userid"></p>
+</div>
+
+<div class="card">
+<h3>Referral Link</h3>
+<p id="refLink"></p>
 </div>
 
 <div class="card">
@@ -142,9 +167,9 @@ Max tap: 4 fingers
 <!-- WITHDRAW -->
 <div id="withdraw" class="screen">
 
-<div class="card">
+<div class="withdraw-card">
 <h3>Deposit Wallet</h3>
-<p id="wallet"></p>
+<div class="wallet-box" id="wallet"></div>
 </div>
 
 </div>
@@ -165,13 +190,12 @@ let token=localStorage.getItem("token");
 
 let coinsVal=0, usdtVal=0, refsVal=0;
 
-// SCREEN
 function show(s){
 document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
 }
 
-// TELEGRAM
+// TELEGRAM LOGIN
 const tg=window.Telegram.WebApp;
 tg.expand();
 
@@ -207,8 +231,15 @@ refsVal=u.referrals;
 
 updateUI();
 
-name.innerText=u.name;
+// USER INFO (ADDED SAFE)
+username.innerText="Name: "+u.name;
+userid.innerText="ID: "+(tg.initDataUnsafe.user.id);
 
+// REF LINK FIX
+refLink.innerText=
+"👤 "+u.name+"\nhttps://t.me/Studybuddy_2025Bot?start="+tg.initDataUnsafe.user.id;
+
+// WALLET
 const w=await fetch(API+"/api/wallet").then(r=>r.json());
 wallet.innerText=w.ton;
 }
@@ -220,21 +251,20 @@ refs.innerText=refsVal;
 level.innerText=Math.floor((coinsVal+usdtVal*1000)/1000)+1;
 }
 
-// VIBRATION
+// VIBRATE
 function vibrate(){
 if(navigator.vibrate) navigator.vibrate(30);
 }
 
-// SHOCKWAVE
-function createWave(el){
-const wave=document.createElement("div");
-wave.className="wave";
-el.appendChild(wave);
-setTimeout(()=>wave.remove(),600);
+// TAP ANIMATION
+function wave(el){
+const w=document.createElement("div");
+w.className="wave";
+el.appendChild(w);
+setTimeout(()=>w.remove(),600);
 }
 
-// FLY COIN
-function flyCoin(x,y,val){
+function fly(x,y,val){
 const c=document.createElement("div");
 c.className="fly-coin";
 c.innerText="+"+val;
@@ -244,14 +274,12 @@ document.body.appendChild(c);
 setTimeout(()=>c.remove(),700);
 }
 
-// TAP SYSTEM (REAL)
+// REAL TAP
 let tapping=false;
 
 const tapArea=document.getElementById("tapArea");
 
-tapArea.addEventListener("touchstart",handleTap);
-
-async function handleTap(e){
+tapArea.addEventListener("touchstart",async(e)=>{
 
 if(tapping) return;
 tapping=true;
@@ -259,11 +287,10 @@ tapping=true;
 let fingers=e.touches.length;
 if(fingers>4) fingers=4;
 
-// animations
-createWave(tapArea);
+wave(tapArea);
 
 const rect=tapArea.getBoundingClientRect();
-flyCoin(rect.left+rect.width/2,rect.top+rect.height/2,fingers);
+fly(rect.left+rect.width/2,rect.top+rect.height/2,fingers);
 
 vibrate();
 
@@ -287,9 +314,10 @@ updateUI();
 }catch{}
 
 setTimeout(()=>tapping=false,80);
-}
 
-// TASKS (REAL ONLY)
+});
+
+// TASKS (SAFE)
 async function task(type){
 
 let url=
@@ -301,7 +329,7 @@ type==="telegram"
 
 window.open(url,"_blank");
 
-const r=await fetch(API+"/api/task",{
+await fetch(API+"/api/task",{
 method:"POST",
 headers:{
 "Content-Type":"application/json",
@@ -310,7 +338,6 @@ Authorization:"Bearer "+token
 body:JSON.stringify({type})
 });
 
-alert((await r.json()).message);
 load();
 }
 
@@ -319,4 +346,4 @@ load();
 </script>
 
 </body>
-  </html>
+</html>

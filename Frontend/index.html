@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Crypto App</title>
+<title>StudyBuddy Crypto</title>
 
 <style>
 body{
@@ -55,7 +55,7 @@ color:#fff;
 <h2>Login with Telegram</h2>
 
 <script async src="https://telegram.org/js/telegram-widget.js?22"
-data-telegram-login="YOUR_BOT_USERNAME"
+data-telegram-login="Studybuddy_2025Bot"
 data-size="large"
 data-userpic="true"
 data-auth-url="https://YOUR-BACKEND.onrender.com/api/auth/telegram">
@@ -69,7 +69,6 @@ data-auth-url="https://YOUR-BACKEND.onrender.com/api/auth/telegram">
 <div class="card">
 <img id="photo" style="width:80px;height:80px;border-radius:50%">
 <h3 id="name"></h3>
-<p>ID: <span id="tgid"></span></p>
 
 <h3>Coins: <span id="coins">0</span></h3>
 <h3>USDT: <span id="usdt">0</span></h3>
@@ -83,7 +82,6 @@ data-auth-url="https://YOUR-BACKEND.onrender.com/api/auth/telegram">
 <div id="withdraw" class="screen">
 <div class="card">
 <h3>Withdraw</h3>
-<p id="status"></p>
 </div>
 
 <button onclick="withdraw()">Request Withdraw</button>
@@ -92,12 +90,12 @@ data-auth-url="https://YOUR-BACKEND.onrender.com/api/auth/telegram">
 <script>
 
 const API="https://YOUR-BACKEND.onrender.com";
-let token = new URLSearchParams(location.search).get("token")
-|| localStorage.getItem("token");
+let token = new URLSearchParams(location.search).get("token");
 
 if(token) localStorage.setItem("token",token);
+token = localStorage.getItem("token");
 
-/* LOAD */
+/* LOAD USER */
 async function load(){
 
 const res = await fetch(API+"/api/user",{
@@ -109,15 +107,13 @@ const u = await res.json();
 if(!u || u.message) return;
 
 name.innerText = u.name;
-tgid.innerText = u.telegramId;
+coins.innerText = u.coins;
+usdt.innerText = u.usdt;
+refs.innerText = u.referrals;
 
 if(u.photo){
 photo.src = u.photo;
 }
-
-coins.innerText = u.coins;
-usdt.innerText = u.usdt;
-refs.innerText = u.referrals;
 }
 
 /* TAP */
@@ -155,4 +151,4 @@ load();
 </script>
 
 </body>
-</html>
+                             </html>

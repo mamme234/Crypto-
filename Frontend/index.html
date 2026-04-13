@@ -29,7 +29,11 @@ gap:10px;
 }
 
 .stat{text-align:center;}
-.stat strong{display:block;font-size:20px;color:#ff9800;}
+.stat strong{
+display:block;
+font-size:20px;
+color:#ff9800;
+}
 
 .tap{
 width:230px;
@@ -37,13 +41,8 @@ height:230px;
 border-radius:50%;
 margin:25px auto;
 background:radial-gradient(circle,#ff9800,#ff5722);
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:45px;
-font-weight:bold;
 box-shadow:0 0 25px rgba(255,152,0,0.4);
-user-select:none;
+cursor:pointer;
 }
 
 button{
@@ -80,7 +79,7 @@ background:#020617;
 <div class="stat">Level<strong id="level">1</strong></div>
 </div>
 
-<div class="tap" onclick="tap(2)">✋✋</div>
+<div class="tap" onclick="tap(2)"></div>
 
 </div>
 
@@ -99,6 +98,13 @@ background:#020617;
 </div>
 
 <div class="card">
+<h3>🎯 Social Tasks</h3>
+<button onclick="task('telegram')">Telegram</button>
+<button onclick="task('tiktok')">TikTok</button>
+<button onclick="task('youtube')">YouTube</button>
+</div>
+
+<div class="card">
 <h3>🏆 Leaderboard</h3>
 <div id="board"></div>
 </div>
@@ -109,12 +115,12 @@ background:#020617;
 <div id="withdraw" class="screen">
 
 <div class="card">
-<h3>💸 Withdraw Rules</h3>
-<p>Min 20 USDT</p>
-<p>10 referrals OR unlock</p>
+<h3>💸 Deposit Wallet</h3>
+<p id="wallet"></p>
 </div>
 
 <div class="card">
+<button onclick="unlock()">Unlock (5 USDT)</button>
 <button onclick="withdraw()">Withdraw</button>
 </div>
 
@@ -170,28 +176,42 @@ headers:{Authorization:"Bearer "+token}
 coins.innerText=u.coins;
 usdt.innerText=Number(u.usdt).toFixed(3);
 refs.innerText=u.referrals;
-level.innerText=Math.floor((u.coins + u.usdt*1000)/1000)+1;
+level.innerText=Math.floor((u.coins+u.usdt*1000)/1000)+1;
 
 name.innerText=u.name;
 
 // referral link with name
 refLink.innerText=`👤 ${u.name}\nhttps://t.me/Studybuddy_2025Bot?start=${tg.initDataUnsafe.user.id}`;
 
-if(u.photo) photo.src=u.photo;
+const w=await fetch(API+"/api/wallet").then(r=>r.json());
+wallet.innerText=w.ton;
 
-// leaderboard
 const lb=await fetch(API+"/api/leaderboard").then(r=>r.json());
 board.innerHTML=lb.map(x=>`<div>${x.name} - ${x.coins}</div>`).join("");
+
+if(u.photo) photo.src=u.photo;
 }
 
-async function tap(fingers){
+async function tap(f){
 await fetch(API+"/api/tap",{
 method:"POST",
 headers:{
 "Content-Type":"application/json",
 Authorization:"Bearer "+token
 },
-body:JSON.stringify({multi:fingers})
+body:JSON.stringify({multi:f})
+});
+load();
+}
+
+async function task(type){
+await fetch(API+"/api/task",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+Authorization:"Bearer "+token
+},
+body:JSON.stringify({type})
 });
 load();
 }
@@ -201,20 +221,24 @@ navigator.clipboard.writeText(refLink.innerText);
 alert("Copied");
 }
 
+async function unlock(){
+alert((await fetch(API+"/api/unlock",{method:"POST",headers:{Authorization:"Bearer "+token}}).then(r=>r.json())).message);
+load();
+}
+
 async function withdraw(){
 const a=prompt("Address");
 const b=prompt("Amount");
 
-const r=await fetch(API+"/api/withdraw",{
+alert((await fetch(API+"/api/withdraw",{
 method:"POST",
 headers:{
 "Content-Type":"application/json",
 Authorization:"Bearer "+token
 },
 body:JSON.stringify({address:a,amount:b})
-});
+}).then(r=>r.json())).message);
 
-alert((await r.json()).message);
 load();
 }
 

@@ -12,37 +12,26 @@ const MONGO_URL = process.env.MONGO_URL;
 const JWT_SECRET = process.env.JWT_SECRET;
 const BOT_TOKEN = process.env.BOT_TOKEN;
 
-// =====================
-// DB CONNECT
-// =====================
+// DB
 mongoose.connect(MONGO_URL)
 .then(()=>console.log("MongoDB Connected"))
 .catch(err=>console.log(err));
 
-// =====================
 // USER MODEL
-// =====================
 const User = mongoose.model("User", new mongoose.Schema({
 telegramId:String,
 name:String,
 photo:String,
-
 coins:{type:Number,default:0},
 usdt:{type:Number,default:0},
 referrals:{type:Number,default:0},
-
 withdrawRequests:{type:Array,default:[]}
 }));
 
-// =====================
-// AUTH MIDDLEWARE
-// =====================
+// AUTH
 function auth(req,res,next){
 const token=req.headers.authorization;
-
-if(!token){
-return res.json({message:"No token"});
-}
+if(!token) return res.json({message:"No token"});
 
 try{
 const data=jwt.verify(token.split(" ")[1],JWT_SECRET);
@@ -54,7 +43,7 @@ res.json({message:"Invalid token"});
 }
 
 // =====================
-// TELEGRAM LOGIN (FIXED - NO USERNAME ERROR)
+// TELEGRAM LOGIN FIXED
 // =====================
 app.get("/api/auth/telegram", async (req,res)=>{
 
@@ -79,12 +68,9 @@ if(hash !== data.hash){
 return res.send("Invalid login");
 }
 
-// =====================
-// SAFE USER DATA (NO CRASH)
-// =====================
+// SAFE DATA (NO username required)
 const tgId = data.id;
 
-// IMPORTANT FIX HERE 👇
 const name =
 data.first_name ||
 "user_" + tgId;
@@ -106,15 +92,13 @@ user.photo = photo;
 await user.save();
 }
 
-// create token
 const token = jwt.sign({id:user._id},JWT_SECRET);
 
-// redirect back
 res.redirect(`https://YOUR-FRONTEND.com?token=${token}`);
 });
 
 // =====================
-// GET USER
+// USER INFO
 // =====================
 app.get("/api/user", auth, async (req,res)=>{
 const u = await User.findById(req.userId);
@@ -129,38 +113,25 @@ referrals:u.referrals
 });
 });
 
-// =====================
-// TAP SYSTEM
-// =====================
+// TAP
 app.post("/api/tap", auth, async (req,res)=>{
 const u = await User.findById(req.userId);
-
 u.coins += 50;
-
 await u.save();
-
 res.json({coins:u.coins});
 });
 
-// =====================
-// TASK SYSTEM
-// =====================
+// TASK
 app.post("/api/task", auth, async (req,res)=>{
 const u = await User.findById(req.userId);
-
 u.coins += 500;
-
 await u.save();
-
 res.json({coins:u.coins});
 });
 
-// =====================
-// WITHDRAW REQUEST (NO DEDUCTION YET)
-// =====================
+// WITHDRAW REQUEST
 app.post("/api/withdraw", auth, async (req,res)=>{
 const {amount,address} = req.body;
-
 const u = await User.findById(req.userId);
 
 if(u.usdt < amount){
@@ -179,17 +150,13 @@ await u.save();
 res.json({message:"Withdraw request sent"});
 });
 
-// =====================
 // LEADERBOARD
-// =====================
 app.get("/api/leaderboard", async (req,res)=>{
 const users = await User.find().sort({coins:-1}).limit(10);
 res.json(users);
 });
 
-// =====================
-// ADMIN - GET WITHDRAW REQUESTS
-// =====================
+// ADMIN WITHDRAW LIST
 app.get("/api/admin/withdraws", async (req,res)=>{
 const users = await User.find();
 
@@ -211,9 +178,7 @@ index:i,
 res.json(all);
 });
 
-// =====================
-// ADMIN - APPROVE WITHDRAW
-// =====================
+// ADMIN APPROVE
 app.post("/api/admin/approve", async (req,res)=>{
 const {userId,index} = req.body;
 
@@ -225,19 +190,12 @@ if(!w || w.status!=="pending"){
 return res.json({message:"Already processed"});
 }
 
-// deduct balance
 u.usdt -= w.amount;
-
-u.withdrawRequests[index].status = "paid";
+u.withdrawRequests[index].status="paid";
 
 await u.save();
 
 res.json({message:"Paid successfully"});
 });
 
-// =====================
-// START SERVER
-// =====================
-app.listen(3000,()=>{
-console.log("Server running on port 3000");
-});
+app.listen(3000,()=>console.log("Server running"));

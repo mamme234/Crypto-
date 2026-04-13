@@ -10,8 +10,6 @@ app.use(express.json());
 const MONGO_URL = process.env.MONGO_URL;
 const JWT_SECRET = process.env.JWT_SECRET;
 
-const TON_WALLET = "UQAYjMccjJ8Xn1z9hodUImMjJCB2qmWGjlMup9-sVZtEQFWH";
-
 mongoose.connect(MONGO_URL);
 
 // ================= MODEL =================
@@ -22,15 +20,13 @@ photo:String,
 
 coins:{type:Number,default:0},
 usdt:{type:Number,default:0},
-
 referrals:{type:Number,default:0},
+
 refUsers:{type:Array,default:[]},
 
 tasks:{type:Object,default:{}},
 
-unlocked:{type:Boolean,default:false},
-
-withdrawRequests:{type:Array,default:[]}
+unlocked:{type:Boolean,default:false}
 }));
 
 // ================= AUTH =================
@@ -60,17 +56,23 @@ name,
 photo
 });
 
-// REFERRAL SAFE
+// REFERRAL FIX (100 coins)
 if(ref && ref != id){
 const r = await User.findOne({telegramId:ref});
-if(r){
 
+if(r){
 const exists = r.refUsers.find(x=>x.id==id);
 
 if(!exists){
 r.referrals += 1;
-r.coins += 1000;
-r.refUsers.push({id,name,photo});
+r.coins += 100;
+
+r.refUsers.push({
+id,
+name,
+photo
+});
+
 await r.save();
 }
 }
@@ -86,11 +88,11 @@ app.get("/api/user", auth, async (req,res)=>{
 const u = await User.findById(req.userId);
 
 res.json({
-name:u.name,
-photo:u.photo,
-coins:u.coins,
-usdt:u.usdt,
-referrals:u.referrals
+name:u.name || "user",
+photo:u.photo || "",
+coins:u.coins || 0,
+usdt:Number(u.usdt || 0),   // FIXED
+referrals:u.referrals || 0
 });
 });
 
@@ -114,11 +116,10 @@ u.coins -= 1000;
 u.usdt += 1;
 
 await u.save();
-
 res.json({message:"Converted"});
 });
 
-// ================= SOCIAL TASK =================
+// ================= TASKS =================
 app.post("/api/task", auth, async (req,res)=>{
 const {type}=req.body;
 const u = await User.findById(req.userId);
@@ -137,23 +138,7 @@ u.tasks[type]=true;
 
 await u.save();
 
-res.json({message:"Task completed"});
-});
-
-// ================= UNLOCK (5 USDT SAFE) =================
-app.post("/api/unlock", auth, async (req,res)=>{
-const u = await User.findById(req.userId);
-
-if(u.usdt < 5){
-return res.json({message:"Need 5 USDT"});
-}
-
-u.usdt -= 5;
-u.unlocked = true;
-
-await u.save();
-
-res.json({message:"Unlocked"});
+res.json({message:"Task done"});
 });
 
 // ================= WITHDRAW =================
@@ -161,28 +146,19 @@ app.post("/api/withdraw", auth, async (req,res)=>{
 const {amount,address}=req.body;
 const u = await User.findById(req.userId);
 
-// RULE 1
 if(amount < 20){
-return res.json({message:"Minimum withdraw 20 USDT"});
+return res.json({message:"Minimum 20 USDT"});
 }
 
-// RULE 2
 if(u.usdt < amount){
 return res.json({message:"Not enough USDT"});
 }
 
-// RULE 3
 if(u.referrals < 10 && !u.unlocked){
-return res.json({message:"Need 10 referrals or unlock (5 USDT)"});
+return res.json({message:"Need 10 referrals or unlock"});
 }
 
 u.usdt -= amount;
-
-u.withdrawRequests.push({
-amount,
-address,
-status:"pending"
-});
 
 await u.save();
 
@@ -195,10 +171,4 @@ const users = await User.find().sort({coins:-1}).limit(10);
 res.json(users);
 });
 
-// ================= WALLET =================
-app.get("/api/wallet",(req,res)=>{
-res.json({ton:TON_WALLET});
-});
-
-// ================= SERVER =================
 app.listen(3000,()=>console.log("Server running"));

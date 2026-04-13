@@ -2,28 +2,30 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Crypto</title>
+<title>Crypto App</title>
 
 <style>
 body{
 margin:0;
-font-family:'Segoe UI';
+font-family:Segoe UI;
 background:linear-gradient(180deg,#0b1220,#020617);
 color:#fff;
 }
 
+.screen{display:none;padding:15px;}
+.active{display:block;}
+
 .header{
-padding:18px;
 text-align:center;
-font-size:22px;
-font-weight:bold;
+padding:10px;
+font-size:20px;
 }
 
 .card{
 background:rgba(255,255,255,0.06);
+padding:15px;
 border-radius:18px;
-padding:18px;
-margin:12px;
+margin:10px;
 }
 
 .grid{
@@ -33,17 +35,13 @@ gap:10px;
 }
 
 .stat{text-align:center;}
-.stat strong{
-display:block;
-font-size:20px;
-color:#ff9800;
-}
+.stat strong{color:#ff9800;font-size:20px;display:block;}
 
 .tap{
 width:170px;
 height:170px;
 border-radius:50%;
-margin:25px auto;
+margin:20px auto;
 background:radial-gradient(circle,#ff9800,#ff5722);
 display:flex;
 align-items:center;
@@ -60,12 +58,27 @@ margin-top:10px;
 background:#229ED9;
 color:#fff;
 }
+
+.nav{
+position:fixed;
+bottom:0;
+width:100%;
+display:flex;
+background:#020617;
+}
+
+.nav button{
+flex:1;
+border-radius:0;
+}
 </style>
 </head>
 
 <body>
 
-<div class="header">💰 Crypto</div>
+<!-- HOME -->
+<div id="home" class="screen active">
+<div class="header">🏠 Home</div>
 
 <div class="card grid">
 <div class="stat">Coins<strong id="coins">0</strong></div>
@@ -74,22 +87,61 @@ color:#fff;
 <div class="stat">Level<strong id="level">1</strong></div>
 </div>
 
-<div style="text-align:center">
-<img id="photo" style="width:70px;height:70px;border-radius:50%">
+<div class="tap" onclick="tap()">TAP</div>
+
+<div class="card">
+<button onclick="daily()">Daily Reward</button>
+</div>
+</div>
+
+<!-- PROFILE -->
+<div id="profile" class="screen">
+<div class="header">👤 Profile</div>
+
+<div class="card" style="text-align:center">
+<img id="photo" style="width:80px;height:80px;border-radius:50%">
 <h3 id="name"></h3>
 </div>
 
-<div class="tap" onclick="tap()">🪙</div>
-
 <div class="card">
-<button onclick="convert()">Convert Coins</button>
-<button onclick="withdraw()">Withdraw</button>
-<button onclick="unlock()">Unlock ($5)</button>
+<h3>👥 Referrals</h3>
+<div id="board"></div>
 </div>
 
 <div class="card">
-<h3>🏆 Leaderboard</h3>
-<div id="board"></div>
+<h3>🎯 Social Tasks</h3>
+<button onclick="task('telegram')">Telegram +500</button>
+<button onclick="task('tiktok')">TikTok +700</button>
+<button onclick="task('youtube')">YouTube +1000</button>
+</div>
+</div>
+
+<!-- WITHDRAW -->
+<div id="withdraw" class="screen">
+<div class="header">💸 Withdraw</div>
+
+<div class="card">
+<h3>Rules</h3>
+<p>Min: 20 USDT</p>
+<p>Need 10 refs OR 5 USDT unlock</p>
+</div>
+
+<div class="card">
+<h3>TON Wallet</h3>
+<p id="wallet"></p>
+</div>
+
+<div class="card">
+<button onclick="unlock()">Unlock (5 USDT)</button>
+<button onclick="withdraw()">Withdraw</button>
+</div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+<button onclick="show('home')">Home</button>
+<button onclick="show('profile')">Profile</button>
+<button onclick="show('withdraw')">Withdraw</button>
 </div>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -99,11 +151,15 @@ color:#fff;
 const API="https://crypto-4bbj.onrender.com";
 let token=localStorage.getItem("token");
 
-// TELEGRAM LOGIN
-const tg = window.Telegram.WebApp;
+function show(s){
+document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
+document.getElementById(s).classList.add("active");
+}
+
+const tg=window.Telegram.WebApp;
 tg.expand();
 
-const user = tg.initDataUnsafe?.user;
+const user=tg.initDataUnsafe?.user;
 
 if(user && !token){
 fetch(API+"/api/tg-login",{
@@ -115,23 +171,18 @@ name:user.first_name,
 photo:user.photo_url
 })
 })
-.then(res=>res.json())
+.then(r=>r.json())
 .then(d=>{
 localStorage.setItem("token",d.token);
 location.reload();
 });
 }
 
-// LOAD USER
 async function load(){
 
-const res=await fetch(API+"/api/user",{
+const u=await fetch(API+"/api/user",{
 headers:{Authorization:"Bearer "+token}
-});
-
-const u=await res.json();
-
-if(!u || u.message) return;
+}).then(r=>r.json());
 
 coins.innerText=u.coins;
 usdt.innerText=u.usdt;
@@ -139,61 +190,57 @@ refs.innerText=u.referrals;
 level.innerText=Math.floor(u.coins/5000)+1;
 name.innerText=u.name;
 
+const lb=await fetch(API+"/api/leaderboard").then(r=>r.json());
+board.innerHTML=lb.map(x=>`<div>${x.name} - ${x.coins}</div>`).join("");
+
+const w=await fetch(API+"/api/wallet").then(r=>r.json());
+wallet.innerText=w.ton;
+
 if(u.photo) photo.src=u.photo;
-
-// leaderboard
-const lb = await fetch(API+"/api/leaderboard").then(r=>r.json());
-
-board.innerHTML = lb.map(u=>`
-<div>${u.name} - ${u.coins}</div>
-`).join("");
 }
 
-// TAP
 async function tap(){
-await fetch(API+"/api/tap",{
-method:"POST",
-headers:{Authorization:"Bearer "+token}
-});
+await fetch(API+"/api/tap",{method:"POST",headers:{Authorization:"Bearer "+token}});
 load();
 }
 
-// CONVERT
-async function convert(){
-const r = await fetch(API+"/api/convert",{
-method:"POST",
-headers:{Authorization:"Bearer "+token}
-});
-alert((await r.json()).message);
-load();
+async function daily(){
+alert("Daily system not enabled yet");
 }
 
-// WITHDRAW
-async function withdraw(){
-
-const address=prompt("Wallet address");
-const amount=prompt("Amount");
-
-const res=await fetch(API+"/api/withdraw",{
+async function task(type){
+await fetch(API+"/api/task",{
 method:"POST",
 headers:{
 "Content-Type":"application/json",
 Authorization:"Bearer "+token
 },
-body:JSON.stringify({address,amount})
+body:JSON.stringify({type})
 });
-
-alert((await res.json()).message);
 load();
 }
 
-// UNLOCK
 async function unlock(){
-await fetch(API+"/api/unlock",{
+const r=await fetch(API+"/api/unlock",{method:"POST",headers:{Authorization:"Bearer "+token}});
+alert((await r.json()).message);
+load();
+}
+
+async function withdraw(){
+const a=prompt("Address");
+const b=prompt("Amount");
+
+const r=await fetch(API+"/api/withdraw",{
 method:"POST",
-headers:{Authorization:"Bearer "+token}
+headers:{
+"Content-Type":"application/json",
+Authorization:"Bearer "+token
+},
+body:JSON.stringify({address:a,amount:b})
 });
-alert("Unlocked");
+
+alert((await r.json()).message);
+load();
 }
 
 load();
@@ -201,4 +248,4 @@ load();
 </script>
 
 </body>
-</html>
+  </html>

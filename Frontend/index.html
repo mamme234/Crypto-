@@ -2,41 +2,57 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Crypto App</title>
+<title>Crypto</title>
 
 <style>
 body{
 margin:0;
-font-family:Segoe UI;
+font-family:'Segoe UI';
 background:linear-gradient(180deg,#0b1220,#020617);
 color:#fff;
-text-align:center;
 }
 
-.screen{display:none;padding:15px;}
-.active{display:block;}
+.header{
+padding:18px;
+text-align:center;
+font-size:22px;
+font-weight:bold;
+}
 
 .card{
 background:rgba(255,255,255,0.06);
-padding:16px;
-margin:15px;
-border-radius:16px;
+border-radius:18px;
+padding:18px;
+margin:12px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+}
+
+.stat{text-align:center;}
+.stat strong{
+display:block;
+font-size:20px;
+color:#ff9800;
 }
 
 .tap{
-width:160px;
-height:160px;
+width:170px;
+height:170px;
 border-radius:50%;
-margin:20px auto;
+margin:25px auto;
 background:radial-gradient(circle,#ff9800,#ff5722);
 display:flex;
 align-items:center;
 justify-content:center;
-font-weight:bold;
+font-size:30px;
 }
 
 button{
-width:90%;
+width:100%;
 padding:12px;
 border:none;
 border-radius:12px;
@@ -49,53 +65,64 @@ color:#fff;
 
 <body>
 
-<!-- LOGIN -->
-<div id="login" class="screen active">
-<div class="card">
-<h2>Login with Telegram</h2>
+<div class="header">💰 Crypto</div>
 
-<script async src="https://telegram.org/js/telegram-widget.js?22"
-data-telegram-login="Studybuddy_2025Bot"
-data-size="large"
-data-userpic="true"
-data-auth-url="https://crypto-4bbj.onrender.com/api/auth/telegram">
-</script>
-
-</div>
+<div class="card grid">
+<div class="stat">Coins<strong id="coins">0</strong></div>
+<div class="stat">USDT<strong id="usdt">0</strong></div>
+<div class="stat">Refs<strong id="refs">0</strong></div>
+<div class="stat">Level<strong id="level">1</strong></div>
 </div>
 
-<!-- HOME -->
-<div id="home" class="screen">
-<div class="card">
-<img id="photo" style="width:80px;height:80px;border-radius:50%">
+<div style="text-align:center">
+<img id="photo" style="width:70px;height:70px;border-radius:50%">
 <h3 id="name"></h3>
-
-<h3>Coins: <span id="coins">0</span></h3>
-<h3>USDT: <span id="usdt">0</span></h3>
-<h3>Refs: <span id="refs">0</span></h3>
 </div>
 
-<div class="tap" onclick="tap()">TAP</div>
-</div>
+<div class="tap" onclick="tap()">🪙</div>
 
-<!-- WITHDRAW -->
-<div id="withdraw" class="screen">
 <div class="card">
-<h3>Withdraw</h3>
+<button onclick="convert()">Convert Coins</button>
+<button onclick="withdraw()">Withdraw</button>
+<button onclick="unlock()">Unlock ($5)</button>
 </div>
 
-<button onclick="withdraw()">Request Withdraw</button>
+<div class="card">
+<h3>🏆 Leaderboard</h3>
+<div id="board"></div>
 </div>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <script>
 
 const API="https://crypto-4bbj.onrender.com";
-let token=new URLSearchParams(location.search).get("token");
+let token=localStorage.getItem("token");
 
-if(token) localStorage.setItem("token",token);
-token=localStorage.getItem("token");
+// TELEGRAM LOGIN
+const tg = window.Telegram.WebApp;
+tg.expand();
 
-/* LOAD USER */
+const user = tg.initDataUnsafe?.user;
+
+if(user && !token){
+fetch(API+"/api/tg-login",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+id:user.id,
+name:user.first_name,
+photo:user.photo_url
+})
+})
+.then(res=>res.json())
+.then(d=>{
+localStorage.setItem("token",d.token);
+location.reload();
+});
+}
+
+// LOAD USER
 async function load(){
 
 const res=await fetch(API+"/api/user",{
@@ -104,30 +131,44 @@ headers:{Authorization:"Bearer "+token}
 
 const u=await res.json();
 
-if(!u||u.message) return;
+if(!u || u.message) return;
 
-name.innerText=u.name;
 coins.innerText=u.coins;
 usdt.innerText=u.usdt;
 refs.innerText=u.referrals;
+level.innerText=Math.floor(u.coins/5000)+1;
+name.innerText=u.name;
 
-if(u.photo){
-photo.src=u.photo;
-}
+if(u.photo) photo.src=u.photo;
+
+// leaderboard
+const lb = await fetch(API+"/api/leaderboard").then(r=>r.json());
+
+board.innerHTML = lb.map(u=>`
+<div>${u.name} - ${u.coins}</div>
+`).join("");
 }
 
-/* TAP */
+// TAP
 async function tap(){
-const res=await fetch(API+"/api/tap",{
+await fetch(API+"/api/tap",{
 method:"POST",
 headers:{Authorization:"Bearer "+token}
 });
-
-const d=await res.json();
-coins.innerText=d.coins;
+load();
 }
 
-/* WITHDRAW */
+// CONVERT
+async function convert(){
+const r = await fetch(API+"/api/convert",{
+method:"POST",
+headers:{Authorization:"Bearer "+token}
+});
+alert((await r.json()).message);
+load();
+}
+
+// WITHDRAW
 async function withdraw(){
 
 const address=prompt("Wallet address");
@@ -142,8 +183,17 @@ Authorization:"Bearer "+token
 body:JSON.stringify({address,amount})
 });
 
-const d=await res.json();
-alert(d.message);
+alert((await res.json()).message);
+load();
+}
+
+// UNLOCK
+async function unlock(){
+await fetch(API+"/api/unlock",{
+method:"POST",
+headers:{Authorization:"Bearer "+token}
+});
+alert("Unlocked");
 }
 
 load();

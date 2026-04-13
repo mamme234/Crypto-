@@ -1,279 +1,81 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Crypto</title>
-
+<title>Crypto App</title>
 <style>
-body{
-  margin:0;
-  font-family:'Segoe UI', sans-serif;
-  background:linear-gradient(180deg,#0b1220,#020617);
-  color:#fff;
-}
-
-/* HEADER */
-.header{
-  padding:18px;
-  text-align:center;
-  font-size:22px;
-  font-weight:bold;
-}
-
-/* SCREENS */
-.screen{
-  display:none;
-  padding:15px;
-  animation:fade 0.3s ease;
-}
-.active{display:block;}
-
-@keyframes fade{
-  from{opacity:0;transform:translateY(10px);}
-  to{opacity:1;transform:translateY(0);}
-}
-
-/* CARD */
-.card{
-  background:rgba(255,255,255,0.06);
-  border-radius:18px;
-  padding:18px;
-  margin-bottom:12px;
-  backdrop-filter: blur(10px);
-  box-shadow:0 10px 30px rgba(0,0,0,0.3);
-}
-
-/* GRID */
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-
-.stat{
-  text-align:center;
-}
-.stat strong{
-  display:block;
-  font-size:20px;
-  color:#ff9800;
-}
-
-/* TAP */
-.tap{
-  width:170px;
-  height:170px;
-  border-radius:50%;
-  margin:25px auto;
-  background:radial-gradient(circle,#ff9800,#ff5722);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:22px;
-  font-weight:bold;
-  box-shadow:0 0 30px rgba(255,152,0,0.4);
-  transition:0.15s;
-  user-select:none;
-}
-.tap:active{
-  transform:scale(0.92);
-}
-
-/* BUTTON */
-button{
-  width:100%;
-  padding:12px;
-  border:none;
-  border-radius:12px;
-  margin-top:10px;
-  font-weight:bold;
-  background:linear-gradient(90deg,#ff9800,#ff5722);
-  color:#fff;
-}
-
-/* TASK */
-.task{
-  background:#0f172a;
-  padding:10px;
-  margin-top:10px;
-  border-radius:12px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-/* NAV */
-.nav{
-  position:fixed;
-  bottom:0;
-  width:100%;
-  background:#020617;
-  display:flex;
-  justify-content:space-around;
-  padding:10px;
-  border-top:1px solid #111;
-}
-
-.nav button{
-  width:auto;
-  background:none;
-  color:#aaa;
-  font-size:16px;
-}
-
-.nav button.active{
-  color:#ff9800;
-}
-
-/* LOADER */
-.loader{
-  display:none;
-  text-align:center;
-  padding:10px;
-  color:#aaa;
-}
+body{margin:0;font-family:Arial;background:#0b1220;color:#fff}
+.screen{display:none;padding:15px}
+.active{display:block}
+.card{background:#111827;padding:15px;margin:10px;border-radius:10px}
+button{width:100%;padding:10px;margin-top:10px}
+.nav{position:fixed;bottom:0;width:100%;display:flex}
+.nav button{flex:1}
 </style>
 </head>
 
 <body>
 
-<div class="header">💰 Crypto</div>
-
-<div class="loader" id="loader">Loading...</div>
-
-<!-- HOME -->
 <div id="home" class="screen active">
-
-  <div class="card grid">
-    <div class="stat">Coins<strong id="coins">0</strong></div>
-    <div class="stat">USDT<strong id="usdt">0</strong></div>
-    <div class="stat">Level<strong id="level">1</strong></div>
-    <div class="stat">Refs<strong id="refs">0</strong></div>
-  </div>
-
-  <div class="tap" onclick="tap()">TAP</div>
+<h2>Home</h2>
+<p>Coins: <span id="c">0</span></p>
+<button onclick="tap()">Tap</button>
 </div>
 
-<!-- PROFILE -->
 <div id="profile" class="screen">
-
-  <div class="card">
-    <h3>🎁 Daily Reward</h3>
-    <button onclick="daily()">Claim +1000</button>
-  </div>
-
-  <div class="card">
-    <h3>📋 Tasks</h3>
-    <div id="tasks"></div>
-  </div>
-
+<h2>Profile</h2>
+<button onclick="task()">Task +500</button>
 </div>
 
-<!-- WITHDRAW -->
 <div id="withdraw" class="screen">
-
-  <div class="card">
-    <h3>💸 Withdraw</h3>
-    <p id="status"></p>
-  </div>
-
-  <button onclick="convert()">Convert Coins → USDT</button>
-  <button onclick="withdraw()">Withdraw</button>
-  <button onclick="deposit()">Unlock $5</button>
-
+<h2>Withdraw</h2>
+<input id="addr" placeholder="address">
+<input id="amt" placeholder="amount">
+<button onclick="withdraw()">Send</button>
 </div>
 
-<!-- NAV -->
 <div class="nav">
-  <button onclick="nav('home')" id="n1">🏠</button>
-  <button onclick="nav('profile')" id="n2">👤</button>
-  <button onclick="nav('withdraw')" id="n3">💸</button>
+<button onclick="show('home')">Home</button>
+<button onclick="show('profile')">Profile</button>
+<button onclick="show('withdraw')">Withdraw</button>
 </div>
 
 <script>
-
 const API="";
 let token=localStorage.getItem("token");
 
-let coins=0, usdt=0, refs=0;
-
-/* NAV */
-function nav(id){
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-
-  document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
-  document.getElementById("n"+(id==='home'?1:id==='profile'?2:3)).classList.add("active");
+function show(id){
+document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
 }
 
-/* LOADER */
-function showLoad(v){
-  document.getElementById("loader").style.display=v?"block":"none";
+async function tap(){
+await fetch(API+"/api/tap",{method:"POST",headers:{Authorization:"Bearer "+token}});
+load();
 }
 
-/* API */
-async function api(url,method="GET",body){
-  showLoad(true);
-  const res=await fetch(API+url,{
-    method,
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization":"Bearer "+token
-    },
-    body:body?JSON.stringify(body):null
-  });
-  showLoad(false);
-  return res.json();
+async function task(){
+await fetch(API+"/api/task",{method:"POST",headers:{Authorization:"Bearer "+token}});
+load();
 }
-
-/* LOAD */
-async function load(){
-  const u=await api("/api/user");
-
-  coins=u.coins;
-  usdt=u.usdt;
-  refs=u.referrals;
-
-  document.getElementById("coins").innerText=coins;
-  document.getElementById("usdt").innerText=usdt;
-  document.getElementById("refs").innerText=refs;
-
-  document.getElementById("level").innerText=Math.floor(coins/5000)+1;
-
-  const tasks=await fetch("/api/tasks").then(r=>r.json());
-
-  document.getElementById("tasks").innerHTML=
-    tasks.map(t=>`
-      <div class="task">
-        <span>${t.title}</span>
-        <button onclick="doTask('${t._id}')">+${t.reward}</button>
-      </div>
-    `).join("");
-
-  document.getElementById("status").innerText=
-    (refs>=10) ? "✅ Ready to withdraw" : "❌ Need 10 refs or $5 unlock";
-}
-
-/* ACTIONS */
-async function tap(){ await api("/api/user/tap","POST"); load(); }
-async function daily(){ await api("/api/user/daily","POST"); load(); }
-async function doTask(id){ await api("/api/user/task","POST",{taskId:id}); load(); }
-async function convert(){ await api("/api/user/convert","POST"); load(); }
 
 async function withdraw(){
-  const address=prompt("Binance address");
-  const amount=prompt("USDT amount");
-  const d=await api("/api/user/withdraw","POST",{amount,address});
-  alert(d.message);
+await fetch(API+"/api/withdraw",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+Authorization:"Bearer "+token
+},
+body:JSON.stringify({amount:amt.value,address:addr.value})
+});
 }
 
-async function deposit(){
-  await api("/api/user/deposit","POST");
-  alert("Send $5 USDT and wait admin confirmation");
+async function load(){
+const r=await fetch(API+"/api/user",{headers:{Authorization:"Bearer "+token}});
+const d=await r.json();
+document.getElementById("c").innerText=d.coins;
 }
 
 load();
-
 </script>
 
 </body>

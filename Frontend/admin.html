@@ -1,20 +1,60 @@
 <!DOCTYPE html>
 <html>
-<body style="background:black;color:lime;text-align:center">
-<h2>Admin</h2>
-<input id="token">
-<button onclick="getUsers()">Get Users</button>
-<pre id="out"></pre>
+<body style="background:#000;color:#fff;text-align:center">
+
+<h2>Admin Login</h2>
+<input id="email"><br>
+<input id="pass" type="password"><br>
+<button onclick="login()">Login</button>
+
+<div id="panel"></div>
 
 <script>
-const API="http://localhost:3000";
+let key="";
 
-async function getUsers(){
-const res=await fetch(API+"/api/user",{
-headers:{Authorization:"Bearer "+token.value}
+function login(){
+fetch("/api/admin/login",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({email:email.value,password:pass.value})
+}).then(()=>{
+key=pass.value;
+load();
 });
-out.innerText=await res.text();
+}
+
+function load(){
+fetch("/api/admin/withdraws",{headers:{key}})
+.then(r=>r.json())
+.then(data=>{
+panel.innerHTML=data.map(u=>u.withdrawRequests.map((w,i)=>`
+<div>
+<p>${u.email}</p>
+<p>${w.amount}</p>
+<p>${w.address}</p>
+<button onclick="pay('${u._id}',${i})">Paid</button>
+<button onclick="confirm('${u._id}')">Confirm Deposit</button>
+</div>
+`).join("")).join("");
+});
+}
+
+function pay(id,i){
+fetch("/api/admin/mark-paid",{
+method:"POST",
+headers:{"Content-Type":"application/json",key},
+body:JSON.stringify({userId:id,index:i})
+}).then(load);
+}
+
+function confirm(id){
+fetch("/api/admin/confirm-deposit",{
+method:"POST",
+headers:{"Content-Type":"application/json",key},
+body:JSON.stringify({userId:id})
+}).then(load);
 }
 </script>
+
 </body>
 </html>

@@ -36,13 +36,25 @@ color:#ff9800;
 }
 
 .tap{
-width:230px;
-height:230px;
+width:240px;
+height:240px;
 border-radius:50%;
 margin:25px auto;
 background:radial-gradient(circle,#ff9800,#ff5722);
 box-shadow:0 0 25px rgba(255,152,0,0.4);
 cursor:pointer;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:28px;
+font-weight:bold;
+}
+
+.small{
+text-align:center;
+color:#aaa;
+font-size:13px;
+margin-top:-10px;
 }
 
 button{
@@ -79,7 +91,9 @@ background:#020617;
 <div class="stat">Level<strong id="level">1</strong></div>
 </div>
 
-<div class="tap" onclick="tap(2)"></div>
+<div class="tap" onclick="tap(2)">TAP</div>
+
+<div class="small">Maximum tap: 4 fingers</div>
 
 </div>
 
@@ -247,4 +261,4 @@ load();
 </script>
 
 </body>
-  </html>
+</html>

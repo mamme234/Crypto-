@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Crypto</title>
+<title>Crypto App</title>
 
 <style>
 body{
@@ -57,7 +57,7 @@ color:#fff;
 <script async src="https://telegram.org/js/telegram-widget.js?22"
 data-telegram-login="YOUR_BOT_USERNAME"
 data-size="large"
-data-userpic="false"
+data-userpic="true"
 data-auth-url="https://YOUR-BACKEND.onrender.com/api/auth/telegram">
 </script>
 
@@ -67,7 +67,10 @@ data-auth-url="https://YOUR-BACKEND.onrender.com/api/auth/telegram">
 <!-- HOME -->
 <div id="home" class="screen">
 <div class="card">
-<h3>User: <span id="name"></span></h3>
+<img id="photo" style="width:80px;height:80px;border-radius:50%">
+<h3 id="name"></h3>
+<p>ID: <span id="tgid"></span></p>
+
 <h3>Coins: <span id="coins">0</span></h3>
 <h3>USDT: <span id="usdt">0</span></h3>
 <h3>Refs: <span id="refs">0</span></h3>
@@ -89,12 +92,12 @@ data-auth-url="https://YOUR-BACKEND.onrender.com/api/auth/telegram">
 <script>
 
 const API="https://YOUR-BACKEND.onrender.com";
-let token = new URLSearchParams(location.search).get("token") 
+let token = new URLSearchParams(location.search).get("token")
 || localStorage.getItem("token");
 
 if(token) localStorage.setItem("token",token);
 
-/* LOAD USER */
+/* LOAD */
 async function load(){
 
 const res = await fetch(API+"/api/user",{
@@ -106,6 +109,12 @@ const u = await res.json();
 if(!u || u.message) return;
 
 name.innerText = u.name;
+tgid.innerText = u.telegramId;
+
+if(u.photo){
+photo.src = u.photo;
+}
+
 coins.innerText = u.coins;
 usdt.innerText = u.usdt;
 refs.innerText = u.referrals;
@@ -118,10 +127,8 @@ method:"POST",
 headers:{Authorization:"Bearer "+token}
 });
 
-const data = await res.json();
-if(data.coins !== undefined){
-coins.innerText = data.coins;
-}
+const d = await res.json();
+coins.innerText = d.coins;
 }
 
 /* WITHDRAW */
@@ -139,8 +146,8 @@ Authorization:"Bearer "+token
 body:JSON.stringify({address,amount})
 });
 
-const data = await res.json();
-alert(data.message);
+const d = await res.json();
+alert(d.message);
 }
 
 load();

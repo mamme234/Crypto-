@@ -2,12 +2,12 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Crypto App</title>
+<title>Tap Earn App</title>
 
 <style>
 body{
 margin:0;
-font-family:Segoe UI;
+font-family:Arial;
 background:linear-gradient(180deg,#0b1220,#020617);
 color:#fff;
 }
@@ -19,27 +19,39 @@ color:#fff;
 background:rgba(255,255,255,0.06);
 padding:15px;
 margin:10px;
-border-radius:18px;
+border-radius:16px;
 }
 
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+}
+
+.stat{text-align:center;}
+.stat strong{display:block;font-size:20px;color:#ff9800;}
+
 .tap{
-width:170px;
-height:170px;
+width:230px;
+height:230px;
 border-radius:50%;
-margin:20px auto;
+margin:25px auto;
 background:radial-gradient(circle,#ff9800,#ff5722);
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:30px;
+font-size:45px;
+font-weight:bold;
+box-shadow:0 0 25px rgba(255,152,0,0.4);
+user-select:none;
 }
 
 button{
 width:100%;
 padding:12px;
-margin-top:10px;
 border:none;
-border-radius:12px;
+border-radius:10px;
+margin-top:10px;
 background:#229ED9;
 color:white;
 }
@@ -60,16 +72,16 @@ background:#020617;
 
 <!-- HOME -->
 <div id="home" class="screen active">
-<div class="card">
-<h3>💰 Balance: <span id="usdt">0</span> USDT</h3>
-<h4>👥 Referrals: <span id="refs">0</span></h4>
+
+<div class="card grid">
+<div class="stat">Coins<strong id="coins">0</strong></div>
+<div class="stat">USDT<strong id="usdt">0</strong></div>
+<div class="stat">Refs<strong id="refs">0</strong></div>
+<div class="stat">Level<strong id="level">1</strong></div>
 </div>
 
-<div class="tap" onclick="tap()">TAP</div>
+<div class="tap" onclick="tap(2)">✋✋</div>
 
-<div class="card">
-<button onclick="daily()">Daily Task</button>
-</div>
 </div>
 
 <!-- PROFILE -->
@@ -87,25 +99,25 @@ background:#020617;
 </div>
 
 <div class="card">
-<h3>🎯 Social Tasks</h3>
-<button onclick="task('telegram')">Telegram</button>
-<button onclick="task('tiktok')">TikTok</button>
-<button onclick="task('youtube')">YouTube</button>
+<h3>🏆 Leaderboard</h3>
+<div id="board"></div>
 </div>
+
 </div>
 
 <!-- WITHDRAW -->
 <div id="withdraw" class="screen">
 
 <div class="card">
-<h3>💳 Deposit</h3>
-<p id="wallet"></p>
+<h3>💸 Withdraw Rules</h3>
+<p>Min 20 USDT</p>
+<p>10 referrals OR unlock</p>
 </div>
 
 <div class="card">
-<button onclick="unlock()">Pay 5 USDT Unlock</button>
 <button onclick="withdraw()">Withdraw</button>
 </div>
+
 </div>
 
 <!-- NAV -->
@@ -155,32 +167,31 @@ const u=await fetch(API+"/api/user",{
 headers:{Authorization:"Bearer "+token}
 }).then(r=>r.json());
 
+coins.innerText=u.coins;
 usdt.innerText=Number(u.usdt).toFixed(3);
 refs.innerText=u.referrals;
+level.innerText=Math.floor((u.coins + u.usdt*1000)/1000)+1;
+
 name.innerText=u.name;
 
-const w=await fetch(API+"/api/wallet").then(r=>r.json());
-wallet.innerText=w.ton;
-
-// referral link
-refLink.innerText=`https://t.me/Studybuddy_2025Bot?start=${tg.initDataUnsafe.user.id}`;
+// referral link with name
+refLink.innerText=`👤 ${u.name}\nhttps://t.me/Studybuddy_2025Bot?start=${tg.initDataUnsafe.user.id}`;
 
 if(u.photo) photo.src=u.photo;
+
+// leaderboard
+const lb=await fetch(API+"/api/leaderboard").then(r=>r.json());
+board.innerHTML=lb.map(x=>`<div>${x.name} - ${x.coins}</div>`).join("");
 }
 
-async function tap(){
-await fetch(API+"/api/tap",{method:"POST",headers:{Authorization:"Bearer "+token}});
-load();
-}
-
-async function task(type){
-await fetch(API+"/api/task",{
+async function tap(fingers){
+await fetch(API+"/api/tap",{
 method:"POST",
 headers:{
 "Content-Type":"application/json",
 Authorization:"Bearer "+token
 },
-body:JSON.stringify({type})
+body:JSON.stringify({multi:fingers})
 });
 load();
 }
@@ -190,24 +201,20 @@ navigator.clipboard.writeText(refLink.innerText);
 alert("Copied");
 }
 
-async function unlock(){
-alert((await fetch(API+"/api/unlock",{method:"POST",headers:{Authorization:"Bearer "+token}}).then(r=>r.json())).message);
-load();
-}
-
 async function withdraw(){
 const a=prompt("Address");
 const b=prompt("Amount");
 
-alert((await fetch(API+"/api/withdraw",{
+const r=await fetch(API+"/api/withdraw",{
 method:"POST",
 headers:{
 "Content-Type":"application/json",
 Authorization:"Bearer "+token
 },
 body:JSON.stringify({address:a,amount:b})
-}).then(r=>r.json())).message);
+});
 
+alert((await r.json()).message);
 load();
 }
 
@@ -216,4 +223,4 @@ load();
 </script>
 
 </body>
-</html>
+  </html>

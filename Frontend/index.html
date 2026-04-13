@@ -24,14 +24,8 @@ body{
 .screen{
   display:none;
   padding:15px;
-  animation:fade 0.3s ease;
 }
 .active{display:block;}
-
-@keyframes fade{
-  from{opacity:0;transform:translateY(10px);}
-  to{opacity:1;transform:translateY(0);}
-}
 
 /* CARD */
 .card{
@@ -39,7 +33,6 @@ body{
   border-radius:18px;
   padding:18px;
   margin-bottom:12px;
-  backdrop-filter: blur(10px);
 }
 
 /* GRID */
@@ -63,7 +56,6 @@ body{
   align-items:center;
   justify-content:center;
   user-select:none;
-  box-shadow:0 0 30px rgba(255,152,0,0.4);
 }
 
 /* BUTTON */
@@ -99,6 +91,11 @@ button{
   padding:10px;
 }
 
+.nav button{
+  width:auto;
+  background:none;
+}
+
 /* LOADER */
 .loader{
   display:none;
@@ -125,7 +122,6 @@ button{
     <div class="stat">Refs<strong id="refs">0</strong></div>
   </div>
 
-  <!-- COIN IMAGE TAP -->
   <div class="tap" onclick="tap()">
     <img src="https://cdn-icons-png.flaticon.com/512/825/825540.png"
          style="width:90px;height:90px;">
@@ -135,12 +131,6 @@ button{
 
 <!-- PROFILE -->
 <div id="profile" class="screen">
-
-  <div class="card">
-    <h3>💎 Premium</h3>
-    <p id="premium">Not Active</p>
-    <button onclick="deposit()">Unlock $5</button>
-  </div>
 
   <div class="card">
     <h3>📋 Tasks</h3>
@@ -163,6 +153,7 @@ button{
   </div>
 
   <button onclick="withdraw()">Withdraw</button>
+  <button onclick="deposit()">Deposit $5 Unlock</button>
 
 </div>
 
@@ -175,19 +166,16 @@ button{
 
 <script>
 
-const API="";
+const API="https://YOUR-BACKEND.onrender.com";
 let token=localStorage.getItem("token");
 
-let refs=0;
-let premium=false;
+let coins=0, usdt=0, refs=0;
 
-/* NAV */
 function nav(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
 
-/* LOADER */
 function showLoad(v){
   document.getElementById("loader").style.display=v?"block":"none";
 }
@@ -195,6 +183,12 @@ function showLoad(v){
 /* SAFE API */
 async function api(url,method="GET",body){
   try{
+
+    if(!token){
+      alert("Please login first");
+      return;
+    }
+
     showLoad(true);
 
     const res=await fetch(API+url,{
@@ -207,6 +201,7 @@ async function api(url,method="GET",body){
     });
 
     const data=await res.json();
+
     showLoad(false);
     return data;
 
@@ -220,31 +215,29 @@ async function api(url,method="GET",body){
 async function load(){
 
   const u=await api("/api/user");
+  if(!u) return;
 
+  coins=u.coins;
+  usdt=u.usdt;
   refs=u.referrals;
-  premium=u.depositVerified;
 
-  document.getElementById("coins").innerText=u.coins;
-  document.getElementById("usdt").innerText=u.usdt;
+  document.getElementById("coins").innerText=coins;
+  document.getElementById("usdt").innerText=usdt;
   document.getElementById("refs").innerText=refs;
-  document.getElementById("level").innerText=Math.floor(u.coins/5000)+1;
 
-  document.getElementById("premium").innerText=
-    premium ? "✅ Active" : "❌ Not Active";
+  document.getElementById("level").innerText=Math.floor(coins/5000)+1;
 
-  /* TASKS */
-  const tasks=await fetch("/api/tasks").then(r=>r.json());
+  const tasks=await fetch(API+"/api/tasks").then(r=>r.json());
 
   document.getElementById("tasks").innerHTML=
     tasks.map(t=>`
       <div class="task">
         <span>${t.title}</span>
-        <button onclick="openTask('${t._id}')">+${t.reward}</button>
+        <button onclick="doTask('${t._id}')">+${t.reward}</button>
       </div>
     `).join("");
 
-  /* LEADERBOARD */
-  const board=await fetch("/api/leaderboard").then(r=>r.json());
+  const board=await fetch(API+"/api/leaderboard").then(r=>r.json());
 
   document.getElementById("board").innerHTML=
     board.map((u,i)=>`
@@ -253,51 +246,22 @@ async function load(){
       </div>
     `).join("");
 
-  /* WITHDRAW RULE */
-  const canWithdraw = refs>=10 || premium;
-
   document.getElementById("status").innerText=
-    canWithdraw
-      ? "✅ Withdraw Enabled (1/day limit)"
-      : "🔒 Need 10 refs OR Premium";
+    (refs>=10) ? "✅ Ready to withdraw" : "❌ Need 10 referrals";
 }
 
-/* TAP */
-async function tap(){
-  await api("/api/user/tap","POST");
-  load();
-}
-
-/* SOCIAL TASK */
-function openTask(id){
-
-  let link="";
-  if(id==="tg") link="https://t.me/gangs234";
-  if(id==="tt") link="https://www.tiktok.com/@mammeliyas";
-  if(id==="yt") link="https://youtube.com/@Mamme234";
-
-  window.open(link,"_blank");
-
-  setTimeout(async ()=>{
-    await api("/api/user/task","POST",{taskId:id});
-    load();
-  },4000);
-}
-
-/* DEPOSIT */
-async function deposit(){
-  await api("/api/user/deposit","POST");
-  alert("Premium request sent (admin approval)");
-  load();
-}
-
-/* WITHDRAW */
+/* ACTIONS */
+async function tap(){ await api("/api/tap","POST"); load(); }
+async function doTask(id){ await api("/api/task","POST",{taskId:id}); load(); }
 async function withdraw(){
   const address=prompt("Address");
   const amount=prompt("Amount");
-
-  const res=await api("/api/user/withdraw","POST",{address,amount});
+  const res=await api("/api/withdraw","POST",{address,amount});
   alert(res.message);
+}
+async function deposit(){
+  const res=await api("/api/deposit","POST");
+  alert("Request sent");
 }
 
 load();
@@ -305,4 +269,4 @@ load();
 </script>
 
 </body>
-  </html>
+      </html>

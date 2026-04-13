@@ -6,62 +6,43 @@
 
 <style>
 body{
-  margin:0;
-  font-family:Segoe UI, sans-serif;
-  background:linear-gradient(180deg,#0b1220,#020617);
-  color:#fff;
+margin:0;
+font-family:Segoe UI;
+background:linear-gradient(180deg,#0b1220,#020617);
+color:#fff;
+text-align:center;
 }
 
 .screen{display:none;padding:15px;}
 .active{display:block;}
 
 .card{
-  background:rgba(255,255,255,0.06);
-  border-radius:16px;
-  padding:16px;
-  margin-bottom:12px;
-}
-
-input{
-  width:100%;
-  padding:10px;
-  margin-top:8px;
-  border-radius:10px;
-  border:none;
+background:rgba(255,255,255,0.06);
+padding:16px;
+margin:15px;
+border-radius:16px;
 }
 
 .tap{
-  width:160px;
-  height:160px;
-  border-radius:50%;
-  margin:25px auto;
-  background:radial-gradient(circle,#ff9800,#ff5722);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:bold;
-  user-select:none;
+width:160px;
+height:160px;
+border-radius:50%;
+margin:20px auto;
+background:radial-gradient(circle,#ff9800,#ff5722);
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
 }
 
 button{
-  width:100%;
-  padding:12px;
-  border:none;
-  border-radius:12px;
-  margin-top:10px;
-  font-weight:bold;
-  background:#ff7a00;
-  color:#fff;
-}
-
-.nav{
-  position:fixed;
-  bottom:0;
-  width:100%;
-  display:flex;
-  justify-content:space-around;
-  background:#020617;
-  padding:10px;
+width:90%;
+padding:12px;
+border:none;
+border-radius:12px;
+margin-top:10px;
+background:#229ED9;
+color:#fff;
 }
 </style>
 </head>
@@ -70,201 +51,96 @@ button{
 
 <!-- LOGIN -->
 <div id="login" class="screen active">
-  <div class="card">
-    <h2>Login</h2>
-    <input id="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
-    <button onclick="login()">Login</button>
-    <button onclick="show('register')">Create Account</button>
-  </div>
-</div>
+<div class="card">
+<h2>Login with Telegram</h2>
 
-<!-- REGISTER -->
-<div id="register" class="screen">
-  <div class="card">
-    <h2>Register</h2>
-    <input id="remail" placeholder="Email">
-    <input id="rpassword" type="password" placeholder="Password">
-    <button onclick="register()">Register</button>
-    <button onclick="show('login')">Back</button>
-  </div>
+<script async src="https://telegram.org/js/telegram-widget.js?22"
+data-telegram-login="YOUR_BOT_USERNAME"
+data-size="large"
+data-userpic="false"
+data-auth-url="https://YOUR-BACKEND.onrender.com/api/auth/telegram">
+</script>
+
+</div>
 </div>
 
 <!-- HOME -->
 <div id="home" class="screen">
-  <div class="card">
-    <h3>Coins: <span id="coins">0</span></h3>
-    <h3>USDT: <span id="usdt">0</span></h3>
-    <h3>Refs: <span id="refs">0</span></h3>
-  </div>
-
-  <div class="tap" onclick="tap()">TAP</div>
+<div class="card">
+<h3>User: <span id="name"></span></h3>
+<h3>Coins: <span id="coins">0</span></h3>
+<h3>USDT: <span id="usdt">0</span></h3>
+<h3>Refs: <span id="refs">0</span></h3>
 </div>
 
-<!-- PROFILE -->
-<div id="profile" class="screen">
-  <div class="card">
-    <h3>👤 User Info</h3>
-    <p>Name: <span id="name"></span></p>
-    <p>Email: <span id="userEmail"></span></p>
-  </div>
-
-  <div class="card">
-    <h3>Tasks</h3>
-    <div id="tasks"></div>
-  </div>
-
-  <div class="card">
-    <h3>Leaderboard</h3>
-    <div id="board"></div>
-  </div>
+<div class="tap" onclick="tap()">TAP</div>
 </div>
 
 <!-- WITHDRAW -->
 <div id="withdraw" class="screen">
-  <div class="card">
-    <h3>Withdraw</h3>
-    <p id="status">Loading...</p>
-  </div>
-
-  <button onclick="withdraw()">Request Withdraw</button>
+<div class="card">
+<h3>Withdraw</h3>
+<p id="status"></p>
 </div>
 
-<!-- NAV -->
-<div class="nav">
-  <button onclick="show('home')">Home</button>
-  <button onclick="show('profile')">Profile</button>
-  <button onclick="show('withdraw')">Withdraw</button>
+<button onclick="withdraw()">Request Withdraw</button>
 </div>
 
 <script>
 
 const API="https://YOUR-BACKEND.onrender.com";
-let token = localStorage.getItem("token");
+let token = new URLSearchParams(location.search).get("token") 
+|| localStorage.getItem("token");
 
-/* SCREEN */
-function show(id){
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-}
+if(token) localStorage.setItem("token",token);
 
-/* API */
-async function api(url,method="GET",body){
+/* LOAD USER */
+async function load(){
 
-  if(!token && url !== "/api/login" && url !== "/api/register"){
-    show("login");
-    return null;
-  }
+const res = await fetch(API+"/api/user",{
+headers:{Authorization:"Bearer "+token}
+});
 
-  const res = await fetch(API+url,{
-    method,
-    headers:{
-      "Content-Type":"application/json",
-      ...(token ? {"Authorization":"Bearer "+token} : {})
-    },
-    body: body ? JSON.stringify(body) : null
-  });
+const u = await res.json();
 
-  return res.json();
-}
+if(!u || u.message) return;
 
-/* LOGIN */
-async function login(){
-  const res = await fetch(API+"/api/login",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      email:email.value,
-      password:password.value
-    })
-  });
-
-  const data = await res.json();
-
-  if(data.token){
-    token = data.token;
-    localStorage.setItem("token",token);
-    show("home");
-    load();
-  }else{
-    alert(data.message || "Login failed");
-  }
-}
-
-/* REGISTER */
-async function register(){
-  const res = await fetch(API+"/api/register",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      email:remail.value,
-      password:rpassword.value
-    })
-  });
-
-  const data = await res.json();
-
-  if(data.token){
-    token = data.token;
-    localStorage.setItem("token",token);
-    show("home");
-    load();
-  }else{
-    alert(data.message || "Register failed");
-  }
+name.innerText = u.name;
+coins.innerText = u.coins;
+usdt.innerText = u.usdt;
+refs.innerText = u.referrals;
 }
 
 /* TAP */
 async function tap(){
-  const res = await api("/api/tap","POST");
-  if(res && res.coins !== undefined){
-    document.getElementById("coins").innerText = res.coins;
-  }
+const res = await fetch(API+"/api/tap",{
+method:"POST",
+headers:{Authorization:"Bearer "+token}
+});
+
+const data = await res.json();
+if(data.coins !== undefined){
+coins.innerText = data.coins;
+}
 }
 
-/* WITHDRAW REQUEST */
+/* WITHDRAW */
 async function withdraw(){
 
-  const address = prompt("Enter wallet address");
-  const amount = prompt("Enter amount");
+const address = prompt("Wallet address");
+const amount = prompt("Amount");
 
-  const res = await api("/api/withdraw","POST",{address,amount});
+const res = await fetch(API+"/api/withdraw",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+Authorization:"Bearer "+token
+},
+body:JSON.stringify({address,amount})
+});
 
-  alert(res.message || "Request sent");
-}
-
-/* LOAD */
-async function load(){
-
-  const u = await api("/api/user");
-  if(!u) return;
-
-  coins.innerText = u.coins;
-  usdt.innerText = u.usdt;
-  refs.innerText = u.referrals;
-
-  document.getElementById("name").innerText = u.email.split("@")[0];
-  document.getElementById("userEmail").innerText = u.email;
-
-  const tasks = await fetch(API+"/api/tasks").then(r=>r.json());
-  document.getElementById("tasks").innerHTML =
-    tasks.map(t=>`
-      <div class="card">
-        ${t.title}
-        <button onclick="api('/api/task','POST',{taskId:'${t._id}'}).then(load)">+${t.reward}</button>
-      </div>
-    `).join("");
-
-  const board = await fetch(API+"/api/leaderboard").then(r=>r.json());
-  document.getElementById("board").innerHTML =
-    board.map((u,i)=>`
-      <div class="card">#${i+1} ${u.email} ⭐ ${u.coins}</div>
-    `).join("");
-
-  document.getElementById("status").innerText =
-    (u.referrals >= 10 || u.depositVerified)
-    ? "Ready (Admin will approve)"
-    : "Need 10 refs or $5 deposit";
+const data = await res.json();
+alert(data.message);
 }
 
 load();
@@ -272,4 +148,4 @@ load();
 </script>
 
 </body>
-    </html>
+</html>

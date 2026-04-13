@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>StudyBuddy Crypto</title>
+<title>Crypto App</title>
 
 <style>
 body{
@@ -58,7 +58,7 @@ color:#fff;
 data-telegram-login="Studybuddy_2025Bot"
 data-size="large"
 data-userpic="true"
-data-auth-url="https://YOUR-BACKEND.onrender.com/api/auth/telegram">
+data-auth-url="https://crypto-4bbj.onrender.com/api/auth/telegram">
 </script>
 
 </div>
@@ -89,51 +89,51 @@ data-auth-url="https://YOUR-BACKEND.onrender.com/api/auth/telegram">
 
 <script>
 
-const API="https://YOUR-BACKEND.onrender.com";
-let token = new URLSearchParams(location.search).get("token");
+const API="https://crypto-4bbj.onrender.com";
+let token=new URLSearchParams(location.search).get("token");
 
 if(token) localStorage.setItem("token",token);
-token = localStorage.getItem("token");
+token=localStorage.getItem("token");
 
 /* LOAD USER */
 async function load(){
 
-const res = await fetch(API+"/api/user",{
+const res=await fetch(API+"/api/user",{
 headers:{Authorization:"Bearer "+token}
 });
 
-const u = await res.json();
+const u=await res.json();
 
-if(!u || u.message) return;
+if(!u||u.message) return;
 
-name.innerText = u.name;
-coins.innerText = u.coins;
-usdt.innerText = u.usdt;
-refs.innerText = u.referrals;
+name.innerText=u.name;
+coins.innerText=u.coins;
+usdt.innerText=u.usdt;
+refs.innerText=u.referrals;
 
 if(u.photo){
-photo.src = u.photo;
+photo.src=u.photo;
 }
 }
 
 /* TAP */
 async function tap(){
-const res = await fetch(API+"/api/tap",{
+const res=await fetch(API+"/api/tap",{
 method:"POST",
 headers:{Authorization:"Bearer "+token}
 });
 
-const d = await res.json();
-coins.innerText = d.coins;
+const d=await res.json();
+coins.innerText=d.coins;
 }
 
 /* WITHDRAW */
 async function withdraw(){
 
-const address = prompt("Wallet address");
-const amount = prompt("Amount");
+const address=prompt("Wallet address");
+const amount=prompt("Amount");
 
-const res = await fetch(API+"/api/withdraw",{
+const res=await fetch(API+"/api/withdraw",{
 method:"POST",
 headers:{
 "Content-Type":"application/json",
@@ -142,7 +142,7 @@ Authorization:"Bearer "+token
 body:JSON.stringify({address,amount})
 });
 
-const d = await res.json();
+const d=await res.json();
 alert(d.message);
 }
 
@@ -151,4 +151,4 @@ load();
 </script>
 
 </body>
-                             </html>
+</html>

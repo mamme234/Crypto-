@@ -10,6 +10,7 @@ margin:0;
 font-family:Arial;
 background:linear-gradient(180deg,#0b1220,#020617);
 color:#fff;
+overflow:hidden;
 }
 
 .screen{display:none;padding:15px;}
@@ -20,6 +21,7 @@ background:rgba(255,255,255,0.06);
 padding:15px;
 margin:10px;
 border-radius:16px;
+backdrop-filter: blur(10px);
 }
 
 .grid{
@@ -31,23 +33,29 @@ gap:10px;
 .stat{text-align:center;}
 .stat strong{
 display:block;
-font-size:20px;
+font-size:22px;
 color:#ff9800;
 }
 
 .tap{
-width:240px;
-height:240px;
+width:260px;
+height:260px;
 border-radius:50%;
-margin:25px auto;
+margin:30px auto;
 background:radial-gradient(circle,#ff9800,#ff5722);
-box-shadow:0 0 25px rgba(255,152,0,0.4);
-cursor:pointer;
+box-shadow:0 0 40px rgba(255,152,0,0.7);
 display:flex;
 align-items:center;
 justify-content:center;
 font-size:28px;
 font-weight:bold;
+cursor:pointer;
+transition:0.1s;
+position:relative;
+}
+
+.tap:active{
+transform:scale(0.92);
 }
 
 .small{
@@ -55,6 +63,30 @@ text-align:center;
 color:#aaa;
 font-size:13px;
 margin-top:-10px;
+}
+
+/* coin animation */
+.coin-pop{
+position:absolute;
+color:#ff9800;
+font-weight:bold;
+animation:pop 0.6s forwards;
+pointer-events:none;
+}
+
+@keyframes pop{
+0%{opacity:1;transform:translateY(0);}
+100%{opacity:0;transform:translateY(-50px);}
+}
+
+/* wallet UI */
+.wallet-box{
+background:linear-gradient(135deg,#00c6ff,#0072ff);
+padding:15px;
+border-radius:14px;
+text-align:center;
+word-break:break-all;
+font-size:13px;
 }
 
 button{
@@ -65,6 +97,7 @@ border-radius:10px;
 margin-top:10px;
 background:#229ED9;
 color:white;
+font-weight:bold;
 }
 
 .nav{
@@ -91,8 +124,7 @@ background:#020617;
 <div class="stat">Level<strong id="level">1</strong></div>
 </div>
 
-<div class="tap" onclick="tap(2)">TAP</div>
-
+<div class="tap" id="tapArea">TAP</div>
 <div class="small">Maximum tap: 4 fingers</div>
 
 </div>
@@ -113,9 +145,9 @@ background:#020617;
 
 <div class="card">
 <h3>🎯 Social Tasks</h3>
-<button onclick="task('telegram')">Telegram</button>
-<button onclick="task('tiktok')">TikTok</button>
-<button onclick="task('youtube')">YouTube</button>
+<button onclick="task('telegram')">Telegram (+500)</button>
+<button onclick="task('tiktok')">TikTok (+700)</button>
+<button onclick="task('youtube')">YouTube (+1000)</button>
 </div>
 
 <div class="card">
@@ -130,7 +162,8 @@ background:#020617;
 
 <div class="card">
 <h3>💸 Deposit Wallet</h3>
-<p id="wallet"></p>
+<div class="wallet-box" id="wallet"></div>
+<button onclick="copyWallet()">Copy</button>
 </div>
 
 <div class="card">
@@ -154,11 +187,15 @@ background:#020617;
 const API="https://crypto-4bbj.onrender.com";
 let token=localStorage.getItem("token");
 
+let coinsVal=0, usdtVal=0, refsVal=0;
+
+// screen switch
 function show(s){
 document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
 }
 
+// telegram login
 const tg=window.Telegram.WebApp;
 tg.expand();
 
@@ -181,20 +218,17 @@ location.reload();
 });
 }
 
+// load user
 async function load(){
+const u=await fetch(API+"/api/user",{headers:{Authorization:"Bearer "+token}}).then(r=>r.json());
 
-const u=await fetch(API+"/api/user",{
-headers:{Authorization:"Bearer "+token}
-}).then(r=>r.json());
+coinsVal=u.coins;
+usdtVal=u.usdt;
+refsVal=u.referrals;
 
-coins.innerText=u.coins;
-usdt.innerText=Number(u.usdt).toFixed(3);
-refs.innerText=u.referrals;
-level.innerText=Math.floor((u.coins+u.usdt*1000)/1000)+1;
+updateUI();
 
 name.innerText=u.name;
-
-// referral link with name
 refLink.innerText=`👤 ${u.name}\nhttps://t.me/Studybuddy_2025Bot?start=${tg.initDataUnsafe.user.id}`;
 
 const w=await fetch(API+"/api/wallet").then(r=>r.json());
@@ -206,20 +240,80 @@ board.innerHTML=lb.map(x=>`<div>${x.name} - ${x.coins}</div>`).join("");
 if(u.photo) photo.src=u.photo;
 }
 
-async function tap(f){
-await fetch(API+"/api/tap",{
+function updateUI(){
+coins.innerText=coinsVal;
+usdt.innerText=Number(usdtVal).toFixed(3);
+refs.innerText=refsVal;
+level.innerText=Math.floor((coinsVal+usdtVal*1000)/1000)+1;
+}
+
+// vibration
+function vibrate(){
+if(navigator.vibrate) navigator.vibrate(30);
+}
+
+// coin animation
+function showCoin(x,y,val){
+const c=document.createElement("div");
+c.className="coin-pop";
+c.innerText="+"+val;
+c.style.left=x+"px";
+c.style.top=y+"px";
+document.body.appendChild(c);
+setTimeout(()=>c.remove(),600);
+}
+
+// REAL TAP
+let tapping=false;
+
+document.getElementById("tapArea").addEventListener("touchstart", async function(e){
+
+if(tapping) return;
+tapping=true;
+
+let fingers = e.touches.length;
+if(fingers > 4) fingers = 4;
+
+vibrate();
+
+showCoin(e.touches[0].clientX,e.touches[0].clientY,fingers);
+
+try{
+const res = await fetch(API+"/api/tap",{
 method:"POST",
 headers:{
 "Content-Type":"application/json",
 Authorization:"Bearer "+token
 },
-body:JSON.stringify({multi:f})
+body:JSON.stringify({multi:fingers})
 });
-load();
-}
 
+const data = await res.json();
+
+coinsVal=data.coins;
+usdtVal=data.usdt;
+
+updateUI();
+
+}catch{}
+
+tapping=false;
+
+});
+
+// tasks
 async function task(type){
-await fetch(API+"/api/task",{
+
+let url =
+type==="telegram"
+? "https://t.me/gangs234"
+: type==="tiktok"
+? "https://tiktok.com/@mammeliyas"
+: "https://youtube.com/@Mamme234";
+
+window.open(url,"_blank");
+
+const r = await fetch(API+"/api/task",{
 method:"POST",
 headers:{
 "Content-Type":"application/json",
@@ -227,14 +321,23 @@ Authorization:"Bearer "+token
 },
 body:JSON.stringify({type})
 });
+
+alert((await r.json()).message);
 load();
 }
 
+// copy
 function copyLink(){
 navigator.clipboard.writeText(refLink.innerText);
 alert("Copied");
 }
 
+function copyWallet(){
+navigator.clipboard.writeText(wallet.innerText);
+alert("Wallet copied");
+}
+
+// withdraw
 async function unlock(){
 alert((await fetch(API+"/api/unlock",{method:"POST",headers:{Authorization:"Bearer "+token}}).then(r=>r.json())).message);
 load();
@@ -261,4 +364,4 @@ load();
 </script>
 
 </body>
-</html>
+  </html>

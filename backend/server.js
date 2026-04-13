@@ -7,161 +7,203 @@ const bcrypt = require("bcryptjs");
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static("public"));
 
-const JWT_SECRET = process.env.JWT_SECRET || "dev_secret";
 const MONGO_URL = process.env.MONGO_URL;
+const JWT_SECRET = process.env.JWT_SECRET;
 
-// ================= DB =================
+// DB CONNECT
 mongoose.connect(MONGO_URL)
 .then(()=>console.log("MongoDB Connected"))
-.catch(err=>console.log("MongoDB Error:", err.message));
+.catch(err=>console.log(err));
 
-// ================= USER =================
+// USER MODEL
 const User = mongoose.model("User", new mongoose.Schema({
 email:String,
 password:String,
 coins:{type:Number,default:0},
 usdt:{type:Number,default:0},
 referrals:{type:Number,default:0},
-withdrawRequests:{type:Array,default:[]},
-depositVerified:{type:Boolean,default:false}
+
+withdrawRequests:{
+  type:Array,
+  default:[]
+},
+
+depositVerified:{
+  type:Boolean,
+  default:false
+}
 }));
 
-// ================= AUTH =================
+// AUTH
 function auth(req,res,next){
 const token=req.headers.authorization;
-if(!token) return res.status(401).json({message:"No token"});
+if(!token) return res.json({message:"No token"});
 
 try{
 const data=jwt.verify(token.split(" ")[1],JWT_SECRET);
 req.userId=data.id;
 next();
 }catch{
-res.status(401).json({message:"Invalid token"});
+res.json({message:"Invalid token"});
 }
 }
 
-// ================= USER =================
-app.get("/api/user", auth, async (req,res)=>{
-const user=await User.findById(req.userId);
-res.json(user);
-});
-
-// ================= 🔥 FIXED TAP =================
-app.post("/api/tap", auth, async (req,res)=>{
-try{
-
-const user=await User.findById(req.userId);
-if(!user) return res.status(404).json({message:"User not found"});
-
-user.coins = (user.coins || 0) + 50;
-
-await user.save();
-res.json(user);
-
-}catch(err){
-console.log("TAP ERROR:",err);
-res.status(500).json({message:"Tap failed"});
-}
-});
-
-// ================= 🔥 FIXED TASK =================
-app.post("/api/task", auth, async (req,res)=>{
-try{
-
-const user=await User.findById(req.userId);
-if(!user) return res.status(404).json({message:"User not found"});
-
-user.coins = (user.coins || 0) + 500;
-
-await user.save();
-res.json(user);
-
-}catch(err){
-console.log(err);
-res.status(500).json({message:"Task failed"});
-}
-});
-
-// ================= 🔥 FIXED WITHDRAW =================
-app.post("/api/withdraw", auth, async (req,res)=>{
-try{
-
-const user=await User.findById(req.userId);
-if(!user) return res.status(404).json({message:"User not found"});
-
-user.withdrawRequests.push({
-amount:req.body.amount,
-address:req.body.address,
-status:"pending"
-});
-
-await user.save();
-
-res.json({message:"Withdraw requested"});
-
-}catch(err){
-console.log(err);
-res.status(500).json({message:"Withdraw failed"});
-}
-});
-
-// ================= OTHER ROUTES =================
+// REGISTER
 app.post("/api/register", async (req,res)=>{
-const {email,password,ref}=req.body;
+const {email,password}=req.body;
 
 const hash=await bcrypt.hash(password,10);
-const user=await User.create({email,password:hash});
 
-if(ref){
-const r=await User.findById(ref);
-if(r){
-r.referrals++;
-r.coins+=500;
-await r.save();
-}
-}
+const user=await User.create({
+email,
+password:hash
+});
 
 const token=jwt.sign({id:user._id},JWT_SECRET);
 res.json({token});
 });
 
+// LOGIN
 app.post("/api/login", async (req,res)=>{
 const {email,password}=req.body;
 
 const user=await User.findOne({email});
-if(!user) return res.status(400).json({message:"No user"});
+if(!user) return res.json({message:"User not found"});
 
 const ok=await bcrypt.compare(password,user.password);
-if(!ok) return res.status(400).json({message:"Wrong password"});
+if(!ok) return res.json({message:"Wrong password"});
 
 const token=jwt.sign({id:user._id},JWT_SECRET);
 res.json({token});
 });
 
-// ================= TASK LIST =================
-app.get("/api/tasks",(req,res)=>{
-res.json([
-  { _id:"tg", title:"Join Telegram", reward:500 },
-  { _id:"tt", title:"Follow TikTok", reward:800 },
-  { _id:"yt", title:"Subscribe YouTube", reward:1000 }
-]);
+// USER INFO
+app.get("/api/user", auth, async (req,res)=>{
+const user=await User.findById(req.userId);
+
+res.json({
+email:user.email,
+coins:user.coins,
+usdt:user.usdt,
+referrals:user.referrals,
+depositVerified:user.depositVerified
+});
 });
 
-// ================= LEADERBOARD =================
-app.get("/api/leaderboard", async (req,res)=>{
-const users = await User.find()
-.sort({coins:-1})
-.limit(10);
+// TAP
+app.post("/api/tap", auth, async (req,res)=>{
+const user=await User.findById(req.userId);
 
+user.coins += 50;
+
+await user.save();
+
+res.json({coins:user.coins});
+});
+
+// TASK
+app.post("/api/task", auth, async (req,res)=>{
+const user=await User.findById(req.userId);
+
+user.coins += 500;
+
+await user.save();
+
+res.json({coins:user.coins});
+});
+
+
+// ================================
+// 💸 WITHDRAW SYSTEM (REQUEST ONLY)
+// ================================
+app.post("/api/withdraw", auth, async (req,res)=>{
+
+const {amount, address} = req.body;
+
+const user = await User.findById(req.userId);
+
+const amt = Number(amount);
+
+if(!amt || amt <= 0){
+return res.json({message:"Invalid amount"});
+}
+
+if(user.usdt < amt){
+return res.json({message:"Not enough USDT"});
+}
+
+// 🔴 STORE REQUEST (NO DEDUCTION YET)
+user.withdrawRequests.push({
+amount:amt,
+address,
+status:"pending",
+date:Date.now()
+});
+
+await user.save();
+
+res.json({message:"Withdraw sent to admin"});
+});
+
+
+// ================================
+// 🧑‍💼 ADMIN: GET WITHDRAW REQUESTS
+// ================================
+app.get("/api/admin/withdraws", async (req,res)=>{
+
+const users = await User.find();
+
+let all = [];
+
+users.forEach(u=>{
+u.withdrawRequests.forEach((w,i)=>{
+if(w.status === "pending"){
+all.push({
+userId:u._id,
+email:u.email,
+index:i,
+...w
+});
+}
+});
+});
+
+res.json(all);
+});
+
+
+// ================================
+// 🧑‍💼 ADMIN: APPROVE WITHDRAW
+// ================================
+app.post("/api/admin/approve", async (req,res)=>{
+
+const {userId, index} = req.body;
+
+const user = await User.findById(userId);
+
+const w = user.withdrawRequests[index];
+
+if(!w || w.status !== "pending"){
+return res.json({message:"Already processed"});
+}
+
+// 💰 NOW DEDUCT BALANCE
+user.usdt -= w.amount;
+
+// mark paid
+user.withdrawRequests[index].status = "paid";
+
+await user.save();
+
+res.json({message:"Withdraw approved & paid"});
+});
+
+
+// LEADERBOARD
+app.get("/api/leaderboard", async (req,res)=>{
+const users = await User.find().sort({coins:-1}).limit(10);
 res.json(users);
 });
 
-// ================= HEALTH =================
-app.get("/",(req,res)=>{
-res.send("Crypto backend running ✅");
-});
-
-// ================= START =================
-app.listen(3000,()=>console.log("Server running"));
+app.listen(3000, ()=>console.log("Server running"));

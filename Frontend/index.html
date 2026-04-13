@@ -35,7 +35,11 @@ gap:10px;
 }
 
 .stat{text-align:center;}
-.stat strong{color:#ff9800;font-size:20px;display:block;}
+.stat strong{
+display:block;
+font-size:20px;
+color:#ff9800;
+}
 
 .tap{
 width:170px;
@@ -88,10 +92,6 @@ border-radius:0;
 </div>
 
 <div class="tap" onclick="tap()">TAP</div>
-
-<div class="card">
-<button onclick="daily()">Daily Reward</button>
-</div>
 </div>
 
 <!-- PROFILE -->
@@ -121,18 +121,7 @@ border-radius:0;
 <div class="header">💸 Withdraw</div>
 
 <div class="card">
-<h3>Rules</h3>
-<p>Min: 20 USDT</p>
-<p>Need 10 refs OR 5 USDT unlock</p>
-</div>
-
-<div class="card">
-<h3>TON Wallet</h3>
-<p id="wallet"></p>
-</div>
-
-<div class="card">
-<button onclick="unlock()">Unlock (5 USDT)</button>
+<button onclick="convert()">Convert 1000 = 1 USDT</button>
 <button onclick="withdraw()">Withdraw</button>
 </div>
 </div>
@@ -185,61 +174,45 @@ headers:{Authorization:"Bearer "+token}
 }).then(r=>r.json());
 
 coins.innerText=u.coins;
-usdt.innerText=u.usdt;
+usdt.innerText=Number(u.usdt).toFixed(2); // FIXED
 refs.innerText=u.referrals;
 level.innerText=Math.floor(u.coins/5000)+1;
+
 name.innerText=u.name;
 
-const lb=await fetch(API+"/api/leaderboard").then(r=>r.json());
-board.innerHTML=lb.map(x=>`<div>${x.name} - ${x.coins}</div>`).join("");
-
-const w=await fetch(API+"/api/wallet").then(r=>r.json());
-wallet.innerText=w.ton;
-
 if(u.photo) photo.src=u.photo;
+
+const lb=await fetch(API+"/api/leaderboard").then(r=>r.json());
+
+board.innerHTML=lb.map(x=>`<div>${x.name} - ${x.coins}</div>`).join("");
 }
 
+// TAP
 async function tap(){
 await fetch(API+"/api/tap",{method:"POST",headers:{Authorization:"Bearer "+token}});
 load();
 }
 
-async function daily(){
-alert("Daily system not enabled yet");
-}
-
-async function task(type){
-await fetch(API+"/api/task",{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-Authorization:"Bearer "+token
-},
-body:JSON.stringify({type})
-});
+// CONVERT
+async function convert(){
+alert((await fetch(API+"/api/convert",{method:"POST",headers:{Authorization:"Bearer "+token}}).then(r=>r.json())).message);
 load();
 }
 
-async function unlock(){
-const r=await fetch(API+"/api/unlock",{method:"POST",headers:{Authorization:"Bearer "+token}});
-alert((await r.json()).message);
-load();
-}
-
+// WITHDRAW
 async function withdraw(){
 const a=prompt("Address");
 const b=prompt("Amount");
 
-const r=await fetch(API+"/api/withdraw",{
+alert((await fetch(API+"/api/withdraw",{
 method:"POST",
 headers:{
 "Content-Type":"application/json",
 Authorization:"Bearer "+token
 },
 body:JSON.stringify({address:a,amount:b})
-});
+}).then(r=>r.json())).message);
 
-alert((await r.json()).message);
 load();
 }
 
@@ -248,4 +221,4 @@ load();
 </script>
 
 </body>
-  </html>
+</html>

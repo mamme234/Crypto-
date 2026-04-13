@@ -35,11 +35,12 @@ unlocked:{type:Boolean,default:false}
 function auth(req,res,next){
 const t=req.headers.authorization;
 if(!t) return res.json({message:"no token"});
+
 try{
 req.userId=jwt.verify(t.split(" ")[1],JWT_SECRET).id;
 next();
 }catch{
-res.json({message:"invalid"});
+res.json({message:"invalid token"});
 }
 }
 
@@ -52,7 +53,7 @@ let u = await User.findOne({telegramId:id});
 if(!u){
 u = await User.create({telegramId:id,name,photo});
 
-// referral (100 coins)
+// referral
 if(ref && ref != id){
 const r = await User.findOne({telegramId:ref});
 if(r){
@@ -84,13 +85,15 @@ referrals:u.referrals
 });
 });
 
-// ================= TAP SYSTEM =================
+// ================= TAP SYSTEM (1–4 FINGERS) =================
 app.post("/api/tap", auth, async (req,res)=>{
 const u = await User.findById(req.userId);
 
-const multi = Number(req.body.multi || 1);
+let multi = Number(req.body.multi || 1);
 
-// 1 finger = 1 coin, 2 finger = 2 coin
+if(multi > 4) multi = 4;
+if(multi < 1) multi = 1;
+
 u.coins += multi;
 
 // auto convert coins → USDT
@@ -105,24 +108,31 @@ await u.save();
 res.json({coins:u.coins,usdt:u.usdt});
 });
 
-// ================= TASKS =================
+// ================= SOCIAL TASKS (FIXED 100%) =================
 app.post("/api/task", auth, async (req,res)=>{
-const {type}=req.body;
+const {type} = req.body;
 const u = await User.findById(req.userId);
 
-if(!u.tasks) u.tasks={};
+// init safe
+if(!u.tasks) u.tasks = {};
 
+// already done
 if(u.tasks[type]){
-return res.json({message:"Already done"});
+return res.json({message:"Already completed"});
 }
 
-let reward=0;
-if(type==="telegram") reward=500;
-if(type==="tiktok") reward=700;
-if(type==="youtube") reward=1000;
+let reward = 0;
+
+if(type === "telegram") reward = 500;
+if(type === "tiktok") reward = 700;
+if(type === "youtube") reward = 1000;
+
+if(reward === 0){
+return res.json({message:"Invalid task"});
+}
 
 u.coins += reward;
-u.tasks[type]=true;
+u.tasks[type] = true;
 
 await u.save();
 

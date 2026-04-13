@@ -21,14 +21,15 @@ mongoose.connect(MONGO_URL)
 const User = mongoose.model("User", new mongoose.Schema({
 telegramId:String,
 name:String,
+photo:String,
 coins:{type:Number,default:0},
 usdt:{type:Number,default:0},
 referrals:{type:Number,default:0},
-withdrawRequests:{type:Array,default:[]},
-depositVerified:{type:Boolean,default:false}
+refUsed:{type:Boolean,default:false},
+withdrawRequests:{type:Array,default:[]}
 }));
 
-// AUTH MIDDLEWARE
+// AUTH
 function auth(req,res,next){
 const token=req.headers.authorization;
 if(!token) return res.json({message:"No token"});
@@ -42,9 +43,9 @@ res.json({message:"Invalid token"});
 }
 }
 
-// =========================
+// =====================
 // TELEGRAM LOGIN
-// =========================
+// =====================
 app.get("/api/auth/telegram", async (req,res)=>{
 
 const data = req.query;
@@ -64,32 +65,56 @@ const hash = crypto.createHmac("sha256", secret)
 .digest("hex");
 
 if(hash !== data.hash){
-return res.send("Invalid Telegram login");
+return res.send("Invalid login");
 }
 
+const tgId = data.id;
+const username = data.username || null;
+const firstName = data.first_name || "User";
+const photo = data.photo_url || "";
+
+// safe name
+const name = username ? `@${username}` : firstName;
+
 // find or create user
-let user = await User.findOne({telegramId:data.id});
+let user = await User.findOne({telegramId:tgId});
 
 if(!user){
 user = await User.create({
-telegramId:data.id,
-name:data.username || data.first_name
+telegramId:tgId,
+name,
+photo
 });
+} else {
+user.name = name;
+user.photo = photo;
+await user.save();
 }
 
 const token = jwt.sign({id:user._id},JWT_SECRET);
 
-// send back to frontend
 res.redirect(`https://YOUR-FRONTEND.com?token=${token}`);
 });
 
-// GET USER
+// =====================
+// USER INFO
+// =====================
 app.get("/api/user", auth, async (req,res)=>{
 const u = await User.findById(req.userId);
-res.json(u);
+
+res.json({
+telegramId:u.telegramId,
+name:u.name,
+photo:u.photo,
+coins:u.coins,
+usdt:u.usdt,
+referrals:u.referrals
+});
 });
 
-// TAP
+// =====================
+// TAP SYSTEM
+// =====================
 app.post("/api/tap", auth, async (req,res)=>{
 const u = await User.findById(req.userId);
 u.coins += 50;
@@ -97,7 +122,9 @@ await u.save();
 res.json({coins:u.coins});
 });
 
-// TASK
+// =====================
+// TASK SYSTEM
+// =====================
 app.post("/api/task", auth, async (req,res)=>{
 const u = await User.findById(req.userId);
 u.coins += 500;
@@ -105,13 +132,16 @@ await u.save();
 res.json({coins:u.coins});
 });
 
+// =====================
 // WITHDRAW REQUEST
+// =====================
 app.post("/api/withdraw", auth, async (req,res)=>{
 const {amount,address} = req.body;
+
 const u = await User.findById(req.userId);
 
 if(u.usdt < amount){
-return res.json({message:"Not enough balance"});
+return res.json({message:"Not enough USDT"});
 }
 
 u.withdrawRequests.push({
@@ -126,13 +156,17 @@ await u.save();
 res.json({message:"Withdraw request sent"});
 });
 
+// =====================
 // LEADERBOARD
+// =====================
 app.get("/api/leaderboard", async (req,res)=>{
 const users = await User.find().sort({coins:-1}).limit(10);
 res.json(users);
 });
 
-// ADMIN VIEW WITHDRAW
+// =====================
+// ADMIN WITHDRAW LIST
+// =====================
 app.get("/api/admin/withdraws", async (req,res)=>{
 const users = await User.find();
 
@@ -154,7 +188,9 @@ index:i,
 res.json(all);
 });
 
-// ADMIN APPROVE
+// =====================
+// ADMIN APPROVE WITHDRAW
+// =====================
 app.post("/api/admin/approve", async (req,res)=>{
 const {userId,index} = req.body;
 

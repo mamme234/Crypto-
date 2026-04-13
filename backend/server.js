@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 
 const app = express();
 app.use(cors());
@@ -10,32 +10,25 @@ app.use(express.json());
 
 const MONGO_URL = process.env.MONGO_URL;
 const JWT_SECRET = process.env.JWT_SECRET;
+const BOT_TOKEN = process.env.BOT_TOKEN;
 
-// DB CONNECT
+// DB
 mongoose.connect(MONGO_URL)
 .then(()=>console.log("MongoDB Connected"))
 .catch(err=>console.log(err));
 
 // USER MODEL
 const User = mongoose.model("User", new mongoose.Schema({
-email:String,
-password:String,
+telegramId:String,
+name:String,
 coins:{type:Number,default:0},
 usdt:{type:Number,default:0},
 referrals:{type:Number,default:0},
-
-withdrawRequests:{
-  type:Array,
-  default:[]
-},
-
-depositVerified:{
-  type:Boolean,
-  default:false
-}
+withdrawRequests:{type:Array,default:[]},
+depositVerified:{type:Boolean,default:false}
 }));
 
-// AUTH
+// AUTH MIDDLEWARE
 function auth(req,res,next){
 const token=req.headers.authorization;
 if(!token) return res.json({message:"No token"});
@@ -49,119 +42,108 @@ res.json({message:"Invalid token"});
 }
 }
 
-// REGISTER
-app.post("/api/register", async (req,res)=>{
-const {email,password}=req.body;
+// =========================
+// TELEGRAM LOGIN
+// =========================
+app.get("/api/auth/telegram", async (req,res)=>{
 
-const hash=await bcrypt.hash(password,10);
+const data = req.query;
 
-const user=await User.create({
-email,
-password:hash
+const checkString = Object.keys(data)
+.filter(k => k !== "hash")
+.sort()
+.map(k => `${k}=${data[k]}`)
+.join("\n");
+
+const secret = crypto.createHash("sha256")
+.update(BOT_TOKEN)
+.digest();
+
+const hash = crypto.createHmac("sha256", secret)
+.update(checkString)
+.digest("hex");
+
+if(hash !== data.hash){
+return res.send("Invalid Telegram login");
+}
+
+// find or create user
+let user = await User.findOne({telegramId:data.id});
+
+if(!user){
+user = await User.create({
+telegramId:data.id,
+name:data.username || data.first_name
+});
+}
+
+const token = jwt.sign({id:user._id},JWT_SECRET);
+
+// send back to frontend
+res.redirect(`https://YOUR-FRONTEND.com?token=${token}`);
 });
 
-const token=jwt.sign({id:user._id},JWT_SECRET);
-res.json({token});
-});
-
-// LOGIN
-app.post("/api/login", async (req,res)=>{
-const {email,password}=req.body;
-
-const user=await User.findOne({email});
-if(!user) return res.json({message:"User not found"});
-
-const ok=await bcrypt.compare(password,user.password);
-if(!ok) return res.json({message:"Wrong password"});
-
-const token=jwt.sign({id:user._id},JWT_SECRET);
-res.json({token});
-});
-
-// USER INFO
+// GET USER
 app.get("/api/user", auth, async (req,res)=>{
-const user=await User.findById(req.userId);
-
-res.json({
-email:user.email,
-coins:user.coins,
-usdt:user.usdt,
-referrals:user.referrals,
-depositVerified:user.depositVerified
-});
+const u = await User.findById(req.userId);
+res.json(u);
 });
 
 // TAP
 app.post("/api/tap", auth, async (req,res)=>{
-const user=await User.findById(req.userId);
-
-user.coins += 50;
-
-await user.save();
-
-res.json({coins:user.coins});
+const u = await User.findById(req.userId);
+u.coins += 50;
+await u.save();
+res.json({coins:u.coins});
 });
 
 // TASK
 app.post("/api/task", auth, async (req,res)=>{
-const user=await User.findById(req.userId);
-
-user.coins += 500;
-
-await user.save();
-
-res.json({coins:user.coins});
+const u = await User.findById(req.userId);
+u.coins += 500;
+await u.save();
+res.json({coins:u.coins});
 });
 
-
-// ================================
-// 💸 WITHDRAW SYSTEM (REQUEST ONLY)
-// ================================
+// WITHDRAW REQUEST
 app.post("/api/withdraw", auth, async (req,res)=>{
+const {amount,address} = req.body;
+const u = await User.findById(req.userId);
 
-const {amount, address} = req.body;
-
-const user = await User.findById(req.userId);
-
-const amt = Number(amount);
-
-if(!amt || amt <= 0){
-return res.json({message:"Invalid amount"});
+if(u.usdt < amount){
+return res.json({message:"Not enough balance"});
 }
 
-if(user.usdt < amt){
-return res.json({message:"Not enough USDT"});
-}
-
-// 🔴 STORE REQUEST (NO DEDUCTION YET)
-user.withdrawRequests.push({
-amount:amt,
+u.withdrawRequests.push({
+amount,
 address,
 status:"pending",
 date:Date.now()
 });
 
-await user.save();
+await u.save();
 
-res.json({message:"Withdraw sent to admin"});
+res.json({message:"Withdraw request sent"});
 });
 
+// LEADERBOARD
+app.get("/api/leaderboard", async (req,res)=>{
+const users = await User.find().sort({coins:-1}).limit(10);
+res.json(users);
+});
 
-// ================================
-// 🧑‍💼 ADMIN: GET WITHDRAW REQUESTS
-// ================================
+// ADMIN VIEW WITHDRAW
 app.get("/api/admin/withdraws", async (req,res)=>{
-
 const users = await User.find();
 
-let all = [];
+let all=[];
 
 users.forEach(u=>{
 u.withdrawRequests.forEach((w,i)=>{
-if(w.status === "pending"){
+if(w.status==="pending"){
 all.push({
 userId:u._id,
-email:u.email,
+name:u.name,
 index:i,
 ...w
 });
@@ -172,38 +154,24 @@ index:i,
 res.json(all);
 });
 
-
-// ================================
-// 🧑‍💼 ADMIN: APPROVE WITHDRAW
-// ================================
+// ADMIN APPROVE
 app.post("/api/admin/approve", async (req,res)=>{
+const {userId,index} = req.body;
 
-const {userId, index} = req.body;
+const u = await User.findById(userId);
 
-const user = await User.findById(userId);
+const w = u.withdrawRequests[index];
 
-const w = user.withdrawRequests[index];
-
-if(!w || w.status !== "pending"){
+if(!w || w.status!=="pending"){
 return res.json({message:"Already processed"});
 }
 
-// 💰 NOW DEDUCT BALANCE
-user.usdt -= w.amount;
+u.usdt -= w.amount;
+u.withdrawRequests[index].status="paid";
 
-// mark paid
-user.withdrawRequests[index].status = "paid";
+await u.save();
 
-await user.save();
-
-res.json({message:"Withdraw approved & paid"});
+res.json({message:"Paid successfully"});
 });
 
-
-// LEADERBOARD
-app.get("/api/leaderboard", async (req,res)=>{
-const users = await User.find().sort({coins:-1}).limit(10);
-res.json(users);
-});
-
-app.listen(3000, ()=>console.log("Server running"));
+app.listen(3000,()=>console.log("Server running"));

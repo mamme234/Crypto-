@@ -169,8 +169,9 @@ color:#fff;
 
 <div class="card">
 <h3>Your Referral</h3>
-<p id="refLink"></p>
+<p id="refLink">Referral Link: https://t.me/Studybuddy_2025Bot?start=</p>
 <button class="copy-btn" onclick="copyRef()">Copy Link</button>
+<p>Earn 100 coins for each referral!</p> <!-- Added the reward information for referrals -->
 </div>
 
 <!-- ✅ ADDED TASK STATUS -->
@@ -181,6 +182,7 @@ color:#fff;
 <button class="task-btn" onclick="task('telegram')">Join Telegram</button>
 <button class="task-btn" onclick="task('tiktok')">Follow TikTok</button>
 <button class="task-btn" onclick="task('youtube')">Subscribe YouTube</button>
+<p>Earn 100 coins for TikTok, 500 coins for Telegram channel, and 1250 coins for YouTube subscription!</p> <!-- Added reward info for social tasks -->
 </div>
 
 </div>
@@ -336,7 +338,7 @@ window.open(url,"_blank");
 setTimeout(async ()=>{
 // reward for tasks (updated)
 let reward = 0;
-if(type === "tiktok") reward = 1000;
+if(type === "tiktok") reward = 100;
 else if(type === "telegram") reward = 500;
 else if(type === "youtube") reward = 1250;
 
@@ -378,4 +380,4 @@ load();
 </script>
 
 </body>
-</html>
+  </html>

@@ -17,11 +17,11 @@ overflow:hidden;
 .active{display:block;}
 
 .card{
-background:rgba(255,255,255,0.06);
+background:linear-gradient(145deg,#1a1a1a,#0a0a0a);
 padding:15px;
 margin:10px;
-border-radius:16px;
-backdrop-filter: blur(10px);
+border-radius:20px;
+box-shadow:0 0 20px rgba(255,180,0,0.2);
 }
 
 .grid{
@@ -37,31 +37,59 @@ font-size:22px;
 color:#ff9800;
 }
 
+/* TAP */
 .tap{
 width:260px;
 height:260px;
-border-radius:50%;
-margin:30px auto;
-background:radial-gradient(circle,#ff9800,#ff5722);
-box-shadow:0 0 40px rgba(255,152,0,0.6);
+margin:20px auto;
 display:flex;
 align-items:center;
 justify-content:center;
-flex-direction:column;
-font-size:22px;
-font-weight:bold;
 touch-action:none;
 }
 
+/* PREMIUM COIN */
 .tap img{
-width:60px;
-margin-bottom:10px;
+width:230px;
+height:230px;
+border-radius:50%;
+box-shadow:
+0 0 40px rgba(255,200,0,0.8),
+0 0 80px rgba(255,150,0,0.5);
+animation:glow 2s infinite alternate;
 }
 
-.tap:active{
+.tap:active img{
 transform:scale(0.92);
 }
 
+@keyframes glow{
+from{filter:brightness(1);}
+to{filter:brightness(1.4);}
+}
+
+/* LEVEL BAR */
+.level-box{
+margin:10px;
+padding:10px;
+border-radius:15px;
+background:rgba(255,255,255,0.05);
+}
+
+.progress{
+height:10px;
+background:#222;
+border-radius:10px;
+overflow:hidden;
+}
+
+.progress-fill{
+height:100%;
+background:linear-gradient(90deg,#ff9800,#ffd54f);
+width:10%;
+}
+
+/* BUTTONS */
 .task-btn{
 background:linear-gradient(135deg,#229ED9,#0072ff);
 padding:12px;
@@ -111,9 +139,17 @@ color:#fff;
 <div class="stat">Level<strong id="level">1</strong></div>
 </div>
 
+<!-- ✅ ADDED LEVEL BAR -->
+<div class="level-box">
+<h3>Next Level</h3>
+<div class="progress">
+<div class="progress-fill" id="progressBar"></div>
+</div>
+</div>
+
+<!-- TAP BUTTON (TEXT REMOVED) -->
 <div class="tap" id="tapArea">
 <img src="https://cdn-icons-png.flaticon.com/512/138/138292.png">
-TAP
 </div>
 
 <div style="text-align:center;font-size:12px;color:#aaa">
@@ -137,7 +173,6 @@ TAP
 <button class="copy-btn" onclick="copyRef()">Copy Link</button>
 </div>
 
-<!-- ✅ ADDED TASK STATUS -->
 <div id="taskStatus" style="text-align:center;color:#0f0;margin-top:10px"></div>
 
 <div class="card">
@@ -231,7 +266,6 @@ userid.innerText="ID: "+user.id;
 
 if(u.photo) photo.src=u.photo;
 
-// ✅ UPDATED REF LINK (username + id)
 refLink.innerText =
 "https://t.me/Studybuddy_2025Bot?start="+user.id+"_"+user.first_name;
 
@@ -244,21 +278,29 @@ coins.innerText=coinsVal;
 usdt.innerText=usdtVal;
 refs.innerText=refsVal;
 level.innerText=Math.floor((coinsVal+usdtVal*1000)/1000)+1;
+
+// ✅ progress update
+let progress=(coinsVal%1000)/10;
+progressBar.style.width=progress+"%";
 }
 
-// ✅ FIX DOUBLE TAP BUG
-let lastTapTime=0;
+// ✅ REAL MULTI-FINGER FIX
+let activeTouches = 0;
 
 tapArea.addEventListener("touchstart",(e)=>{
+e.preventDefault();
+activeTouches = e.touches.length;
+if(activeTouches > 4) activeTouches = 4;
+});
 
-const now=Date.now();
-if(now-lastTapTime<80) return;
-lastTapTime=now;
+tapArea.addEventListener("touchend",()=>{
 
-let fingers=e.touches.length;
-if(fingers>4) fingers=4;
+if(activeTouches < 1) return;
 
-coinsVal+=fingers;
+let fingers = activeTouches;
+activeTouches = 0;
+
+coinsVal += fingers;
 updateUI();
 
 fetch(API+"/api/tap",{
@@ -283,7 +325,7 @@ navigator.clipboard.writeText(wallet.innerText);
 alert("Copied");
 }
 
-// ✅ UPDATED TASK (COMPLETED MESSAGE)
+// task
 async function task(type){
 
 let url=
@@ -296,7 +338,6 @@ type==="telegram"
 window.open(url,"_blank");
 
 setTimeout(async ()=>{
-
 await fetch(API+"/api/task",{
 method:"POST",
 headers:{
@@ -307,9 +348,7 @@ body:JSON.stringify({type})
 });
 
 taskStatus.innerHTML="✅ Task completed! Reward added";
-
 load();
-
 },3000);
 }
 

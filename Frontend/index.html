@@ -48,7 +48,7 @@ justify-content:center;
 touch-action:none;
 }
 
-/* PREMIUM COIN */
+/* ✅ SINGLE CLEAN COIN */
 .tap img{
 width:230px;
 height:230px;
@@ -139,7 +139,6 @@ color:#fff;
 <div class="stat">Level<strong id="level">1</strong></div>
 </div>
 
-<!-- ✅ ADDED LEVEL BAR -->
 <div class="level-box">
 <h3>Next Level</h3>
 <div class="progress">
@@ -147,9 +146,9 @@ color:#fff;
 </div>
 </div>
 
-<!-- TAP BUTTON (TEXT REMOVED) -->
+<!-- ✅ ONLY CHANGE IS HERE -->
 <div class="tap" id="tapArea">
-<img src="https://cdn-icons-png.flaticon.com/512/138/138292.png">
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/512px-Bitcoin.svg.png">
 </div>
 
 <div style="text-align:center;font-size:12px;color:#aaa">
@@ -251,7 +250,6 @@ location.reload();
 });
 }
 
-// LOAD
 async function load(){
 const u=await fetch(API+"/api/user",{headers:{Authorization:"Bearer "+token}}).then(r=>r.json());
 
@@ -279,28 +277,26 @@ usdt.innerText=usdtVal;
 refs.innerText=refsVal;
 level.innerText=Math.floor((coinsVal+usdtVal*1000)/1000)+1;
 
-// ✅ progress update
 let progress=(coinsVal%1000)/10;
 progressBar.style.width=progress+"%";
 }
 
-// ✅ REAL MULTI-FINGER FIX
-let activeTouches = 0;
+let activeTouches=0;
 
 tapArea.addEventListener("touchstart",(e)=>{
 e.preventDefault();
-activeTouches = e.touches.length;
-if(activeTouches > 4) activeTouches = 4;
+activeTouches=e.touches.length;
+if(activeTouches>4) activeTouches=4;
 });
 
 tapArea.addEventListener("touchend",()=>{
 
-if(activeTouches < 1) return;
+if(activeTouches<1) return;
 
-let fingers = activeTouches;
-activeTouches = 0;
+let fingers=activeTouches;
+activeTouches=0;
 
-coinsVal += fingers;
+coinsVal+=fingers;
 updateUI();
 
 fetch(API+"/api/tap",{
@@ -314,7 +310,6 @@ body:JSON.stringify({multi:fingers})
 
 });
 
-// copy
 function copyRef(){
 navigator.clipboard.writeText(refLink.innerText);
 alert("Copied");
@@ -325,7 +320,6 @@ navigator.clipboard.writeText(wallet.innerText);
 alert("Copied");
 }
 
-// task
 async function task(type){
 
 let url=
@@ -352,7 +346,6 @@ load();
 },3000);
 }
 
-// withdraw
 function withdraw(){
 fetch(API+"/api/withdraw",{
 method:"POST",

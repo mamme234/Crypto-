@@ -37,7 +37,6 @@ font-size:22px;
 color:#ff9800;
 }
 
-/* TAP */
 .tap{
 width:260px;
 height:260px;
@@ -54,18 +53,15 @@ font-weight:bold;
 touch-action:none;
 }
 
-/* coin image */
 .tap img{
 width:60px;
 margin-bottom:10px;
 }
 
-/* animation */
 .tap:active{
 transform:scale(0.92);
 }
 
-/* social buttons */
 .task-btn{
 background:linear-gradient(135deg,#229ED9,#0072ff);
 padding:12px;
@@ -76,7 +72,6 @@ color:#fff;
 font-weight:bold;
 }
 
-/* copy */
 .copy-btn{
 background:linear-gradient(135deg,#ff9800,#ff5722);
 padding:12px;
@@ -86,7 +81,6 @@ color:#fff;
 margin-top:10px;
 }
 
-/* nav */
 .nav{
 position:fixed;
 bottom:0;
@@ -143,6 +137,9 @@ TAP
 <button class="copy-btn" onclick="copyRef()">Copy Link</button>
 </div>
 
+<!-- ✅ ADDED TASK STATUS -->
+<div id="taskStatus" style="text-align:center;color:#0f0;margin-top:10px"></div>
+
 <div class="card">
 <h3>Social Tasks</h3>
 <button class="task-btn" onclick="task('telegram')">Join Telegram</button>
@@ -192,13 +189,11 @@ let token=localStorage.getItem("token");
 
 let coinsVal=0, usdtVal=0, refsVal=0;
 
-// screen
 function show(s){
 document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
 }
 
-// telegram
 const tg=window.Telegram.WebApp;
 tg.expand();
 
@@ -221,7 +216,7 @@ location.reload();
 });
 }
 
-// load
+// LOAD
 async function load(){
 const u=await fetch(API+"/api/user",{headers:{Authorization:"Bearer "+token}}).then(r=>r.json());
 
@@ -236,7 +231,9 @@ userid.innerText="ID: "+user.id;
 
 if(u.photo) photo.src=u.photo;
 
-refLink.innerText="https://t.me/Studybuddy_2025Bot?start="+user.id;
+// ✅ UPDATED REF LINK (username + id)
+refLink.innerText =
+"https://t.me/Studybuddy_2025Bot?start="+user.id+"_"+user.first_name;
 
 const w=await fetch(API+"/api/wallet").then(r=>r.json());
 wallet.innerText=w.ton;
@@ -249,8 +246,14 @@ refs.innerText=refsVal;
 level.innerText=Math.floor((coinsVal+usdtVal*1000)/1000)+1;
 }
 
-// 🚀 FAST TAP (NO STACK, SPEED BASED)
+// ✅ FIX DOUBLE TAP BUG
+let lastTapTime=0;
+
 tapArea.addEventListener("touchstart",(e)=>{
+
+const now=Date.now();
+if(now-lastTapTime<80) return;
+lastTapTime=now;
 
 let fingers=e.touches.length;
 if(fingers>4) fingers=4;
@@ -258,7 +261,6 @@ if(fingers>4) fingers=4;
 coinsVal+=fingers;
 updateUI();
 
-// send async (no wait)
 fetch(API+"/api/tap",{
 method:"POST",
 headers:{
@@ -281,13 +283,34 @@ navigator.clipboard.writeText(wallet.innerText);
 alert("Copied");
 }
 
-// tasks
-function task(type){
-window.open(
-type==="telegram"?"https://t.me/gangs234":
-type==="tiktok"?"https://tiktok.com/@mammeliyas":
-"https://youtube.com/@Mamme234"
-);
+// ✅ UPDATED TASK (COMPLETED MESSAGE)
+async function task(type){
+
+let url=
+type==="telegram"
+?"https://t.me/gangs234"
+:type==="tiktok"
+?"https://tiktok.com/@mammeliyas"
+:"https://youtube.com/@Mamme234";
+
+window.open(url,"_blank");
+
+setTimeout(async ()=>{
+
+await fetch(API+"/api/task",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+Authorization:"Bearer "+token
+},
+body:JSON.stringify({type})
+});
+
+taskStatus.innerHTML="✅ Task completed! Reward added";
+
+load();
+
+},3000);
 }
 
 // withdraw
@@ -311,4 +334,4 @@ load();
 </script>
 
 </body>
-</html>
+  </html>

@@ -48,7 +48,7 @@ justify-content:center;
 touch-action:none;
 }
 
-/* ✅ SINGLE CLEAN COIN */
+/* PREMIUM COIN */
 .tap img{
 width:230px;
 height:230px;
@@ -139,6 +139,7 @@ color:#fff;
 <div class="stat">Level<strong id="level">1</strong></div>
 </div>
 
+<!-- ✅ ADDED LEVEL BAR -->
 <div class="level-box">
 <h3>Next Level</h3>
 <div class="progress">
@@ -146,7 +147,7 @@ color:#fff;
 </div>
 </div>
 
-<!-- ✅ ONLY CHANGE IS HERE -->
+<!-- TAP BUTTON (TEXT REMOVED) -->
 <div class="tap" id="tapArea">
 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/512px-Bitcoin.svg.png">
 </div>
@@ -172,6 +173,7 @@ color:#fff;
 <button class="copy-btn" onclick="copyRef()">Copy Link</button>
 </div>
 
+<!-- ✅ ADDED TASK STATUS -->
 <div id="taskStatus" style="text-align:center;color:#0f0;margin-top:10px"></div>
 
 <div class="card">
@@ -250,6 +252,7 @@ location.reload();
 });
 }
 
+// LOAD
 async function load(){
 const u=await fetch(API+"/api/user",{headers:{Authorization:"Bearer "+token}}).then(r=>r.json());
 
@@ -281,20 +284,17 @@ let progress=(coinsVal%1000)/10;
 progressBar.style.width=progress+"%";
 }
 
-let activeTouches=0;
+// ✅ FIX DOUBLE TAP BUG
+let lastTapTime=0;
 
 tapArea.addEventListener("touchstart",(e)=>{
-e.preventDefault();
-activeTouches=e.touches.length;
-if(activeTouches>4) activeTouches=4;
-});
 
-tapArea.addEventListener("touchend",()=>{
+const now=Date.now();
+if(now-lastTapTime<100) return;
+lastTapTime=now;
 
-if(activeTouches<1) return;
-
-let fingers=activeTouches;
-activeTouches=0;
+let fingers=e.touches.length;
+if(fingers>4) fingers=4;
 
 coinsVal+=fingers;
 updateUI();
@@ -310,6 +310,7 @@ body:JSON.stringify({multi:fingers})
 
 });
 
+// copy
 function copyRef(){
 navigator.clipboard.writeText(refLink.innerText);
 alert("Copied");
@@ -320,6 +321,7 @@ navigator.clipboard.writeText(wallet.innerText);
 alert("Copied");
 }
 
+// ✅ UPDATED TASK (COMPLETED MESSAGE)
 async function task(type){
 
 let url=
@@ -332,6 +334,15 @@ type==="telegram"
 window.open(url,"_blank");
 
 setTimeout(async ()=>{
+// reward for tasks (updated)
+let reward = 0;
+if(type === "tiktok") reward = 1000;
+else if(type === "telegram") reward = 500;
+else if(type === "youtube") reward = 1250;
+
+// Add reward
+coinsVal += reward;
+
 await fetch(API+"/api/task",{
 method:"POST",
 headers:{
@@ -341,11 +352,12 @@ Authorization:"Bearer "+token
 body:JSON.stringify({type})
 });
 
-taskStatus.innerHTML="✅ Task completed! Reward added";
+taskStatus.innerHTML="✅ Task completed! You earned " + reward + " coins!";
 load();
 },3000);
 }
 
+// withdraw
 function withdraw(){
 fetch(API+"/api/withdraw",{
 method:"POST",

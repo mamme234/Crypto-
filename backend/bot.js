@@ -1,31 +1,43 @@
 const TelegramBot = require("node-telegram-bot-api");
 const mongoose = require("mongoose");
 
-const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
+// ===== CONFIG =====
+const TOKEN = process.env.BOT_TOKEN;
+const MONGO = process.env.MONGO_URI;
+const APP_URL = "https://myapp1-khaki.vercel.app";
 
-// USER MODEL
+// ===== CONNECT DB =====
+mongoose.connect(MONGO)
+.then(()=>console.log("MongoDB Connected"))
+.catch(err=>console.log(err));
+
+// ===== USER MODEL =====
 const User = mongoose.model("User", new mongoose.Schema({
   tgId: String,
   name: String,
   coins: { type: Number, default: 0 },
-  referredBy: String,
-  referrals: { type: Number, default: 0 }
+  referrals: { type: Number, default: 0 },
+  referredBy: String
 }));
 
-// START COMMAND WITH REFERRAL
+// ===== BOT =====
+const bot = new TelegramBot(TOKEN, { polling: true });
+
+// ===== START WITH REFERRAL =====
 bot.onText(/\/start (.+)/, async (msg, match) => {
 
   const chatId = msg.chat.id;
   const tgId = msg.from.id.toString();
   const name = msg.from.first_name;
 
-  const refData = match[1]; // example: 12345_Ali
+  const refData = match[1]; // example: 12345_name
   const refId = refData.split("_")[0];
 
   let user = await User.findOne({ tgId });
 
-  // 🟢 CREATE NEW USER
+  // CREATE USER
   if (!user) {
+
     user = new User({
       tgId,
       name,
@@ -34,32 +46,29 @@ bot.onText(/\/start (.+)/, async (msg, match) => {
 
     await user.save();
 
-    // 🎁 GIVE REFERRAL REWARD
+    // GIVE REFERRAL REWARD
     if (refId && refId !== tgId) {
 
       const refUser = await User.findOne({ tgId: refId });
 
       if (refUser) {
-        refUser.coins += 100; // ✅ 100 coins reward
+        refUser.coins += 100; // ✅ 100 coins
         refUser.referrals += 1;
         await refUser.save();
 
-        // notify inviter
         bot.sendMessage(refId, "🎉 You got 100 coins from referral!");
       }
     }
   }
 
-  // 🚀 OPEN MINI APP BUTTON
+  // OPEN APP BUTTON
   bot.sendMessage(chatId, "🚀 Tap below to open app", {
     reply_markup: {
       inline_keyboard: [
         [
           {
             text: "🔥 Open App",
-            web_app: {
-              url: "https://myapp1-khaki.vercel.app"
-            }
+            web_app: { url: APP_URL }
           }
         ]
       ]
@@ -68,7 +77,7 @@ bot.onText(/\/start (.+)/, async (msg, match) => {
 
 });
 
-// NORMAL START (NO REF)
+// ===== NORMAL START =====
 bot.onText(/\/start$/, async (msg) => {
 
   const chatId = msg.chat.id;
@@ -88,9 +97,7 @@ bot.onText(/\/start$/, async (msg) => {
         [
           {
             text: "🔥 Open App",
-            web_app: {
-              url: "https://myapp1-khaki.vercel.app"
-            }
+            web_app: { url: APP_URL }
           }
         ]
       ]
@@ -98,3 +105,8 @@ bot.onText(/\/start$/, async (msg) => {
   });
 
 });
+
+// ===== ERROR LOG =====
+bot.on("polling_error", (err) => console.log(err));
+
+console.log("🤖 Bot is running...");

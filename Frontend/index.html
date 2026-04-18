@@ -186,28 +186,9 @@ color:#fff;
 <p>• Need 10 referrals OR deposit 5 USDT</p>
 </div>
 
-<div class="card">
-<h3>Deposit Wallet</h3>
-<p id="wallet"></p>
-<button class="copy-btn" onclick="copyWallet()">Copy Address</button>
 </div>
 
-<div class="card">
-<h3>Withdraw</h3>
-
-<input id="wAddress" placeholder="Your wallet address"
-style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
-
-<input id="wAmount" placeholder="Amount (USDT)"
-style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
-
-<button class="copy-btn" onclick="withdraw()">Submit Withdraw</button>
-
-</div>
-
-</div>
-
-<!-- ADS -->
+<!-- ADS SCREEN -->
 <div id="ads" class="screen">
 
 <div class="card" style="text-align:center">
@@ -217,8 +198,7 @@ style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
 ▶ Watch Monetag Ad
 </button>
 
-<p id="adTimer" style="margin-top:10px;color:#ff9800;"></p>
-
+<p id="adTimer"></p>
 </div>
 
 </div>
@@ -238,33 +218,57 @@ style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
 const API="https://crypto-4bbj.onrender.com";
 let token=localStorage.getItem("token");
 
-let coinsVal=0, usdtVal=0, refsVal=0;
+/* ===== FIXED GLOBAL VALUES ===== */
+let coinsVal = 0;
+let usdtVal = 0;
+let refsVal = 0;
 
+/* SCREEN */
 function show(s){
 document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
 }
 
-/* ===== FIX ADDED ===== */
-function updateBalance(){
+/* TELEGRAM */
+const tg = window.Telegram?.WebApp;
+if (tg) tg.expand();
 
-if(coinsVal >= 1000){
-let earned = Math.floor(coinsVal / 1000);
-usdtVal += earned;
-coinsVal = coinsVal % 1000;
+const user = tg?.initDataUnsafe?.user;
+
+/* PROFILE FIX */
+if(user){
+username.innerText = user.first_name;
+userid.innerText = "ID: " + user.id + (user.username ? " | @" + user.username : "");
+
+refLink.innerText =
+"https://t.me/Studybuddy_2025Bot?start=" + user.id;
+
+if(user.photo_url){
+photo.src = user.photo_url;
+}
 }
 
-coins.innerText = coinsVal;
-usdt.innerText = usdtVal;
-}
-
-/* TAP */
+/* TAP FIX (1 finger = 1 coin, 2 fingers = x2 etc) */
 tapArea.addEventListener("touchstart",(e)=>{
+
 let fingers = e.touches?.length || 1;
 fingers = Math.min(fingers,4);
 
 coinsVal += fingers;
-updateBalance();
+
+coins.innerText = coinsVal;
+
+/* USDT FIX: 1000 coins = 1 USDT */
+usdtVal = (coinsVal / 1000).toFixed(2);
+usdt.innerText = usdtVal;
+
+/* LEVEL FIX */
+level.innerText = Math.floor(coinsVal / 1000) + 1;
+
+/* REF FIX (simple example) */
+refsVal = Math.floor(coinsVal / 5000);
+refs.innerText = refsVal;
+
 });
 
 /* TASK */
@@ -285,25 +289,7 @@ navigator.clipboard.writeText(refLink.innerText);
 alert("Copied");
 }
 
-/* TELEGRAM */
-const tg = window.Telegram?.WebApp;
-if (tg) tg.expand();
-
-const user = tg?.initDataUnsafe?.user;
-
-if(user){
-username.innerText = user.first_name;
-userid.innerText = "ID: " + user.id + (user.username ? " | @" + user.username : "");
-
-refLink.innerText =
-"https://t.me/Studybuddy_2025Bot?start=" + user.id;
-
-if(user.photo_url){
-photo.src = user.photo_url;
-}
-}
-
-/* ADS */
+/* ADS FIX */
 let adCooldown = false;
 
 function watchAdReward(){
@@ -314,25 +300,27 @@ return;
 }
 
 if(typeof show_3304242 !== "function"){
-alert("Ad not ready");
+alert("Ad not ready or no ads available");
 return;
 }
 
-show_3304242().then(()=>giveReward())
-.catch(()=>alert("No ads"));
-
-}
-
-function giveReward(){
-
-adCooldown = true;
+/* Monetag proper call */
+show_3304242().then(()=>{
 
 let reward = 310 + Math.floor(Math.random()*90);
 
 coinsVal += reward;
-updateBalance();
+coins.innerText = coinsVal;
 
 alert("+"+reward+" coins");
+
+/* update USDT + level */
+usdtVal = (coinsVal / 1000).toFixed(2);
+usdt.innerText = usdtVal;
+
+level.innerText = Math.floor(coinsVal / 1000) + 1;
+
+adCooldown = true;
 
 let t = 60;
 adTimer.innerText = "Next ad in: " + t + "s";
@@ -349,6 +337,10 @@ adTimer.innerText = "Ready";
 }
 
 },1000);
+
+}).catch(()=>{
+alert("No ads available now");
+});
 
 }
 

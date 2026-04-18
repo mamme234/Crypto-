@@ -2,33 +2,28 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Earn App</title>
-
-<script src="https://libtl.com/sdk.js"
-data-zone="3304242"
-data-sdk="show_3304242"></script>
+<title>Earn App Stable</title>
 
 <style>
 body{
 margin:0;
 font-family:Arial;
-background:linear-gradient(180deg,#0b122a,#020617);
+background:#0b122a;
 color:white;
 }
 
-/* TOP BAR */
+/* TOP */
 .topbar{
 display:flex;
 justify-content:space-between;
-align-items:center;
 padding:12px;
 background:rgba(255,255,255,0.05);
 }
 
 .user{
 display:flex;
-align-items:center;
 gap:10px;
+align-items:center;
 }
 
 .user img{
@@ -37,8 +32,6 @@ height:45px;
 border-radius:50%;
 border:2px solid gold;
 }
-
-.small{font-size:12px;opacity:0.7;}
 
 /* STATS */
 .stats{
@@ -51,39 +44,35 @@ padding:10px;
 .card{
 background:rgba(255,255,255,0.05);
 padding:15px;
-border-radius:12px;
+border-radius:10px;
 text-align:center;
 }
 
 .card strong{
+display:block;
 font-size:20px;
 color:#facc15;
 }
 
 /* TAP */
-.tap-area{
+.tap{
 display:flex;
 justify-content:center;
-align-items:center;
-margin-top:40px;
+margin-top:30px;
 }
 
-.tap-btn{
-width:220px;
-height:220px;
+.tap button{
+width:200px;
+height:200px;
 border-radius:50%;
-background:radial-gradient(circle,#facc15,#f59e0b);
-box-shadow:0 0 25px gold;
-display:flex;
-align-items:center;
-justify-content:center;
-font-weight:bold;
-user-select:none;
+background:gold;
+font-size:20px;
+border:none;
 }
 
-.tap-btn:active{
-transform:scale(0.95);
-}
+/* SCREENS */
+.screen{display:none;}
+.active{display:block;}
 
 /* NAV */
 .nav{
@@ -91,12 +80,12 @@ position:fixed;
 bottom:0;
 width:100%;
 display:flex;
-background:#0f172a;
+background:#111;
 }
 
 .nav button{
 flex:1;
-padding:12px;
+padding:10px;
 background:none;
 border:none;
 color:white;
@@ -106,40 +95,52 @@ color:white;
 
 <body>
 
-<!-- TOP -->
+<!-- HOME -->
+<div id="home" class="screen active">
+
 <div class="topbar">
-
 <div class="user">
-<img id="photo" src="https://i.imgur.com/8Km9tLL.png">
+<img id="photo" src="">
 <div>
-<div id="name">Loading...</div>
-<div class="small" id="uname">@user</div>
+<div id="name">User</div>
+<div id="uname">@user</div>
 </div>
 </div>
-
-<div class="small">
-Level: <span id="level">1</span>
+<div>Level <span id="level">1</span></div>
 </div>
 
-</div>
-
-<!-- STATS -->
 <div class="stats">
-<div class="card">Coins<br><strong id="coins">0</strong></div>
-<div class="card">USDT<br><strong id="usdt">0.000</strong></div>
+<div class="card">Coins<strong id="coins">0</strong></div>
+<div class="card">USDT<strong id="usdt">0.000</strong></div>
 </div>
 
-<!-- TAP -->
-<div class="tap-area">
-<div class="tap-btn" id="tapBtn">TAP</div>
+<div class="tap">
+<button id="tapBtn">TAP</button>
+</div>
+
+</div>
+
+<!-- PROFILE -->
+<div id="profile" class="screen">
+<h3>Profile Screen</h3>
+</div>
+
+<!-- WITHDRAW -->
+<div id="withdraw" class="screen">
+<h3>Withdraw Screen</h3>
+</div>
+
+<!-- ADS -->
+<div id="ads" class="screen">
+<h3>Ads Screen</h3>
 </div>
 
 <!-- NAV -->
 <div class="nav">
-<button>Home</button>
-<button>Tasks</button>
-<button>Withdraw</button>
-<button>Profile</button>
+<button onclick="show('home')">Home</button>
+<button onclick="show('profile')">Profile</button>
+<button onclick="show('withdraw')">Withdraw</button>
+<button onclick="show('ads')">Ads</button>
 </div>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -148,10 +149,28 @@ Level: <span id="level">1</span>
 
 const API="https://crypto-4bbj.onrender.com";
 
-let token=null;
-let coins=0;
-let usdt=0;
-let lastTap=0;
+/* SAFE VARIABLES (IMPORTANT FIX) */
+let coins = 0;
+let usdt = 0;
+let token = null;
+let lastTap = 0;
+
+/* ELEMENTS (FIX "NOT DEFINED") */
+const coinsEl = document.getElementById("coins");
+const usdtEl = document.getElementById("usdt");
+const tapBtn = document.getElementById("tapBtn");
+
+/* SCREEN NAV */
+function show(id){
+document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+
+/* UPDATE UI */
+function update(){
+coinsEl.innerText = Math.floor(coins);
+usdtEl.innerText = usdt.toFixed(3);
+}
 
 /* TELEGRAM */
 const tg = window.Telegram?.WebApp;
@@ -159,23 +178,49 @@ const user = tg?.initDataUnsafe?.user;
 
 if(tg) tg.expand();
 
-/* PROFILE */
 if(user){
 document.getElementById("name").innerText=user.first_name;
-document.getElementById("uname").innerText="@"+(user.username||"no_username");
-
-if(user.photo_url){
-document.getElementById("photo").src=user.photo_url;
-}
+document.getElementById("uname").innerText="@"+(user.username||"no_user");
+if(user.photo_url) document.getElementById("photo").src=user.photo_url;
 }
 
-/* UI UPDATE */
-function updateUI(){
-document.getElementById("coins").innerText=coins;
-document.getElementById("usdt").innerText=usdt.toFixed(3);
+/* TAP FIX (NO CRASH) */
+tapBtn.addEventListener("click",tapHandler);
+tapBtn.addEventListener("touchstart",tapHandler);
+
+function tapHandler(e){
+
+e.preventDefault();
+
+let now = Date.now();
+let fingers = e.touches ? Math.min(e.touches.length,4) : 1;
+
+let bonus = 1;
+if(now - lastTap < 200) bonus = 1.2;
+
+lastTap = now;
+
+/* SAFE CALC */
+coins += fingers * bonus;
+usdt = coins / 1000;
+
+update();
+
+/* OPTIONAL BACKEND (SAFE) */
+if(token){
+fetch(API+"/api/tap",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+Authorization:"Bearer "+token
+},
+body:JSON.stringify({multi:fingers})
+}).catch(()=>{});
 }
 
-/* LOGIN */
+}
+
+/* LOGIN SAFE */
 async function login(){
 
 try{
@@ -191,9 +236,7 @@ ref:user?.username
 });
 
 const d = await res.json();
-token=d.token;
-
-loadUser();
+token = d.token;
 
 }catch(e){
 setTimeout(login,3000);
@@ -201,76 +244,6 @@ setTimeout(login,3000);
 
 }
 
-/* LOAD USER */
-async function loadUser(){
-
-try{
-
-const res = await fetch(API+"/api/user",{
-headers:{Authorization:"Bearer "+token}
-});
-
-const d = await res.json();
-
-coins = d.coins || 0;
-usdt = Number((d.usdt || 0).toFixed(3));
-
-updateUI();
-
-}catch(e){
-setTimeout(loadUser,3000);
-}
-
-}
-
-/* TAP SYSTEM */
-function handleTap(e){
-
-try{
-
-if(!token) return;
-
-let now = Date.now();
-let fingers = e.touches ? Math.min(e.touches.length,4) : 1;
-
-/* speed bonus */
-let bonus = 1;
-
-if(now - lastTap < 200) bonus = 1.2;
-else if(now - lastTap < 400) bonus = 1.1;
-
-lastTap = now;
-
-/* UPDATE */
-coins += fingers * bonus;
-usdt = coins / 1000;
-
-/* FORMAT */
-usdt = Number(usdt.toFixed(3));
-
-updateUI();
-
-/* OPTIONAL BACKEND SYNC */
-fetch(API+"/api/tap",{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-Authorization:"Bearer "+token
-},
-body:JSON.stringify({multi:fingers})
-}).catch(()=>{});
-
-}catch(e){
-console.log("tap error");
-}
-
-}
-
-/* EVENTS */
-tapBtn.addEventListener("touchstart",handleTap);
-tapBtn.addEventListener("click",handleTap);
-
-/* START */
 login();
 
 </script>

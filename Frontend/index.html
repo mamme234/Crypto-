@@ -6,6 +6,9 @@
 
 <!-- SAFE ADS LOADER (prevents crash) -->
 <script>
+window.onerror = function(){ return true; };
+window.onunhandledrejection = function(){ return true; };
+
 try {
 let ad = document.createElement("script");
 ad.src = "https://quge5.com/88/tag.min.js";
@@ -14,7 +17,7 @@ ad.async = true;
 ad.setAttribute("data-cfasync","false");
 document.head.appendChild(ad);
 } catch(e){
-console.log("ad error",e);
+console.log("ad error", e);
 }
 </script>
 
@@ -27,7 +30,6 @@ color:#fff;
 overflow:hidden;
 }
 
-/* ORIGINAL DESIGN RESTORED */
 .screen{display:none;padding:15px;}
 .active{display:block;}
 
@@ -52,7 +54,7 @@ font-size:22px;
 color:#ff9800;
 }
 
-/* TAP (RESTORED PREMIUM STYLE) */
+/* TAP */
 .tap{
 width:260px;
 height:260px;
@@ -67,57 +69,10 @@ touch-action:none;
 width:230px;
 height:230px;
 border-radius:50%;
-box-shadow:0 0 40px rgba(255,200,0,0.8),0 0 80px rgba(255,150,0,0.5);
-animation:glow 2s infinite alternate;
+box-shadow:0 0 40px rgba(255,200,0,0.8);
 }
 
-@keyframes glow{
-from{filter:brightness(1);}
-to{filter:brightness(1.4);}
-}
-
-/* LEVEL BAR RESTORED */
-.level-box{
-margin:10px;
-padding:10px;
-border-radius:15px;
-background:rgba(255,255,255,0.05);
-}
-
-.progress{
-height:10px;
-background:#222;
-border-radius:10px;
-overflow:hidden;
-}
-
-.progress-fill{
-height:100%;
-background:linear-gradient(90deg,#ff9800,#ffd54f);
-width:10%;
-}
-
-/* BUTTONS RESTORED */
-.task-btn{
-background:linear-gradient(135deg,#229ED9,#0072ff);
-padding:12px;
-border:none;
-border-radius:10px;
-margin-top:10px;
-color:#fff;
-font-weight:bold;
-}
-
-.copy-btn{
-background:linear-gradient(135deg,#ff9800,#ff5722);
-padding:12px;
-border:none;
-border-radius:10px;
-color:#fff;
-margin-top:10px;
-}
-
-/* NAV RESTORED */
+/* NAV */
 .nav{
 position:fixed;
 bottom:0;
@@ -148,14 +103,7 @@ color:#fff;
 <div class="stat">Level<strong id="level">1</strong></div>
 </div>
 
-<div class="level-box">
-<h3>Next Level</h3>
-<div class="progress">
-<div class="progress-fill" id="progressBar"></div>
-</div>
-</div>
-
-<!-- TAP RESTORED -->
+<!-- TAP -->
 <div class="tap" id="tapArea">
 <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg">
 </div>
@@ -171,21 +119,21 @@ color:#fff;
 
 <div class="card" style="text-align:center">
 <img id="photo" style="width:80px;height:80px;border-radius:50%">
-<h3 id="username"></h3>
+<h3 id="username">User</h3>
 <p id="userid"></p>
 </div>
 
 <div class="card">
-<h3>Your Referral</h3>
+<h3>Referral</h3>
 <p id="refLink">Loading...</p>
-<button class="copy-btn" onclick="copyRef()">Copy Link</button>
+<button onclick="copyRef()">Copy Link</button>
 </div>
 
 <div class="card">
 <h3>Social Tasks</h3>
-<button class="task-btn" onclick="task('telegram')">Join Telegram</button>
-<button class="task-btn" onclick="task('tiktok')">Follow TikTok</button>
-<button class="task-btn" onclick="task('youtube')">Subscribe YouTube</button>
+<button onclick="task('telegram')">Join Telegram</button>
+<button onclick="task('tiktok')">Follow TikTok</button>
+<button onclick="task('youtube')">Subscribe YouTube</button>
 </div>
 
 </div>
@@ -200,10 +148,9 @@ color:#fff;
 </div>
 
 <div class="card">
-<h3>Withdraw</h3>
 <input id="wAddress" placeholder="Wallet address" style="width:100%;padding:10px;">
 <input id="wAmount" placeholder="Amount" style="width:100%;padding:10px;margin-top:10px;">
-<button class="copy-btn" onclick="withdraw()">Submit</button>
+<button onclick="withdraw()">Submit</button>
 </div>
 
 </div>
@@ -219,9 +166,7 @@ color:#fff;
 
 <script>
 
-/* GLOBAL CRASH PROTECTION */
-window.onerror=function(){return true;};
-
+/* SAFE VARIABLES */
 let API="https://crypto-4bbj.onrender.com";
 let token=localStorage.getItem("token");
 
@@ -232,7 +177,7 @@ document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
 }
 
-/* TELEGRAM SAFE */
+/* TELEGRAM SAFE INIT */
 const tg = window.Telegram ? window.Telegram.WebApp : null;
 if(tg) tg.expand();
 
@@ -240,7 +185,49 @@ const user = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user)
 ? tg.initDataUnsafe.user
 : {id:"0",first_name:"User"};
 
-/* TAP FIX */
+/* LOGIN */
+if(user && !token){
+fetch(API+"/api/tg-login",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+id:user.id,
+name:user.first_name
+})
+})
+.then(r=>r.json())
+.then(d=>{
+localStorage.setItem("token",d.token);
+location.reload();
+});
+}
+
+/* LOAD SAFE */
+async function load(){
+try{
+const res = await fetch(API+"/api/user",{headers:{Authorization:"Bearer "+token}});
+const u = await res.json();
+
+coinsVal=u.coins||0;
+usdtVal=u.usdt||0;
+refsVal=u.referrals||0;
+
+document.getElementById("coins").innerText=coinsVal;
+document.getElementById("usdt").innerText=usdtVal;
+document.getElementById("refs").innerText=refsVal;
+
+document.getElementById("level").innerText=Math.floor((coinsVal+usdtVal*1000)/1000)+1;
+
+document.getElementById("userid").innerText="ID: "+user.id;
+
+document.getElementById("refLink").innerText="https://t.me/YourBot?start="+user.id;
+
+}catch(e){
+console.log("load error",e);
+}
+}
+
+/* TAP FIX (NO CRASH) */
 document.addEventListener("touchstart",(e)=>{
 
 try{
@@ -251,11 +238,13 @@ coinsVal += fingers;
 
 document.getElementById("coins").innerText=coinsVal;
 
-}catch(err){}
+}catch(err){
+console.log("tap error",err);
+}
 
 });
 
-/* SOCIAL TASK (RESTORED) */
+/* SOCIAL TASK FIXED */
 function task(type){
 
 let url =
@@ -265,7 +254,7 @@ type==="telegram"
 ?"https://tiktok.com/@mammeliyas"
 :"https://youtube.com/@Mamme234";
 
-let win=window.open(url,"_blank");
+let win = window.open(url,"_blank");
 
 setTimeout(()=>{
 
@@ -288,13 +277,16 @@ win?.close?.();
 
 /* COPY */
 function copyRef(){
-navigator.clipboard.writeText(refLink.innerText);
+navigator.clipboard.writeText(document.getElementById("refLink").innerText);
 alert("Copied");
 }
 
+/* WITHDRAW */
 function withdraw(){
 alert("Request sent");
 }
+
+load();
 
 </script>
 

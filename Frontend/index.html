@@ -4,21 +4,21 @@
 <meta charset="UTF-8">
 <title>Mini Earn App</title>
 
-<!-- SAFE ADS LOADER (prevents crash) -->
 <script>
+/* CRASH PROTECTION */
 window.onerror = function(){ return true; };
 window.onunhandledrejection = function(){ return true; };
 
+/* SAFE ADS (ONLY IN CHROME, NOT TELEGRAM) */
 try {
+if (!window.Telegram || !window.Telegram.WebApp) {
 let ad = document.createElement("script");
 ad.src = "https://quge5.com/88/tag.min.js";
 ad.setAttribute("data-zone","230862");
 ad.async = true;
-ad.setAttribute("data-cfasync","false");
 document.head.appendChild(ad);
-} catch(e){
-console.log("ad error", e);
 }
+} catch(e){}
 </script>
 
 <style>
@@ -103,7 +103,6 @@ color:#fff;
 <div class="stat">Level<strong id="level">1</strong></div>
 </div>
 
-<!-- TAP -->
 <div class="tap" id="tapArea">
 <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg">
 </div>
@@ -166,7 +165,6 @@ color:#fff;
 
 <script>
 
-/* SAFE VARIABLES */
 let API="https://crypto-4bbj.onrender.com";
 let token=localStorage.getItem("token");
 
@@ -177,7 +175,7 @@ document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
 }
 
-/* TELEGRAM SAFE INIT */
+/* TELEGRAM SAFE */
 const tg = window.Telegram ? window.Telegram.WebApp : null;
 if(tg) tg.expand();
 
@@ -202,7 +200,7 @@ location.reload();
 });
 }
 
-/* LOAD SAFE */
+/* LOAD */
 async function load(){
 try{
 const res = await fetch(API+"/api/user",{headers:{Authorization:"Bearer "+token}});
@@ -212,22 +210,20 @@ coinsVal=u.coins||0;
 usdtVal=u.usdt||0;
 refsVal=u.referrals||0;
 
-document.getElementById("coins").innerText=coinsVal;
-document.getElementById("usdt").innerText=usdtVal;
-document.getElementById("refs").innerText=refsVal;
+coins.innerText=coinsVal;
+usdt.innerText=usdtVal;
+refs.innerText=refsVal;
 
-document.getElementById("level").innerText=Math.floor((coinsVal+usdtVal*1000)/1000)+1;
+level.innerText=Math.floor((coinsVal+usdtVal*1000)/1000)+1;
 
-document.getElementById("userid").innerText="ID: "+user.id;
+userid.innerText="ID: "+user.id;
 
-document.getElementById("refLink").innerText="https://t.me/YourBot?start="+user.id;
+refLink.innerText="https://t.me/YourBot?start="+user.id;
 
-}catch(e){
-console.log("load error",e);
-}
+}catch(e){}
 }
 
-/* TAP FIX (NO CRASH) */
+/* TAP FIX */
 document.addEventListener("touchstart",(e)=>{
 
 try{
@@ -236,11 +232,9 @@ if(fingers>4) fingers=4;
 
 coinsVal += fingers;
 
-document.getElementById("coins").innerText=coinsVal;
+coins.innerText=coinsVal;
 
-}catch(err){
-console.log("tap error",err);
-}
+}catch(e){}
 
 });
 
@@ -254,7 +248,13 @@ type==="telegram"
 ?"https://tiktok.com/@mammeliyas"
 :"https://youtube.com/@Mamme234";
 
-let win = window.open(url,"_blank");
+const tg = window.Telegram?.WebApp;
+
+if(tg && tg.openLink){
+tg.openLink(url);
+}else{
+window.open(url,"_blank");
+}
 
 setTimeout(()=>{
 
@@ -265,11 +265,9 @@ if(type==="youtube") reward=1250;
 
 coinsVal+=reward;
 
-document.getElementById("coins").innerText=coinsVal;
+coins.innerText=coinsVal;
 
 alert("Task completed +"+reward);
-
-win?.close?.();
 
 },5000);
 
@@ -277,7 +275,7 @@ win?.close?.();
 
 /* COPY */
 function copyRef(){
-navigator.clipboard.writeText(document.getElementById("refLink").innerText);
+navigator.clipboard.writeText(refLink.innerText);
 alert("Copied");
 }
 

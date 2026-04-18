@@ -37,9 +37,8 @@ box-shadow:0 0 20px rgba(255,180,0,0.2);
 .progress-fill{height:100%;background:linear-gradient(90deg,#ff9800,#ffd54f);width:10%;}
 
 .tap{
-width:260px;height:260px;margin:0;
+width:260px;height:260px;
 display:flex;align-items:center;justify-content:center;
-touch-action:none;
 position:absolute;top:50%;left:50%;
 transform:translate(-50%,-50%);
 }
@@ -47,22 +46,16 @@ transform:translate(-50%,-50%);
 .tap img{
 width:230px;height:230px;border-radius:50%;
 box-shadow:0 0 40px rgba(255,200,0,0.8);
-animation:glow 2s infinite alternate;
-}
-
-@keyframes glow{
-from{filter:brightness(1);}
-to{filter:brightness(1.4);}
 }
 
 .task-btn{
-background:linear-gradient(135deg,#229ED9,#0072ff);
+background:#229ED9;
 padding:12px;border:none;border-radius:10px;
 margin-top:10px;color:#fff;font-weight:bold;width:100%;
 }
 
 .copy-btn{
-background:linear-gradient(135deg,#ff9800,#ff5722);
+background:#ff9800;
 padding:12px;border:none;border-radius:10px;
 color:#fff;margin-top:10px;width:100%;
 }
@@ -72,9 +65,7 @@ position:fixed;bottom:0;width:100%;
 display:flex;background:#020617;
 }
 
-.nav button{
-flex:1;padding:12px;border:none;background:#111;color:#fff;
-}
+.nav button{flex:1;padding:12px;border:none;background:#111;color:#fff;}
 </style>
 </head>
 
@@ -90,22 +81,14 @@ flex:1;padding:12px;border:none;background:#111;color:#fff;
 <div class="stat">Level<strong id="level">1</strong></div>
 </div>
 
-<div class="level-box">
-<h3>Level Progress</h3>
-<div class="progress">
-<div class="progress-fill" id="progressBar"></div>
-</div>
-</div>
-
 <div class="tap" id="tapArea">
-<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/512px-Bitcoin.svg.png">
+<img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg">
 </div>
 
 </div>
 
 <!-- PROFILE -->
 <div id="profile" class="screen">
-
 <div class="card" style="text-align:center">
 <img id="photo" style="width:90px;height:90px;border-radius:50%;border:3px solid #ff9800;">
 <h3 id="username"></h3>
@@ -113,49 +96,27 @@ flex:1;padding:12px;border:none;background:#111;color:#fff;
 </div>
 
 <div class="card">
-<h3>Your Referral</h3>
+<h3>Referral</h3>
 <p id="refLink"></p>
-<button class="copy-btn" onclick="copyRef()">Copy Link</button>
+<button class="copy-btn" onclick="copyRef()">Copy</button>
 </div>
-
-<div class="card">
-<h3>🔥 Social Tasks</h3>
-<button class="task-btn" onclick="task('telegram')">Join Telegram</button>
-<button class="task-btn" onclick="task('tiktok')">Follow TikTok</button>
-<button class="task-btn" onclick="task('youtube')">Subscribe YouTube</button>
-</div>
-
 </div>
 
 <!-- WITHDRAW -->
 <div id="withdraw" class="screen">
 <div class="card">
-<h3>Withdraw Rules</h3>
-<p>• Minimum withdraw: 20 USDT</p>
-<p>• Need 10 referrals OR deposit 5 USDT</p>
-</div>
-
-<div class="card">
-<h3>Deposit Wallet</h3>
-<p id="wallet"></p>
-<button class="copy-btn" onclick="copyWallet()">Copy Address</button>
-</div>
-
-<div class="card">
 <h3>Withdraw</h3>
-<input id="wAddress" placeholder="Your wallet address"
-style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
-<input id="wAmount" placeholder="Amount (USDT)"
-style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
-<button class="copy-btn" onclick="withdraw()">Submit Withdraw</button>
+<input id="wAddress" placeholder="wallet">
+<input id="wAmount" placeholder="amount">
+<button class="copy-btn" onclick="withdraw()">Send</button>
 </div>
 </div>
 
 <!-- ADS -->
 <div id="ads" class="screen">
-<div class="card" style="text-align:center">
-<h3>💰 Watch Ads & Earn</h3>
-<button class="task-btn" onclick="watchAdReward()">Watch Ad</button>
+<div class="card">
+<h3>Ads Reward</h3>
+<button class="task-btn" onclick="watchAd()">Watch Ad</button>
 </div>
 </div>
 
@@ -167,10 +128,7 @@ style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
 <button onclick="show('ads')">Ads</button>
 </div>
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-
 <script>
-
 const API="https://crypto-4bbj.onrender.com";
 let token=localStorage.getItem("token");
 
@@ -182,34 +140,37 @@ document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
 }
 
-/* STATS FIX */
+/* FIX STATS */
 function updateStats(){
 usdtVal = Math.floor(coinsVal / 1000);
-
 coins.innerText = coinsVal;
 usdt.innerText = usdtVal;
 level.innerText = Math.floor(coinsVal / 1000) + 1;
 }
 
-/* LOAD DATA */
+/* LOAD */
 async function load(){
 const u = await fetch(API+"/api/user",{headers:{Authorization:"Bearer "+token}}).then(r=>r.json());
 
 coinsVal = u.coins || 0;
-usdtVal = u.usdt || 0;
 refsVal = u.referrals || 0;
 
 updateStats();
 refs.innerText = refsVal;
 }
 
-/* TAP FIX */
+/* FIX TAP (NO DOUBLE BUG) */
+let lastTap = 0;
+
 tapArea.addEventListener("touchstart",(e)=>{
+
+const now = Date.now();
+if(now - lastTap < 120) return;
+lastTap = now;
 
 let fingers = Math.min(e.touches?.length || 1,4);
 
 coinsVal += fingers;
-
 updateStats();
 
 fetch(API+"/api/tap",{
@@ -223,35 +184,20 @@ body:JSON.stringify({multi:fingers})
 
 });
 
-/* PROFILE REF FIX */
+/* PROFILE */
 const tg = window.Telegram?.WebApp;
 if(tg) tg.expand();
 
 const user = tg?.initDataUnsafe?.user;
 
 if(user){
+username.innerText = user.first_name;
+userid.innerText = "ID:"+user.id;
 
 let uname = user.username || user.first_name;
-
-username.innerText = user.first_name;
-userid.innerText = "ID: "+user.id;
-
-refLink.innerText =
-"https://t.me/YourBot?start="+uname;
+refLink.innerText = "https://t.me/YourBot?start="+uname;
 
 if(user.photo_url) photo.src=user.photo_url;
-}
-
-/* TASK */
-function task(type){
-let url=
-type==="telegram"
-?"https://t.me/gangs234"
-:type==="tiktok"
-?"https://tiktok.com"
-:"https://youtube.com";
-
-window.open(url,"_blank");
 }
 
 /* WITHDRAW */
@@ -270,17 +216,16 @@ amount:wAmount.value
 }
 
 /* ADS FIX */
-function watchAdReward(){
+function watchAd(){
 
 if(typeof show_3304242 !== "function"){
-alert("No ads");
+alert("No ads available");
 return;
 }
 
 show_3304242().then(()=>{
 
 coinsVal += 300;
-
 updateStats();
 
 alert("Reward added");
@@ -290,8 +235,7 @@ alert("Reward added");
 }
 
 load();
-
 </script>
 
 </body>
-  </html>
+</html>

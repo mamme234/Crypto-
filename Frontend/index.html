@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Mini Earn App</title>
 
-<!-- MONETAG -->
 <script src="https://libtl.com/sdk.js"
 data-zone="3304242"
 data-sdk="show_3304242"></script>
@@ -177,32 +176,13 @@ color:#fff;
 
 </div>
 
-<!-- WITHDRAW (RESTORED FULL) -->
+<!-- WITHDRAW -->
 <div id="withdraw" class="screen">
 
 <div class="card">
 <h3>Withdraw Rules</h3>
 <p>• Minimum withdraw: 20 USDT</p>
 <p>• Need 10 referrals OR deposit 5 USDT</p>
-</div>
-
-<div class="card">
-<h3>Deposit Wallet</h3>
-<p id="wallet"></p>
-<button class="copy-btn" onclick="copyWallet()">Copy Address</button>
-</div>
-
-<div class="card">
-<h3>Withdraw</h3>
-
-<input id="wAddress" placeholder="Your wallet address"
-style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
-
-<input id="wAmount" placeholder="Amount (USDT)"
-style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
-
-<button class="copy-btn" onclick="withdraw()">Submit Withdraw</button>
-
 </div>
 
 </div>
@@ -250,32 +230,24 @@ const user = tg?.initDataUnsafe?.user;
 
 /* PROFILE */
 if(user){
+let uname = user.username || user.first_name;
+
 username.innerText = user.first_name;
 userid.innerText = "ID: " + user.id + (user.username ? " | @" + user.username : "");
-refLink.innerText = "https://t.me/Studybuddy_2025Bot?start=" + user.id;
+
+refLink.innerText =
+"https://t.me/Studybuddy_2025Bot?start=" + uname;
+
 if(user.photo_url) photo.src = user.photo_url;
 }
 
-/* LOAD */
-async function load(){
-try{
-const u = await fetch(API+"/api/user",{headers:{Authorization:"Bearer "+token}}).then(r=>r.json());
-
-coinsVal = u.coins || 0;
-refsVal = u.referrals || 0;
-
+/* UPDATE STATS */
+function updateStats(){
 usdtVal = Math.floor(coinsVal / 1000);
 
 coins.innerText = coinsVal;
 usdt.innerText = usdtVal;
-refs.innerText = refsVal;
-
 level.innerText = Math.floor(coinsVal / 1000) + 1;
-
-const w = await fetch(API+"/api/wallet").then(r=>r.json());
-wallet.innerText = w.ton;
-
-}catch(e){}
 }
 
 /* TAP FIX */
@@ -285,11 +257,8 @@ let fingers = e.touches?.length || 1;
 fingers = Math.min(fingers, 4);
 
 coinsVal += fingers;
-usdtVal = Math.floor(coinsVal / 1000);
 
-coins.innerText = coinsVal;
-usdt.innerText = usdtVal;
-level.innerText = Math.floor(coinsVal / 1000) + 1;
+updateStats();
 
 });
 
@@ -310,22 +279,6 @@ navigator.clipboard.writeText(refLink.innerText);
 alert("Copied");
 }
 
-/* WITHDRAW */
-function withdraw(){
-fetch(API+"/api/withdraw",{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-Authorization:"Bearer "+token
-},
-body:JSON.stringify({
-address:wAddress.value,
-amount:wAmount.value
-})
-});
-alert("Request sent");
-}
-
 /* ADS */
 let adCooldown=false;
 
@@ -341,10 +294,8 @@ show_3304242().then(()=>{
 let reward = 310 + Math.floor(Math.random()*90);
 
 coinsVal += reward;
-usdtVal = Math.floor(coinsVal / 1000);
 
-coins.innerText = coinsVal;
-usdt.innerText = usdtVal;
+updateStats();
 
 adCooldown=true;
 
@@ -364,8 +315,6 @@ adTimer.innerText="";
 });
 
 }
-
-load();
 
 </script>
 

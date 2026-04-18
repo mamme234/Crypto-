@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <title>Mini Earn App</title>
 
+<!-- 🔔 PUSH ADS (ZONE 10890856) -->
+<script src="https://quge5.com/88/tag.min.js"
+data-zone="10890856"
+async
+data-cfasync="false"></script>
+
 <style>
 body{
 margin:0;
@@ -165,22 +171,18 @@ color:#fff;
 </div>
 
 <div class="card">
-<h3>🔥 Social Tasks (STRICT)</h3>
+<h3>🔥 Social Tasks</h3>
 
 <button class="task-btn" onclick="task('telegram')">
-📢 Join Telegram (Verify Required)
+📢 Join Telegram
 </button>
 
 <button class="task-btn" onclick="task('tiktok')">
-🎵 Follow TikTok (Verify Required)
+🎵 Follow TikTok
 </button>
 
 <button class="task-btn" onclick="task('youtube')">
-▶ Subscribe YouTube (Verify Required)
-</button>
-
-<button class="task-btn" onclick="verifyTask()">
-✅ Verify Completion
+▶ Subscribe YouTube
 </button>
 
 </div>
@@ -243,7 +245,6 @@ if (tg) tg.expand();
 
 const user=tg?.initDataUnsafe?.user;
 
-// LOGIN
 if(user && !token){
 fetch(API+"/api/tg-login",{
 method:"POST",
@@ -261,7 +262,6 @@ location.reload();
 });
 }
 
-// LOAD
 async function load(){
 const u=await fetch(API+"/api/user",{headers:{Authorization:"Bearer "+token}}).then(r=>r.json());
 
@@ -286,7 +286,7 @@ const w=await fetch(API+"/api/wallet").then(r=>r.json());
 wallet.innerText=w.ton;
 }
 
-// TAP (safe multi-touch)
+/* TAP */
 let lastTapTime=0;
 
 tapArea.addEventListener("touchstart",(e)=>{
@@ -296,11 +296,9 @@ if(now-lastTapTime<90) return;
 lastTapTime=now;
 
 let fingers = 1;
-
 if(e.touches && e.touches.length){
 fingers = e.touches.length;
 }
-
 fingers = Math.min(fingers, 4);
 
 coinsVal += fingers;
@@ -317,9 +315,19 @@ body:JSON.stringify({multi:fingers})
 });
 }
 
+// 🔔 PUSH ACTIVITY TRIGGER (helps ad activation)
+enablePush();
+
 });
 
-// START TASK (NO REWARD HERE)
+/* PUSH PERMISSION (IMPORTANT) */
+function enablePush(){
+if ("Notification" in window && Notification.permission === "default") {
+Notification.requestPermission();
+}
+}
+
+/* TASK */
 function task(type){
 
 let url=
@@ -331,42 +339,9 @@ type==="telegram"
 
 window.open(url,"_blank");
 
-fetch(API+"/api/task/start",{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-Authorization:"Bearer "+token
-},
-body:JSON.stringify({type})
-});
-
-alert("Task started. Complete it and click VERIFY.");
 }
 
-// VERIFY TASK (STRICT CHECK)
-async function verifyTask(){
-
-const res = await fetch(API+"/api/task/verify",{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-Authorization:"Bearer "+token
-}
-});
-
-const data = await res.json();
-
-if(data.success){
-coinsVal += data.reward;
-coins.innerText = coinsVal;
-alert("Verified! Reward added.");
-}else{
-alert("Task not completed yet!");
-}
-
-}
-
-// COPY
+/* COPY */
 function copyRef(){
 navigator.clipboard.writeText(refLink.innerText);
 alert("Copied");
@@ -377,7 +352,7 @@ navigator.clipboard.writeText(wallet.innerText);
 alert("Copied");
 }
 
-// WITHDRAW
+/* WITHDRAW */
 function withdraw(){
 fetch(API+"/api/withdraw",{
 method:"POST",
@@ -398,4 +373,4 @@ load();
 </script>
 
 </body>
-  </html>
+</html>

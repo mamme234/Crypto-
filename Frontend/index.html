@@ -2,22 +2,25 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Notcoin Style App</title>
+<title>Crypto Tap Game</title>
 
 <style>
 body{
 margin:0;
 font-family:Arial;
-background:#0b122a;
+background:radial-gradient(circle at top,#1b2a4a,#050914 70%);
 color:white;
 }
 
-/* TOP */
+/* TOP BAR */
 .topbar{
 display:flex;
 justify-content:space-between;
-padding:12px;
-background:rgba(255,255,255,0.05);
+align-items:center;
+padding:14px;
+background:rgba(255,255,255,0.06);
+backdrop-filter:blur(10px);
+border-bottom:1px solid rgba(255,255,255,0.08);
 }
 
 .user{
@@ -27,26 +30,32 @@ align-items:center;
 }
 
 .user img{
-width:45px;
-height:45px;
+width:46px;
+height:46px;
 border-radius:50%;
-border:2px solid gold;
+border:2px solid #facc15;
+box-shadow:0 0 15px rgba(250,204,21,0.5);
 }
 
 /* STATS */
 .stats{
 display:flex;
 justify-content:space-around;
-margin-top:10px;
+margin-top:12px;
 }
 
 .box{
+background:rgba(255,255,255,0.06);
+padding:12px;
+border-radius:14px;
+width:40%;
 text-align:center;
+backdrop-filter:blur(8px);
 }
 
 .box strong{
 display:block;
-font-size:18px;
+font-size:20px;
 color:#facc15;
 }
 
@@ -54,21 +63,58 @@ color:#facc15;
 .tap{
 display:flex;
 justify-content:center;
-margin-top:60px;
+margin-top:70px;
 }
 
 .tap button{
-width:200px;
-height:200px;
+width:220px;
+height:220px;
 border-radius:50%;
-background:gold;
 border:none;
-font-size:20px;
+font-size:22px;
+font-weight:bold;
+color:#111;
+background:radial-gradient(circle,#ffe066,#facc15);
+box-shadow:0 0 40px rgba(250,204,21,0.6);
+transition:0.15s;
+}
+
+.tap button:active{
+transform:scale(0.92);
 }
 
 /* SCREENS */
-.screen{display:none;padding:10px;}
+.screen{
+display:none;
+padding:15px;
+animation:fade 0.2s ease;
+}
+
 .active{display:block;}
+
+@keyframes fade{
+from{opacity:0;transform:translateY(10px);}
+to{opacity:1;transform:translateY(0);}
+}
+
+/* INPUTS */
+input{
+width:100%;
+padding:12px;
+border-radius:10px;
+border:none;
+background:rgba(255,255,255,0.08);
+color:white;
+margin-top:8px;
+}
+
+/* BUTTONS */
+button{
+border:none;
+border-radius:10px;
+padding:12px;
+font-weight:bold;
+}
 
 /* NAV */
 .nav{
@@ -76,15 +122,17 @@ position:fixed;
 bottom:0;
 width:100%;
 display:flex;
-background:#111;
+background:rgba(0,0,0,0.6);
+backdrop-filter:blur(10px);
+border-top:1px solid rgba(255,255,255,0.1);
 }
 
 .nav button{
 flex:1;
-padding:10px;
+padding:12px;
 background:none;
-border:none;
 color:white;
+font-size:13px;
 }
 </style>
 </head>
@@ -118,15 +166,18 @@ color:white;
 
 <!-- PROFILE -->
 <div id="profile" class="screen">
+
 <h2>Profile</h2>
+
 <p id="pName"></p>
 <p id="pUser"></p>
 
-<h3>Referral</h3>
-<input id="refLink" readonly style="width:100%;padding:10px">
-<button onclick="copyRef()" style="width:100%;padding:10px">
+<h3>Referral Link</h3>
+<input id="refLink" readonly>
+<button onclick="copyRef()" style="width:100%;margin-top:8px">
 Copy Link
 </button>
+
 </div>
 
 <!-- WITHDRAW -->
@@ -136,12 +187,10 @@ Copy Link
 
 <p>Min: 20 USDT</p>
 
-<input id="wallet" placeholder="Wallet address" style="width:100%;padding:10px">
-<br><br>
-<input id="amount" placeholder="Amount USDT" style="width:100%;padding:10px">
+<input id="wallet" placeholder="Wallet address">
+<input id="amount" placeholder="Amount USDT">
 
-<br><br>
-<button onclick="withdraw()" style="width:100%;padding:10px">
+<button onclick="withdraw()" style="width:100%;margin-top:10px">
 Withdraw
 </button>
 
@@ -152,11 +201,11 @@ Withdraw
 
 <h2>Deposit</h2>
 
-<input id="depWallet" readonly style="width:100%;padding:10px"
+<input id="depWallet" readonly
 value="UQAYjMccjJ8Xn1z9hodUImMjJCB2qmWGjlMup9-sVZtEQFWH">
 
-<button onclick="copyWallet()" style="width:100%;padding:10px">
-Copy Deposit Address
+<button onclick="copyWallet()" style="width:100%;margin-top:10px">
+Copy Address
 </button>
 
 </div>
@@ -190,13 +239,13 @@ const coinsEl = document.getElementById("coins");
 const usdtEl = document.getElementById("usdt");
 const tapBtn = document.getElementById("tapBtn");
 
-/* SCREEN NAV */
+/* NAV */
 function show(id){
 document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 }
 
-/* UPDATE UI */
+/* RENDER */
 function render(){
 coinsEl.innerText = Math.floor(state.coins);
 usdtEl.innerText = state.usdt.toFixed(3);
@@ -209,6 +258,7 @@ const user = tg?.initDataUnsafe?.user;
 if(tg) tg.expand();
 
 if(user){
+
 document.getElementById("name").innerText=user.first_name;
 document.getElementById("uname").innerText="@"+(user.username||"user");
 
@@ -223,7 +273,7 @@ document.getElementById("photo").src=user.photo_url;
 }
 }
 
-/* EXACT FINGER TAP SYSTEM */
+/* TAP SYSTEM (FIXED 1–4 FINGERS EXACT) */
 tapBtn.addEventListener("touchstart",tap,{passive:false});
 tapBtn.addEventListener("click",tap);
 
@@ -233,20 +283,18 @@ e.preventDefault();
 
 let fingers = 1;
 
-/* finger count */
 if(e.touches){
 fingers = e.touches.length;
 }
 
 if(fingers > 4) fingers = 4;
 
-/* EXACT RULE */
+/* EXACT COIN RULE */
 state.coins += fingers;
 
 /* USDT */
 state.usdt = state.coins / 1000;
 
-/* LEVEL */
 document.getElementById("level").innerText =
 Math.floor(state.coins / 5000) + 1;
 
@@ -265,7 +313,7 @@ return;
 }
 
 if(a > state.usdt){
-alert("Not enough USDT");
+alert("Not enough balance");
 return;
 }
 
@@ -278,7 +326,7 @@ navigator.clipboard.writeText(document.getElementById("refLink").value);
 alert("Copied");
 }
 
-/* COPY DEPOSIT */
+/* COPY DEP */
 function copyWallet(){
 navigator.clipboard.writeText(document.getElementById("depWallet").value);
 alert("Copied");
@@ -289,4 +337,4 @@ render();
 </script>
 
 </body>
-</html>
+  </html>

@@ -4,10 +4,9 @@
 <meta charset="UTF-8">
 <title>Mini Earn App</title>
 
-<!-- ✅ MONETAG ADDED -->
 <script src="https://libtl.com/sdk.js"
-data-zone="10892291"
-data-sdk="show_10892291"></script>
+data-zone="3304242"
+data-sdk="show_3304242"></script>
 
 <style>
 body{
@@ -29,18 +28,9 @@ border-radius:20px;
 box-shadow:0 0 20px rgba(255,180,0,0.2);
 }
 
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:10px;
-}
-
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .stat{text-align:center;}
-.stat strong{
-display:block;
-font-size:22px;
-color:#ff9800;
-}
+.stat strong{display:block;font-size:22px;color:#ff9800;}
 
 .level-box{
 margin:10px;
@@ -65,7 +55,6 @@ width:10%;
 .tap{
 width:260px;
 height:260px;
-margin:0;
 display:flex;
 align-items:center;
 justify-content:center;
@@ -81,12 +70,6 @@ width:230px;
 height:230px;
 border-radius:50%;
 box-shadow:0 0 40px rgba(255,200,0,0.8);
-animation:glow 2s infinite alternate;
-}
-
-@keyframes glow{
-from{filter:brightness(1);}
-to{filter:brightness(1.4);}
 }
 
 .task-btn{
@@ -177,7 +160,7 @@ color:#fff;
 
 </div>
 
-<!-- ⭐ RESTORED FULL WITHDRAW SCREEN -->
+<!-- WITHDRAW -->
 <div id="withdraw" class="screen">
 
 <div class="card">
@@ -207,18 +190,13 @@ style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
 
 </div>
 
-<!-- ADS SCREEN -->
+<!-- ADS -->
 <div id="ads" class="screen">
 
 <div class="card" style="text-align:center">
 <h3>💰 Watch Ads & Earn</h3>
-
-<button class="task-btn" onclick="watchAdReward()">
-▶ Watch Monetag Ad
-</button>
-
-<p id="adTimer" style="margin-top:10px;color:#ff9800;"></p>
-
+<button class="task-btn" onclick="watchAdReward()">Watch Ad</button>
+<p id="adTimer"></p>
 </div>
 
 </div>
@@ -238,20 +216,55 @@ style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
 const API="https://crypto-4bbj.onrender.com";
 let token=localStorage.getItem("token");
 
-let coinsVal=0, usdtVal=0, refsVal=0;
+let coinsVal=0;
+let refsVal=0;
+let adCooldown=false;
 
+/* SCREEN */
 function show(s){
 document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
 }
 
-/* TAP */
+/* FIX: STATS (USDT + LEVEL) */
+function updateStats(){
+document.getElementById("coins").innerText = coinsVal;
+
+let usdt = Math.floor(coinsVal / 1000);
+document.getElementById("usdt").innerText = usdt;
+
+document.getElementById("level").innerText = Math.floor(coinsVal / 1000) + 1;
+}
+
+/* FIX: TAP (NO DOUBLE COUNT BUG) */
+let lastTap=0;
+
 tapArea.addEventListener("touchstart",(e)=>{
-let fingers = e.touches?.length || 1;
-fingers = Math.min(fingers,4);
+
+let now=Date.now();
+if(now-lastTap<120) return;
+lastTap=now;
+
+let fingers=Math.min(e.touches?.length||1,4);
+
 coinsVal += fingers;
-coins.innerText = coinsVal;
+updateStats();
+
 });
+
+/* PROFILE */
+const tg = window.Telegram?.WebApp;
+if(tg) tg.expand();
+
+const user = tg?.initDataUnsafe?.user;
+
+if(user){
+username.innerText=user.first_name;
+userid.innerText="ID:"+user.id+(user.username?" | @"+user.username:"");
+refLink.innerText="https://t.me/Studybuddy_2025Bot?start="+user.id;
+
+if(user.photo_url) photo.src=user.photo_url;
+}
 
 /* TASK */
 function task(type){
@@ -261,87 +274,72 @@ type==="telegram"
 :type==="tiktok"
 ?"https://tiktok.com"
 :"https://youtube.com";
-
 window.open(url,"_blank");
 }
 
 /* COPY */
 function copyRef(){
 navigator.clipboard.writeText(refLink.innerText);
-alert("Copied");
 }
 
 /* WITHDRAW */
 function withdraw(){
-alert("Request sent");
+fetch(API+"/api/withdraw",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+Authorization:"Bearer "+token
+},
+body:JSON.stringify({
+address:wAddress.value,
+amount:wAmount.value
+})
+});
 }
 
-/* ================= ADS FIX ================= */
-
-let adCooldown = false;
-
+/* ADS FIX */
 function watchAdReward(){
 
 if(adCooldown){
-alert("Wait 60 seconds");
+alert("Wait 60s");
 return;
 }
 
-if(typeof show_10892291 !== "function"){
-alert("Ad not loaded yet");
-return;
+if(typeof show_3304242==="function"){
+
+let ad=show_3304242();
+
+if(ad && ad.then){
+ad.then(giveReward).catch(()=>alert("No ads"));
+}else{
+giveReward();
 }
-
-adCooldown = true;
-
-setTimeout(()=>{
-adCooldown = false;
-adTimer.innerText = "Ready";
-},65000);
-
-try{
-
-const ad = show_10892291();
-
-if(ad && typeof ad.then === "function"){
-
-ad.then(()=> giveReward())
-.catch(()=> alert("Ad not available"));
 
 }else{
-
-giveReward();
-
-}
-
-}catch(e){
-adCooldown = false;
-alert("Ad error");
+alert("Ad not ready");
 }
 
 }
 
 function giveReward(){
 
-let reward = 310 + Math.floor(Math.random()*90);
+adCooldown=true;
 
-coinsVal += reward;
-coins.innerText = coinsVal;
+coinsVal+=300;
+updateStats();
 
-alert("+" + reward + " coins");
+let t=60;
+adTimer.innerText="Next ad in: "+t+"s";
 
-let t = 60;
-adTimer.innerText = "Next ad in: " + t + "s";
-
-let timer = setInterval(()=>{
+let timer=setInterval(()=>{
 
 t--;
-adTimer.innerText = "Next ad in: " + t + "s";
+adTimer.innerText="Next ad in: "+t+"s";
 
-if(t <= 0){
+if(t<=0){
 clearInterval(timer);
-adCooldown = false;
-adTimer.innerText = "Ready";
+adCooldown=false;
+adTimer.innerText="Ready";
 }
 
 },1000);
@@ -351,4 +349,4 @@ adTimer.innerText = "Ready";
 </script>
 
 </body>
-</html>
+  </html>

@@ -4,8 +4,10 @@
 <meta charset="UTF-8">
 <title>Mini Earn App</title>
 
-<!-- AD SCRIPT (UNCHANGED POSITION) -->
-<script src="https://quge5.com/88/tag.min.js" data-zone="230862" async data-cfasync="false"></script>
+<script src="https://quge5.com/88/tag.min.js"
+data-zone="230862"
+async
+data-cfasync="false"></script>
 
 <style>
 body{
@@ -55,47 +57,7 @@ touch-action:none;
 width:230px;
 height:230px;
 border-radius:50%;
-}
-
-/* LEVEL */
-.level-box{
-margin:10px;
-padding:10px;
-border-radius:15px;
-background:rgba(255,255,255,0.05);
-}
-
-.progress{
-height:10px;
-background:#222;
-border-radius:10px;
-overflow:hidden;
-}
-
-.progress-fill{
-height:100%;
-background:linear-gradient(90deg,#ff9800,#ffd54f);
-width:10%;
-}
-
-/* BUTTONS */
-.task-btn{
-background:linear-gradient(135deg,#229ED9,#0072ff);
-padding:12px;
-border:none;
-border-radius:10px;
-margin-top:10px;
-color:#fff;
-font-weight:bold;
-}
-
-.copy-btn{
-background:linear-gradient(135deg,#ff9800,#ff5722);
-padding:12px;
-border:none;
-border-radius:10px;
-color:#fff;
-margin-top:10px;
+display:block;
 }
 
 /* NAV */
@@ -129,26 +91,15 @@ color:#fff;
 <div class="stat">Level<strong id="level">1</strong></div>
 </div>
 
-<div class="level-box">
-<h3>Next Level</h3>
-<div class="progress">
-<div class="progress-fill" id="progressBar"></div>
-</div>
-</div>
-
 <!-- TAP -->
 <div class="tap" id="tapArea">
-<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/512px-Bitcoin.svg.png">
+<img 
+src="https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg"
+onerror="this.src='https://cryptologos.cc/logos/bitcoin-btc-logo.png'">
 </div>
 
 <div style="text-align:center;font-size:12px;color:#aaa">
 1 finger = 1 coin | max 4 fingers
-</div>
-
-<!-- 🔥 AD FUTURE FEATURE (NO DESIGN CHANGE) -->
-<div class="card">
-<h3>💰 Earn Section (Future System)</h3>
-<p>Offerwalls and partner tasks will appear here after approval.</p>
 </div>
 
 </div>
@@ -163,16 +114,18 @@ color:#fff;
 </div>
 
 <div class="card">
-<h3>Your Referral</h3>
-<p id="refLink">Loading...</p>
-<button class="copy-btn" onclick="copyRef()">Copy Link</button>
+<h3>Referral</h3>
+<p id="refLink"></p>
+<button onclick="copyRef()">Copy Link</button>
 </div>
 
 <div class="card">
 <h3>Social Tasks</h3>
-<button class="task-btn" onclick="task('telegram')">Join Telegram</button>
-<button class="task-btn" onclick="task('tiktok')">Follow TikTok</button>
-<button class="task-btn" onclick="task('youtube')">Subscribe YouTube</button>
+
+<button onclick="task('telegram')">Join Telegram</button>
+<button onclick="task('tiktok')">Follow TikTok</button>
+<button onclick="task('youtube')">Subscribe YouTube</button>
+
 </div>
 
 </div>
@@ -182,27 +135,14 @@ color:#fff;
 
 <div class="card">
 <h3>Withdraw Rules</h3>
-<p>• Minimum withdraw: 20 USDT</p>
-<p>• Need 10 referrals OR deposit 5 USDT</p>
+<p>Minimum withdraw: 20 USDT</p>
+<p>Need 10 referrals or deposit 5 USDT</p>
 </div>
 
 <div class="card">
-<h3>Deposit Wallet</h3>
-<p id="wallet"></p>
-<button class="copy-btn" onclick="copyWallet()">Copy Address</button>
-</div>
-
-<div class="card">
-<h3>Withdraw</h3>
-
-<input id="wAddress" placeholder="Your wallet address"
-style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
-
-<input id="wAmount" placeholder="Amount"
-style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
-
-<button class="copy-btn" onclick="withdraw()">Submit Withdraw</button>
-
+<input id="wAddress" placeholder="Wallet address" style="width:100%;padding:10px;">
+<input id="wAmount" placeholder="Amount" style="width:100%;padding:10px;margin-top:10px;">
+<button onclick="withdraw()">Submit</button>
 </div>
 
 </div>
@@ -228,10 +168,12 @@ document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
 }
 
-const tg=window.Telegram?.WebApp;
+const tg = window.Telegram ? window.Telegram.WebApp : null;
 if(tg) tg.expand();
 
-const user=tg?.initDataUnsafe?.user || {id:"0",first_name:"User"};
+const user = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user)
+? tg.initDataUnsafe.user
+: {id:"0",first_name:"User"};
 
 // LOGIN
 if(user && !token){
@@ -271,29 +213,54 @@ userid.innerText="ID: "+user.id;
 refLink.innerText="https://t.me/YourBot?start="+user.id;
 
 }catch(e){
-console.log("load error",e);
+console.log(e);
 }
 }
 
-// TAP (FIXED MAX FINGER)
+// TAP FIX (MAX 4 FINGERS)
 tapArea.addEventListener("touchstart",(e)=>{
 
-let fingers=e.touches.length || 1;
+let fingers = e.touches ? e.touches.length : 1;
 if(fingers>4) fingers=4;
 
 coinsVal += fingers;
-coins.innerText=coinsVal;
+coins.innerText = coinsVal;
 
 });
+
+/* RESTORED SOCIAL TASK SYSTEM */
+async function task(type){
+
+let url =
+type==="telegram"
+?"https://t.me/gangs234"
+:type==="tiktok"
+?"https://tiktok.com/@mammeliyas"
+:"https://youtube.com/@Mamme234";
+
+let win = window.open(url,"_blank");
+
+setTimeout(()=>{
+
+let reward = 0;
+if(type==="telegram") reward = 500;
+if(type==="tiktok") reward = 1000;   // FIXED
+if(type==="youtube") reward = 1250;
+
+coinsVal += reward;
+coins.innerText = coinsVal;
+
+alert("Task completed! +" + reward + " coins");
+
+win?.close?.();
+
+},5000);
+
+}
 
 // COPY
 function copyRef(){
 navigator.clipboard.writeText(refLink.innerText);
-alert("Copied");
-}
-
-function copyWallet(){
-navigator.clipboard.writeText(wallet.innerText);
 alert("Copied");
 }
 

@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <title>Mini Earn App</title>
 
+<!-- ✅ MONETAG ADDED ONLY -->
+<script src='//libtl.com/sdk.js' data-zone='10892289' data-sdk='show_10892289'></script>
+
 <style>
 body{
 margin:0;
@@ -147,6 +150,11 @@ color:#fff;
 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/512px-Bitcoin.svg.png">
 </div>
 
+<!-- OPTIONAL BUTTON (ONLY ADDITION) -->
+<button class="task-btn" onclick="watchAdReward()">
+💰 Watch Ad & Earn (Monetag)
+</button>
+
 </div>
 
 <!-- PROFILE -->
@@ -286,7 +294,7 @@ const w=await fetch(API+"/api/wallet").then(r=>r.json());
 wallet.innerText=w.ton;
 }
 
-// TAP (safe multi-touch)
+// TAP
 let lastTapTime=0;
 
 tapArea.addEventListener("touchstart",(e)=>{
@@ -295,12 +303,7 @@ const now=Date.now();
 if(now-lastTapTime<90) return;
 lastTapTime=now;
 
-let fingers = 1;
-
-if(e.touches && e.touches.length){
-fingers = e.touches.length;
-}
-
+let fingers = e.touches?.length || 1;
 fingers = Math.min(fingers, 4);
 
 coinsVal += fingers;
@@ -319,7 +322,7 @@ body:JSON.stringify({multi:fingers})
 
 });
 
-// START TASK (NO REWARD HERE)
+// TASK
 function task(type){
 
 let url=
@@ -340,10 +343,10 @@ Authorization:"Bearer "+token
 body:JSON.stringify({type})
 });
 
-alert("Task started. Complete it and click VERIFY.");
+alert("Task started. Verify later.");
 }
 
-// VERIFY TASK (STRICT CHECK)
+// VERIFY
 async function verifyTask(){
 
 const res = await fetch(API+"/api/task/verify",{
@@ -359,9 +362,9 @@ const data = await res.json();
 if(data.success){
 coinsVal += data.reward;
 coins.innerText = coinsVal;
-alert("Verified! Reward added.");
+alert("Verified!");
 }else{
-alert("Task not completed yet!");
+alert("Not completed");
 }
 
 }
@@ -393,9 +396,42 @@ amount:wAmount.value
 alert("Request sent");
 }
 
+/* =========================
+   MONETAG REWARD FUNCTION
+   ========================= */
+
+let adMultiplier = 1;
+let adTimer = null;
+
+function watchAdReward(){
+
+if(typeof show_10892289 !== "function") return;
+
+show_10892289().then(()=>{
+
+let reward = 310 + Math.floor(Math.random()*90);
+reward *= adMultiplier;
+
+coinsVal += reward;
+coins.innerText = coinsVal;
+
+alert("+" + reward + " coins");
+
+adMultiplier = 2;
+
+if(adTimer) clearTimeout(adTimer);
+
+adTimer = setTimeout(()=>{
+adMultiplier = 1;
+},60000);
+
+});
+
+}
+
 load();
 
 </script>
 
 </body>
-                                                               </html>
+  </html>

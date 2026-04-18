@@ -2,17 +2,18 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Earn App Full</title>
+<title>Tap Game</title>
 
 <style>
 body{
 margin:0;
 font-family:Arial;
-background:#0b122a;
+background:radial-gradient(circle,#0b122a,#020617);
 color:white;
+overflow:hidden;
 }
 
-/* TOP */
+/* TOP BAR */
 .topbar{
 display:flex;
 justify-content:space-between;
@@ -22,8 +23,8 @@ background:rgba(255,255,255,0.05);
 
 .user{
 display:flex;
-align-items:center;
 gap:10px;
+align-items:center;
 }
 
 .user img{
@@ -35,55 +36,74 @@ border:2px solid gold;
 
 /* STATS */
 .stats{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:10px;
-padding:10px;
+display:flex;
+justify-content:space-around;
+margin-top:10px;
 }
 
-.card{
-background:rgba(255,255,255,0.05);
-padding:12px;
-border-radius:10px;
+.box{
 text-align:center;
 }
 
-.card strong{
+.box strong{
 display:block;
-font-size:20px;
+font-size:18px;
 color:#facc15;
 }
 
+/* ENERGY */
+.energy-bar{
+width:90%;
+height:10px;
+background:#222;
+border-radius:10px;
+margin:10px auto;
+overflow:hidden;
+}
+
+.energy-fill{
+height:100%;
+width:100%;
+background:linear-gradient(90deg,#00ff99,#00ccff);
+transition:0.3s;
+}
+
 /* TAP */
-.tap{
+.tap-area{
 display:flex;
 justify-content:center;
-margin-top:30px;
+align-items:center;
+height:60vh;
 }
 
-.tap button{
-width:180px;
-height:180px;
+.tap-btn{
+width:220px;
+height:220px;
 border-radius:50%;
-background:gold;
-border:none;
-font-size:20px;
+background:radial-gradient(circle,#facc15,#f59e0b);
+box-shadow:0 0 40px gold;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:22px;
+font-weight:bold;
+user-select:none;
 }
 
-/* SCREEN */
-.screen{display:none;}
-.active{display:block;padding:10px;}
+.tap-btn:active{
+transform:scale(0.95);
+}
 
-/* NAV */
-.nav{
+/* BOTTOM */
+.bottom{
 position:fixed;
 bottom:0;
 width:100%;
-display:flex;
 background:#111;
+display:flex;
 }
 
-.nav button{
+.bottom button{
 flex:1;
 padding:10px;
 background:none;
@@ -95,10 +115,9 @@ color:white;
 
 <body>
 
-<!-- HOME -->
-<div id="home" class="screen active">
-
+<!-- TOP -->
 <div class="topbar">
+
 <div class="user">
 <img id="photo">
 <div>
@@ -106,71 +125,33 @@ color:white;
 <div id="uname">@user</div>
 </div>
 </div>
+
 <div>Lv <span id="level">1</span></div>
+
 </div>
 
+<!-- STATS -->
 <div class="stats">
-<div class="card">Coins<strong id="coins">0</strong></div>
-<div class="card">USDT<strong id="usdt">0.000</strong></div>
+<div class="box">Coins<strong id="coins">0</strong></div>
+<div class="box">USDT<strong id="usdt">0.000</strong></div>
 </div>
 
-<div class="tap">
-<button id="tapBtn">TAP</button>
+<!-- ENERGY -->
+<div class="energy-bar">
+<div class="energy-fill" id="energy"></div>
 </div>
 
+<!-- TAP -->
+<div class="tap-area">
+<div class="tap-btn" id="tapBtn">TAP</div>
 </div>
 
-<!-- PROFILE -->
-<div id="profile" class="screen">
-
-<h2>Profile</h2>
-
-<p id="pName"></p>
-<p id="pUser"></p>
-
-<div class="card">
-Referral Link:
-<p id="ref"></p>
-</div>
-
-</div>
-
-<!-- WITHDRAW -->
-<div id="withdraw" class="screen">
-
-<h2>Withdraw</h2>
-
-<div class="card">
-<p>Min: 20 USDT</p>
-<p>Need 10 referrals or deposit 5 USDT</p>
-</div>
-
-<input placeholder="Wallet address" style="width:100%;padding:10px;">
-<br><br>
-<input placeholder="Amount USDT" style="width:100%;padding:10px;">
-
-<br><br>
-<button style="width:100%;padding:10px;">Withdraw</button>
-
-</div>
-
-<!-- ADS -->
-<div id="ads" class="screen">
-
-<h2>Ads</h2>
-
-<div class="card">
-<button onclick="alert('Ad clicked')">Watch Ad</button>
-</div>
-
-</div>
-
-<!-- NAV -->
-<div class="nav">
-<button onclick="show('home')">Home</button>
-<button onclick="show('profile')">Profile</button>
-<button onclick="show('withdraw')">Withdraw</button>
-<button onclick="show('ads')">Ads</button>
+<!-- BOTTOM -->
+<div class="bottom">
+<button>Home</button>
+<button>Tasks</button>
+<button>Withdraw</button>
+<button>Profile</button>
 </div>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -179,17 +160,25 @@ Referral Link:
 
 let coins = 0;
 let usdt = 0;
-let lastTap = 0;
 
-const coinsEl = document.getElementById("coins");
-const usdtEl = document.getElementById("usdt");
-const tapBtn = document.getElementById("tapBtn");
+/* ENERGY SYSTEM */
+let energy = 100;
+const maxEnergy = 100;
 
-/* NAV */
-function show(id){
-document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-document.getElementById(id).classList.add("active");
+/* UI */
+function update(){
+document.getElementById("coins").innerText = Math.floor(coins);
+document.getElementById("usdt").innerText = usdt.toFixed(3);
+document.getElementById("energy").style.width = energy + "%";
 }
+
+/* ENERGY REGEN */
+setInterval(()=>{
+if(energy < maxEnergy){
+energy += 1;
+update();
+}
+},1000);
 
 /* TELEGRAM */
 const tg = window.Telegram?.WebApp;
@@ -198,48 +187,47 @@ const user = tg?.initDataUnsafe?.user;
 if(tg) tg.expand();
 
 if(user){
-
 document.getElementById("name").innerText=user.first_name;
 document.getElementById("uname").innerText="@"+(user.username||"user");
 
-document.getElementById("pName").innerText="Name: "+user.first_name;
-document.getElementById("pUser").innerText="ID: "+user.id;
-
-document.getElementById("ref").innerText=
-"https://t.me/YourBot?start="+user.id;
-
-if(user.photo_url)
+if(user.photo_url){
 document.getElementById("photo").src=user.photo_url;
-
+}
 }
 
-/* UPDATE */
-function update(){
-coinsEl.innerText = Math.floor(coins);
-usdtEl.innerText = usdt.toFixed(3);
-}
+/* TAP SYSTEM (NOTCOIN STYLE) */
+let lastTap = 0;
 
-/* TAP */
 tapBtn.addEventListener("click",tap);
-tapBtn.addEventListener("touchstart",tap);
 
-function tap(e){
+function tap(){
+
+if(energy <= 0) return;
 
 let now = Date.now();
-let fingers = e.touches ? Math.min(e.touches.length,4) : 1;
 
-let bonus = 1;
-if(now - lastTap < 200) bonus = 1.2;
+/* prevent spam */
+if(now - lastTap < 80) return;
 
 lastTap = now;
 
-coins += fingers * bonus;
+/* reduce energy */
+energy -= 1;
+
+/* reward */
+coins += 1;
 usdt = coins / 1000;
+
+/* level */
+document.getElementById("level").innerText =
+Math.floor(coins / 5000) + 1;
 
 update();
 }
 
+update();
+
 </script>
 
 </body>
-  </html>
+</html>

@@ -57,7 +57,9 @@ box-shadow:
 animation:glow 2s infinite alternate;
 }
 
-.tap:active img{transform:scale(0.92);}
+.tap:active img{
+transform:scale(0.92);
+}
 
 @keyframes glow{
 from{filter:brightness(1);}
@@ -66,9 +68,9 @@ to{filter:brightness(1.4);}
 
 .task-btn{
 background:linear-gradient(135deg,#229ED9,#0072ff);
-padding:14px;
+padding:12px;
 border:none;
-border-radius:12px;
+border-radius:10px;
 margin-top:10px;
 color:#fff;
 font-weight:bold;
@@ -206,13 +208,11 @@ document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
 }
 
-// SAFE TELEGRAM
 const tg = window.Telegram?.WebApp;
 if (tg) tg.expand();
 
 const user=tg?.initDataUnsafe?.user;
 
-// LOGIN
 if(user && !token){
 fetch(API+"/api/tg-login",{
 method:"POST",
@@ -230,7 +230,6 @@ location.reload();
 });
 }
 
-// LOAD
 async function load(){
 const u=await fetch(API+"/api/user",{headers:{Authorization:"Bearer "+token}}).then(r=>r.json());
 
@@ -255,15 +254,19 @@ const w=await fetch(API+"/api/wallet").then(r=>r.json());
 wallet.innerText=w.ton;
 }
 
-// TAP
+// ✅ ONLY FIXED PART (multi-finger safe)
 let lastTapTime=0;
+
 tapArea.addEventListener("touchstart",(e)=>{
 const now=Date.now();
 if(now-lastTapTime<100) return;
 lastTapTime=now;
 
-let fingers=e.touches.length;
-if(fingers>4) fingers=4;
+// FIXED LINE (safe + reliable)
+let fingers = e.touches ? e.touches.length : 1;
+
+// max 4 fingers
+fingers = Math.min(fingers, 4);
 
 coinsVal+=fingers;
 coins.innerText=coinsVal;
@@ -293,6 +296,7 @@ alert("Copied");
 
 // TASK
 function task(type){
+
 let url=
 type==="telegram"
 ?"https://t.me/gangs234"

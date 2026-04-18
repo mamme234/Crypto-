@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <title>Mini Earn App</title>
 
-<!-- ===================== -->
-<!-- MONETAG SDK (ADDED ONLY) -->
-<!-- ===================== -->
+<!-- ========================= -->
+<!-- MONETAG AD SCRIPT -->
+<!-- ========================= -->
 <script src='//libtl.com/sdk.js' data-zone='10892289' data-sdk='show_10892289'></script>
 
 <style>
@@ -56,9 +56,7 @@ touch-action:none;
 width:230px;
 height:230px;
 border-radius:50%;
-box-shadow:
-0 0 40px rgba(255,200,0,0.8),
-0 0 80px rgba(255,150,0,0.5);
+box-shadow:0 0 40px rgba(255,200,0,0.8),0 0 80px rgba(255,150,0,0.5);
 animation:glow 2s infinite alternate;
 }
 
@@ -126,12 +124,9 @@ color:#fff;
 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/512px-Bitcoin.svg.png">
 </div>
 
-<!-- ADS BUTTON (ADDED ONLY) -->
-<div style="text-align:center;margin-top:10px;">
 <button onclick="watchAd()" class="task-btn">
-💰 Watch Ad & Earn
+💰 Watch Ad & Earn (2X for 1 min)
 </button>
-</div>
 
 </div>
 
@@ -145,25 +140,11 @@ color:#fff;
 </div>
 
 <div class="card">
-<h3>Your Referral</h3>
-<p id="refLink"></p>
-<button class="copy-btn" onclick="copyRef()">Copy Link</button>
-</div>
-
-<div class="card">
 <h3>🔥 Social Tasks</h3>
 
-<button class="task-btn" onclick="task('telegram')">
-📢 Join Telegram (+500 coins)
-</button>
-
-<button class="task-btn" onclick="task('tiktok')">
-🎵 Follow TikTok (+1000 coins)
-</button>
-
-<button class="task-btn" onclick="task('youtube')">
-▶ Subscribe YouTube (+1250 coins)
-</button>
+<button class="task-btn" onclick="task('telegram')">Join Telegram</button>
+<button class="task-btn" onclick="task('tiktok')">Follow TikTok</button>
+<button class="task-btn" onclick="task('youtube')">Subscribe YouTube</button>
 
 </div>
 
@@ -174,27 +155,7 @@ color:#fff;
 
 <div class="card">
 <h3>Withdraw Rules</h3>
-<p>• Minimum withdraw: 20 USDT</p>
-<p>• Need 10 referrals OR deposit 5 USDT</p>
-</div>
-
-<div class="card">
-<h3>Deposit Wallet</h3>
-<p id="wallet"></p>
-<button class="copy-btn" onclick="copyWallet()">Copy Address</button>
-</div>
-
-<div class="card">
-<h3>Withdraw</h3>
-
-<input id="wAddress" placeholder="Your wallet address"
-style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
-
-<input id="wAmount" placeholder="Amount (USDT)"
-style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
-
-<button class="copy-btn" onclick="withdraw()">Submit Withdraw</button>
-
+<p>Minimum: 20 USDT</p>
 </div>
 
 </div>
@@ -210,132 +171,39 @@ style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
 
 <script>
 
-const API="https://crypto-4bbj.onrender.com";
-let token=localStorage.getItem("token");
+let coinsVal = 0;
+let multiplier = 1;
 
-let coinsVal=0, usdtVal=0, refsVal=0;
-
+// SCREEN SWITCH
 function show(s){
 document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
 }
 
-const tg = window.Telegram?.WebApp;
-if (tg) tg.expand();
-
-const user=tg?.initDataUnsafe?.user;
-
-if(user && !token){
-fetch(API+"/api/tg-login",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-id:user.id,
-name:user.first_name,
-photo:user.photo_url
-})
-})
-.then(r=>r.json())
-.then(d=>{
-localStorage.setItem("token",d.token);
-location.reload();
-});
-}
-
-async function load(){
-const u=await fetch(API+"/api/user",{headers:{Authorization:"Bearer "+token}}).then(r=>r.json());
-
-coinsVal=u.coins;
-usdtVal=u.usdt;
-refsVal=u.referrals;
-
-coins.innerText=coinsVal;
-usdt.innerText=usdtVal;
-refs.innerText=refsVal;
-level.innerText=Math.floor((coinsVal+usdtVal*1000)/1000)+1;
-
-if(user){
-username.innerText=user.first_name;
-userid.innerText="ID: "+user.id;
-refLink.innerText="https://t.me/Studybuddy_2025Bot?start="+user.id;
-}
-
-if(u.photo) photo.src=u.photo;
-
-const w=await fetch(API+"/api/wallet").then(r=>r.json());
-wallet.innerText=w.ton;
-}
-
-// ============================
-// TAP SYSTEM (UNCHANGED)
-// ============================
-
-let lastTapTime=0;
-
+// TAP SYSTEM
 tapArea.addEventListener("touchstart",(e)=>{
+let f = e.touches?.length || 1;
+f = Math.min(f,4);
 
-const now=Date.now();
-if(now-lastTapTime<90) return;
-lastTapTime=now;
-
-let fingers = e.touches?.length || 1;
-fingers = Math.min(fingers,4);
-
-coinsVal += fingers;
+coinsVal += f * multiplier;
 coins.innerText = coinsVal;
-
-if(token){
-fetch(API+"/api/tap",{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-Authorization:"Bearer "+token
-},
-body:JSON.stringify({multi:fingers})
-});
-}
-
 });
 
-// COPY
-function copyRef(){
-navigator.clipboard.writeText(refLink.innerText);
-alert("Copied");
-}
-
-function copyWallet(){
-navigator.clipboard.writeText(wallet.innerText);
-alert("Copied");
-}
-
-// TASK
+// TASKS
 function task(type){
-
 let url=
 type==="telegram"
-?"https://t.me/gangs234"
+?"https://t.me/example"
 :type==="tiktok"
-?"https://tiktok.com/@mammeliyas"
-:"https://youtube.com/@Mamme234";
+?"https://tiktok.com"
+:"https://youtube.com";
 
 window.open(url,"_blank");
-
-setTimeout(()=>{
-
-let reward=0;
-if(type==="telegram") reward=500;
-if(type==="tiktok") reward=1000;
-if(type==="youtube") reward=1250;
-
-coinsVal+=reward;
-coins.innerText=coinsVal;
-
-},3000);
 }
 
-// ============================
-// MONETAG AD SYSTEM (ADDED ONLY)
-// ============================
+// =========================
+// MONETAG REWARDED ADS
+// =========================
 
 function watchAd(){
 
@@ -345,22 +213,34 @@ if(typeof show_10892289 === "function"){
 
 show_10892289().then(()=>{
 
-coinsVal += 100;
+let reward = 100 * multiplier;
+
+coinsVal += reward;
 coins.innerText = coinsVal;
 
-alert("Ad completed +100 coins");
+alert("🎉 +" + reward + " coins earned");
 
-}).catch(()=>{});
+// 2X BOOST
+multiplier = 2;
+
+setTimeout(()=>{
+multiplier = 1;
+alert("⏳ 2X ended");
+},60000);
+
+}).catch(()=>{
+alert("❌ Ad not completed");
+});
 
 }
 
-}catch(e){}
-
+}catch(e){
+console.log(e);
 }
 
-load();
+}
 
 </script>
 
 </body>
-  </html>
+</html>

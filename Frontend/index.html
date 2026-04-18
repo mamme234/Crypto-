@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Earn App Pro Safe</title>
+<title>Earn App</title>
 
 <script src="https://libtl.com/sdk.js"
 data-zone="3304242"
@@ -23,7 +23,6 @@ justify-content:space-between;
 align-items:center;
 padding:12px;
 background:rgba(255,255,255,0.05);
-backdrop-filter:blur(10px);
 }
 
 .user{
@@ -41,7 +40,7 @@ border:2px solid gold;
 
 .small{font-size:12px;opacity:0.7;}
 
-/* CARDS */
+/* STATS */
 .stats{
 display:grid;
 grid-template-columns:1fr 1fr;
@@ -107,7 +106,7 @@ color:white;
 
 <body>
 
-<!-- TOP USER -->
+<!-- TOP -->
 <div class="topbar">
 
 <div class="user">
@@ -127,7 +126,7 @@ Level: <span id="level">1</span>
 <!-- STATS -->
 <div class="stats">
 <div class="card">Coins<br><strong id="coins">0</strong></div>
-<div class="card">USDT<br><strong id="usdt">0</strong></div>
+<div class="card">USDT<br><strong id="usdt">0.000</strong></div>
 </div>
 
 <!-- TAP -->
@@ -150,32 +149,33 @@ Level: <span id="level">1</span>
 const API="https://crypto-4bbj.onrender.com";
 
 let token=null;
-let user=null;
+let coins=0;
+let usdt=0;
+let lastTap=0;
 
-/* SAFE CHECK */
-if(window.Telegram && Telegram.WebApp){
-Telegram.WebApp.expand();
-user = Telegram.WebApp.initDataUnsafe.user;
-}else{
-alert("Open inside Telegram");
-}
+/* TELEGRAM */
+const tg = window.Telegram?.WebApp;
+const user = tg?.initDataUnsafe?.user;
 
-/* SHOW USER SAFELY */
-function setUser(){
-if(!user) return;
+if(tg) tg.expand();
 
-document.getElementById("name").innerText =
-user.first_name || "User";
-
-document.getElementById("uname").innerText =
-"@"+(user.username || "no_username");
+/* PROFILE */
+if(user){
+document.getElementById("name").innerText=user.first_name;
+document.getElementById("uname").innerText="@"+(user.username||"no_username");
 
 if(user.photo_url){
 document.getElementById("photo").src=user.photo_url;
 }
 }
 
-/* LOGIN SAFE */
+/* UI UPDATE */
+function updateUI(){
+document.getElementById("coins").innerText=coins;
+document.getElementById("usdt").innerText=usdt.toFixed(3);
+}
+
+/* LOGIN */
 async function login(){
 
 try{
@@ -191,13 +191,8 @@ ref:user?.username
 });
 
 const d = await res.json();
-
-if(!d.token){
-setTimeout(login,3000);
-return;
-}
-
 token=d.token;
+
 loadUser();
 
 }catch(e){
@@ -206,10 +201,8 @@ setTimeout(login,3000);
 
 }
 
-/* LOAD USER SAFE */
+/* LOAD USER */
 async function loadUser(){
-
-if(!token) return;
 
 try{
 
@@ -219,51 +212,65 @@ headers:{Authorization:"Bearer "+token}
 
 const d = await res.json();
 
-coins.innerText=d.coins || 0;
-usdt.innerText=d.usdt || 0;
-level.innerText=d.level || 1;
+coins = d.coins || 0;
+usdt = Number((d.usdt || 0).toFixed(3));
+
+updateUI();
 
 }catch(e){
-console.log("load error");
 setTimeout(loadUser,3000);
 }
 
 }
 
-/* TAP SAFE */
-tapBtn.addEventListener("touchstart",async (e)=>{
-
-if(!token) return;
+/* TAP SYSTEM */
+function handleTap(e){
 
 try{
 
-let fingers = Math.min(e.touches.length,4);
+if(!token) return;
 
-const res = await fetch(API+"/api/tap",{
+let now = Date.now();
+let fingers = e.touches ? Math.min(e.touches.length,4) : 1;
+
+/* speed bonus */
+let bonus = 1;
+
+if(now - lastTap < 200) bonus = 1.2;
+else if(now - lastTap < 400) bonus = 1.1;
+
+lastTap = now;
+
+/* UPDATE */
+coins += fingers * bonus;
+usdt = coins / 1000;
+
+/* FORMAT */
+usdt = Number(usdt.toFixed(3));
+
+updateUI();
+
+/* OPTIONAL BACKEND SYNC */
+fetch(API+"/api/tap",{
 method:"POST",
 headers:{
 "Content-Type":"application/json",
 Authorization:"Bearer "+token
 },
 body:JSON.stringify({multi:fingers})
-});
-
-const d = await res.json();
-
-if(!d) return;
-
-coins.innerText=d.coins;
-usdt.innerText=d.usdt;
-level.innerText=d.level;
+}).catch(()=>{});
 
 }catch(e){
 console.log("tap error");
 }
 
-});
+}
 
-/* AUTO START */
-setUser();
+/* EVENTS */
+tapBtn.addEventListener("touchstart",handleTap);
+tapBtn.addEventListener("click",handleTap);
+
+/* START */
 login();
 
 </script>

@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <title>Mini Earn App</title>
 
-<!-- ✅ MONETAG ADDED -->
+<!-- ✅ MONETAG FIXED ZONE -->
 <script src="https://libtl.com/sdk.js"
-data-zone="10892291"
-data-sdk="show_10892291"></script>
+data-zone="3304242"
+data-sdk="show_3304242"></script>
 
 <style>
 body{
@@ -177,32 +177,13 @@ color:#fff;
 
 </div>
 
-<!-- ⭐ RESTORED FULL WITHDRAW SCREEN -->
+<!-- WITHDRAW -->
 <div id="withdraw" class="screen">
 
 <div class="card">
 <h3>Withdraw Rules</h3>
 <p>• Minimum withdraw: 20 USDT</p>
 <p>• Need 10 referrals OR deposit 5 USDT</p>
-</div>
-
-<div class="card">
-<h3>Deposit Wallet</h3>
-<p id="wallet"></p>
-<button class="copy-btn" onclick="copyWallet()">Copy Address</button>
-</div>
-
-<div class="card">
-<h3>Withdraw</h3>
-
-<input id="wAddress" placeholder="Your wallet address"
-style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
-
-<input id="wAmount" placeholder="Amount (USDT)"
-style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
-
-<button class="copy-btn" onclick="withdraw()">Submit Withdraw</button>
-
 </div>
 
 </div>
@@ -245,6 +226,18 @@ document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
 }
 
+const tg = window.Telegram?.WebApp;
+if (tg) tg.expand();
+
+const user = tg?.initDataUnsafe?.user;
+
+/* TELEGRAM FIX */
+if(user){
+username.innerText = user.first_name;
+userid.innerText = "@" + (user.username || "no_username");
+refLink.innerText = "https://t.me/YourBot?start=" + user.id;
+}
+
 /* TAP */
 tapArea.addEventListener("touchstart",(e)=>{
 let fingers = e.touches?.length || 1;
@@ -271,12 +264,7 @@ navigator.clipboard.writeText(refLink.innerText);
 alert("Copied");
 }
 
-/* WITHDRAW */
-function withdraw(){
-alert("Request sent");
-}
-
-/* ================= ADS FIX ================= */
+/* ================= ADS SYSTEM FIX ================= */
 
 let adCooldown = false;
 
@@ -287,26 +275,19 @@ alert("Wait 60 seconds");
 return;
 }
 
-if(typeof show_10892291 !== "function"){
-alert("Ad not loaded yet");
+if(typeof show_3304242 !== "function"){
+alert("Ad not loaded");
 return;
 }
 
-adCooldown = true;
-
-setTimeout(()=>{
-adCooldown = false;
-adTimer.innerText = "Ready";
-},65000);
-
 try{
 
-const ad = show_10892291();
+const ad = show_3304242();
 
 if(ad && typeof ad.then === "function"){
 
 ad.then(()=> giveReward())
-.catch(()=> alert("Ad not available"));
+.catch(()=> alert("No ads available"));
 
 }else{
 
@@ -315,13 +296,14 @@ giveReward();
 }
 
 }catch(e){
-adCooldown = false;
 alert("Ad error");
 }
 
 }
 
 function giveReward(){
+
+adCooldown = true;
 
 let reward = 310 + Math.floor(Math.random()*90);
 

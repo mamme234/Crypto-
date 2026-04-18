@@ -37,23 +37,47 @@ font-size:22px;
 color:#ff9800;
 }
 
+/* LEVEL BAR */
+.level-box{
+margin:10px;
+padding:10px;
+border-radius:15px;
+background:rgba(255,255,255,0.05);
+}
+.progress{
+height:10px;
+background:#222;
+border-radius:10px;
+overflow:hidden;
+}
+.progress-fill{
+height:100%;
+background:linear-gradient(90deg,#ff9800,#ffd54f);
+width:10%;
+}
+
+/* TAP BUTTON CENTER FIX */
 .tap{
 width:260px;
 height:260px;
-margin:20px auto;
+margin:0;
 display:flex;
 align-items:center;
 justify-content:center;
 touch-action:none;
+
+/* CENTER FIX */
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
 }
 
 .tap img{
 width:230px;
 height:230px;
 border-radius:50%;
-box-shadow:
-0 0 40px rgba(255,200,0,0.8),
-0 0 80px rgba(255,150,0,0.5);
+box-shadow:0 0 40px rgba(255,200,0,0.8);
 animation:glow 2s infinite alternate;
 }
 
@@ -117,8 +141,18 @@ color:#fff;
 <div class="stat">Level<strong id="level">1</strong></div>
 </div>
 
+<!-- LEVEL BAR ADDED -->
+<div class="level-box">
+<h3>Level Progress</h3>
+<div class="progress">
+<div class="progress-fill" id="progressBar"></div>
+</div>
+</div>
+
+<!-- TAP -->
 <div class="tap" id="tapArea">
-<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/512px-Bitcoin.svg.png">
+<img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png"
+style="filter:drop-shadow(0 0 20px gold);">
 </div>
 
 </div>
@@ -254,10 +288,7 @@ const w=await fetch(API+"/api/wallet").then(r=>r.json());
 wallet.innerText=w.ton;
 }
 
-// ============================
-// ✅ FIXED TAP (REALISTIC MULTI INPUT)
-// ============================
-
+// TAP (IMPROVED MULTI TOUCH)
 let lastTapTime=0;
 
 tapArea.addEventListener("touchstart",(e)=>{
@@ -266,19 +297,16 @@ const now=Date.now();
 if(now-lastTapTime<90) return;
 lastTapTime=now;
 
-// improved detection (works better in Telegram WebView)
 let fingers = 1;
 
-if (e.touches && e.touches.length) {
+if(e.touches && e.touches.length){
 fingers = e.touches.length;
-} else if (e.targetTouches && e.targetTouches.length) {
-fingers = e.targetTouches.length;
 }
 
-// fallback boost (makes it feel like multi-finger even if blocked)
-if (fingers < 1) fingers = 1;
+if(e.targetTouches && e.targetTouches.length){
+fingers = Math.max(fingers, e.targetTouches.length);
+}
 
-// limit max 4
 fingers = Math.min(fingers, 4);
 
 coinsVal += fingers;
@@ -308,7 +336,7 @@ navigator.clipboard.writeText(wallet.innerText);
 alert("Copied");
 }
 
-// TASK (FIXED REWARD)
+// TASK
 function task(type){
 
 let url=

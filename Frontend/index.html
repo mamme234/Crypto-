@@ -177,13 +177,32 @@ color:#fff;
 
 </div>
 
-<!-- WITHDRAW -->
+<!-- WITHDRAW (RESTORED FULL) -->
 <div id="withdraw" class="screen">
 
 <div class="card">
 <h3>Withdraw Rules</h3>
 <p>• Minimum withdraw: 20 USDT</p>
 <p>• Need 10 referrals OR deposit 5 USDT</p>
+</div>
+
+<div class="card">
+<h3>Deposit Wallet</h3>
+<p id="wallet"></p>
+<button class="copy-btn" onclick="copyWallet()">Copy Address</button>
+</div>
+
+<div class="card">
+<h3>Withdraw</h3>
+
+<input id="wAddress" placeholder="Your wallet address"
+style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
+
+<input id="wAmount" placeholder="Amount (USDT)"
+style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
+
+<button class="copy-btn" onclick="withdraw()">Submit Withdraw</button>
+
 </div>
 
 </div>
@@ -253,27 +272,24 @@ refs.innerText = refsVal;
 
 level.innerText = Math.floor(coinsVal / 1000) + 1;
 
+const w = await fetch(API+"/api/wallet").then(r=>r.json());
+wallet.innerText = w.ton;
+
 }catch(e){}
 }
 
-/* TAP FIX (YOUR REQUEST) */
+/* TAP FIX */
 tapArea.addEventListener("touchstart",(e)=>{
 
 let fingers = e.touches?.length || 1;
 fingers = Math.min(fingers, 4);
 
-/* 1 finger = 1 coin, 2 fingers = 2 coins */
 coinsVal += fingers;
-
-/* USDT FIX */
 usdtVal = Math.floor(coinsVal / 1000);
 
-/* LEVEL FIX */
-level.innerText = Math.floor(coinsVal / 1000) + 1;
-
-/* UI */
 coins.innerText = coinsVal;
 usdt.innerText = usdtVal;
+level.innerText = Math.floor(coinsVal / 1000) + 1;
 
 });
 
@@ -294,16 +310,31 @@ navigator.clipboard.writeText(refLink.innerText);
 alert("Copied");
 }
 
-/* ADS SAFE */
+/* WITHDRAW */
+function withdraw(){
+fetch(API+"/api/withdraw",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+Authorization:"Bearer "+token
+},
+body:JSON.stringify({
+address:wAddress.value,
+amount:wAmount.value
+})
+});
+alert("Request sent");
+}
+
+/* ADS */
 let adCooldown=false;
 
 function watchAdReward(){
 
 if(adCooldown) return alert("Wait 60s");
 
-if(typeof show_3304242 !== "function"){
+if(typeof show_3304242 !== "function")
 return alert("No ads available");
-}
 
 show_3304242().then(()=>{
 
@@ -339,4 +370,4 @@ load();
 </script>
 
 </body>
-</html>
+  </html>

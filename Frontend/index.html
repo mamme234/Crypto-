@@ -2,19 +2,19 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Tap Game</title>
+<title>Clean Tap Game</title>
 
 <style>
 body{
 margin:0;
 font-family:Arial;
-background:radial-gradient(circle,#0b122a,#020617);
+background:#0b122a;
 color:white;
-overflow:hidden;
+text-align:center;
 }
 
-/* TOP BAR */
-.topbar{
+/* TOP */
+.top{
 display:flex;
 justify-content:space-between;
 padding:12px;
@@ -28,10 +28,9 @@ align-items:center;
 }
 
 .user img{
-width:45px;
-height:45px;
+width:40px;
+height:40px;
 border-radius:50%;
-border:2px solid gold;
 }
 
 /* STATS */
@@ -41,83 +40,42 @@ justify-content:space-around;
 margin-top:10px;
 }
 
-.box{
-text-align:center;
+/* TAP */
+.tap{
+margin-top:80px;
 }
 
-.box strong{
-display:block;
-font-size:18px;
-color:#facc15;
+.btn{
+width:200px;
+height:200px;
+border-radius:50%;
+background:gold;
+font-size:22px;
+border:none;
 }
 
 /* ENERGY */
-.energy-bar{
-width:90%;
+.energy{
+width:80%;
 height:10px;
 background:#222;
+margin:20px auto;
 border-radius:10px;
-margin:10px auto;
 overflow:hidden;
 }
 
-.energy-fill{
+.fill{
 height:100%;
 width:100%;
-background:linear-gradient(90deg,#00ff99,#00ccff);
-transition:0.3s;
-}
-
-/* TAP */
-.tap-area{
-display:flex;
-justify-content:center;
-align-items:center;
-height:60vh;
-}
-
-.tap-btn{
-width:220px;
-height:220px;
-border-radius:50%;
-background:radial-gradient(circle,#facc15,#f59e0b);
-box-shadow:0 0 40px gold;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:22px;
-font-weight:bold;
-user-select:none;
-}
-
-.tap-btn:active{
-transform:scale(0.95);
-}
-
-/* BOTTOM */
-.bottom{
-position:fixed;
-bottom:0;
-width:100%;
-background:#111;
-display:flex;
-}
-
-.bottom button{
-flex:1;
-padding:10px;
-background:none;
-border:none;
-color:white;
+background:lime;
+transition:0.2s;
 }
 </style>
 </head>
 
 <body>
 
-<!-- TOP -->
-<div class="topbar">
-
+<div class="top">
 <div class="user">
 <img id="photo">
 <div>
@@ -125,58 +83,48 @@ color:white;
 <div id="uname">@user</div>
 </div>
 </div>
-
 <div>Lv <span id="level">1</span></div>
-
 </div>
 
-<!-- STATS -->
 <div class="stats">
-<div class="box">Coins<strong id="coins">0</strong></div>
-<div class="box">USDT<strong id="usdt">0.000</strong></div>
+<div>Coins: <span id="coins">0</span></div>
+<div>USDT: <span id="usdt">0.000</span></div>
 </div>
 
-<!-- ENERGY -->
-<div class="energy-bar">
-<div class="energy-fill" id="energy"></div>
+<div class="energy">
+<div class="fill" id="energyBar"></div>
 </div>
 
-<!-- TAP -->
-<div class="tap-area">
-<div class="tap-btn" id="tapBtn">TAP</div>
-</div>
-
-<!-- BOTTOM -->
-<div class="bottom">
-<button>Home</button>
-<button>Tasks</button>
-<button>Withdraw</button>
-<button>Profile</button>
+<div class="tap">
+<button class="btn" id="tapBtn">TAP</button>
 </div>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <script>
 
-let coins = 0;
-let usdt = 0;
+/* SINGLE SOURCE STATE (IMPORTANT FIX) */
+let state = {
+coins:0,
+energy:100,
+lastTap:0
+};
 
-/* ENERGY SYSTEM */
-let energy = 100;
 const maxEnergy = 100;
 
 /* UI */
-function update(){
-document.getElementById("coins").innerText = Math.floor(coins);
-document.getElementById("usdt").innerText = usdt.toFixed(3);
-document.getElementById("energy").style.width = energy + "%";
+function render(){
+document.getElementById("coins").innerText = Math.floor(state.coins);
+document.getElementById("usdt").innerText = (state.coins/1000).toFixed(3);
+document.getElementById("energyBar").style.width = state.energy + "%";
+document.getElementById("level").innerText = Math.floor(state.coins/5000)+1;
 }
 
 /* ENERGY REGEN */
 setInterval(()=>{
-if(energy < maxEnergy){
-energy += 1;
-update();
+if(state.energy < maxEnergy){
+state.energy++;
+render();
 }
 },1000);
 
@@ -189,43 +137,32 @@ if(tg) tg.expand();
 if(user){
 document.getElementById("name").innerText=user.first_name;
 document.getElementById("uname").innerText="@"+(user.username||"user");
-
-if(user.photo_url){
-document.getElementById("photo").src=user.photo_url;
-}
+if(user.photo_url) document.getElementById("photo").src=user.photo_url;
 }
 
-/* TAP SYSTEM (NOTCOIN STYLE) */
-let lastTap = 0;
-
+/* TAP (100% FIXED - NO DOUBLE COUNT) */
 tapBtn.addEventListener("click",tap);
 
 function tap(){
 
-if(energy <= 0) return;
+if(state.energy <= 0) return;
 
 let now = Date.now();
 
-/* prevent spam */
-if(now - lastTap < 80) return;
+/* anti double click */
+if(now - state.lastTap < 120) return;
 
-lastTap = now;
+state.lastTap = now;
 
-/* reduce energy */
-energy -= 1;
+/* GAME LOGIC */
+state.energy -= 1;
+state.coins += 1;
 
-/* reward */
-coins += 1;
-usdt = coins / 1000;
-
-/* level */
-document.getElementById("level").innerText =
-Math.floor(coins / 5000) + 1;
-
-update();
+/* UPDATE */
+render();
 }
 
-update();
+render();
 
 </script>
 

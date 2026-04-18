@@ -176,13 +176,32 @@ color:#fff;
 
 </div>
 
-<!-- WITHDRAW -->
+<!-- WITHDRAW (UNCHANGED) -->
 <div id="withdraw" class="screen">
 
 <div class="card">
 <h3>Withdraw Rules</h3>
 <p>• Minimum withdraw: 20 USDT</p>
 <p>• Need 10 referrals OR deposit 5 USDT</p>
+</div>
+
+<div class="card">
+<h3>Deposit Wallet</h3>
+<p id="wallet"></p>
+<button class="copy-btn" onclick="copyWallet()">Copy Address</button>
+</div>
+
+<div class="card">
+<h3>Withdraw</h3>
+
+<input id="wAddress" placeholder="Your wallet address"
+style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
+
+<input id="wAmount" placeholder="Amount (USDT)"
+style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
+
+<button class="copy-btn" onclick="withdraw()">Submit Withdraw</button>
+
 </div>
 
 </div>
@@ -217,6 +236,7 @@ let coinsVal=0;
 let usdtVal=0;
 let refsVal=0;
 
+/* SCREEN SWITCH */
 function show(s){
 document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
@@ -228,9 +248,9 @@ if (tg) tg.expand();
 
 const user = tg?.initDataUnsafe?.user;
 
-/* PROFILE */
+/* PROFILE FIX */
 if(user){
-let uname = user.username || user.first_name;
+let uname = user.username || user.first_name || "user";
 
 username.innerText = user.first_name;
 userid.innerText = "ID: " + user.id + (user.username ? " | @" + user.username : "");
@@ -241,7 +261,7 @@ refLink.innerText =
 if(user.photo_url) photo.src = user.photo_url;
 }
 
-/* UPDATE STATS */
+/* FIX STATS */
 function updateStats(){
 usdtVal = Math.floor(coinsVal / 1000);
 
@@ -277,6 +297,22 @@ window.open(url,"_blank");
 function copyRef(){
 navigator.clipboard.writeText(refLink.innerText);
 alert("Copied");
+}
+
+/* WITHDRAW */
+function withdraw(){
+fetch(API+"/api/withdraw",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+Authorization:"Bearer "+token
+},
+body:JSON.stringify({
+address:wAddress.value,
+amount:wAmount.value
+})
+});
+alert("Request sent");
 }
 
 /* ADS */

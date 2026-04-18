@@ -153,7 +153,7 @@ color:#fff;
 
 </div>
 
-<!-- PROFILE -->
+<!-- PROFILE (RESTORED FULL FIX) -->
 <div id="profile" class="screen">
 
 <div class="card" style="text-align:center">
@@ -177,7 +177,7 @@ color:#fff;
 
 </div>
 
-<!-- WITHDRAW -->
+<!-- WITHDRAW (RESTORED FULL — YOUR ORIGINAL) -->
 <div id="withdraw" class="screen">
 
 <div class="card">
@@ -207,8 +207,9 @@ style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
 
 </div>
 
-<!-- ADS -->
+<!-- ADS SCREEN -->
 <div id="ads" class="screen">
+
 <div class="card" style="text-align:center">
 <h3>💰 Watch Ads & Earn</h3>
 
@@ -217,7 +218,9 @@ style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
 </button>
 
 <p id="adTimer" style="margin-top:10px;color:#ff9800;"></p>
+
 </div>
+
 </div>
 
 <!-- NAV -->
@@ -232,9 +235,11 @@ style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
 
 <script>
 
-let coinsVal=0;
+const API="https://crypto-4bbj.onrender.com";
+let token=localStorage.getItem("token");
 
-/* NAV */
+let coinsVal=0, usdtVal=0, refsVal=0;
+
 function show(s){
 document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
@@ -256,10 +261,17 @@ type==="telegram"
 :type==="tiktok"
 ?"https://tiktok.com"
 :"https://youtube.com";
+
 window.open(url,"_blank");
 }
 
-/* PROFILE */
+/* COPY */
+function copyRef(){
+navigator.clipboard.writeText(refLink.innerText);
+alert("Copied");
+}
+
+/* TELEGRAM PROFILE FIX */
 const tg = window.Telegram?.WebApp;
 if (tg) tg.expand();
 
@@ -268,11 +280,16 @@ const user = tg?.initDataUnsafe?.user;
 if(user){
 username.innerText = user.first_name;
 userid.innerText = "ID: " + user.id + (user.username ? " | @" + user.username : "");
-refLink.innerText = "https://t.me/Studybuddy_2025Bot?start=" + user.id;
-if(user.photo_url){ photo.src = user.photo_url; }
+
+refLink.innerText =
+"https://t.me/Studybuddy_2025Bot?start=" + user.id;
+
+if(user.photo_url){
+photo.src = user.photo_url;
+}
 }
 
-/* ADS FIXED */
+/* ADS */
 let adCooldown = false;
 
 function watchAdReward(){
@@ -289,14 +306,20 @@ return;
 
 try{
 
-show_3304242().then(()=>{
+const ad = show_3304242();
+
+if(ad && ad.then){
+
+ad.then(()=>giveReward()).catch(()=>alert("No ads"));
+
+}else{
+
 giveReward();
-}).catch(()=>{
-alert("No ads available");
-});
+
+}
 
 }catch(e){
-alert("Ad error");
+alert("Error");
 }
 
 }
@@ -316,6 +339,7 @@ let t = 60;
 adTimer.innerText = "Next ad in: " + t + "s";
 
 let timer = setInterval(()=>{
+
 t--;
 adTimer.innerText = "Next ad in: " + t + "s";
 
@@ -329,6 +353,16 @@ adTimer.innerText = "Ready";
 
 }
 
+
+// Rewarded interstitial
+
+show_10892289().then(() => {
+    // You need to add your user reward function here, which will be executed after the user watches the ad.
+    // For more details, please refer to the detailed instructions.
+    alert('You have seen an ad!');
+})
+
+        
 </script>
 
 </body>

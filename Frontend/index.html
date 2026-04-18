@@ -87,8 +87,9 @@ display:flex;background:#020617;
 
 </div>
 
-<!-- PROFILE -->
+<!-- PROFILE (KEPT FULL) -->
 <div id="profile" class="screen">
+
 <div class="card" style="text-align:center">
 <img id="photo" style="width:90px;height:90px;border-radius:50%;border:3px solid #ff9800;">
 <h3 id="username"></h3>
@@ -96,28 +97,58 @@ display:flex;background:#020617;
 </div>
 
 <div class="card">
-<h3>Referral</h3>
+<h3>Your Referral</h3>
 <p id="refLink"></p>
-<button class="copy-btn" onclick="copyRef()">Copy</button>
-</div>
+<button class="copy-btn" onclick="copyRef()">Copy Link</button>
 </div>
 
-<!-- WITHDRAW -->
+<div class="card">
+<h3>🔥 Social Tasks</h3>
+<button class="task-btn" onclick="task('telegram')">Join Telegram</button>
+<button class="task-btn" onclick="task('tiktok')">Follow TikTok</button>
+<button class="task-btn" onclick="task('youtube')">Subscribe YouTube</button>
+</div>
+
+</div>
+
+<!-- WITHDRAW (RULES KEPT) -->
 <div id="withdraw" class="screen">
+
+<div class="card">
+<h3>Withdraw Rules</h3>
+<p>• Minimum withdraw: 20 USDT</p>
+<p>• Need 10 referrals OR deposit 5 USDT</p>
+</div>
+
+<div class="card">
+<h3>Deposit Wallet</h3>
+<p id="wallet"></p>
+<button class="copy-btn" onclick="copyWallet()">Copy Address</button>
+</div>
+
 <div class="card">
 <h3>Withdraw</h3>
-<input id="wAddress" placeholder="wallet">
-<input id="wAmount" placeholder="amount">
-<button class="copy-btn" onclick="withdraw()">Send</button>
+
+<input id="wAddress" placeholder="Your wallet address"
+style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
+
+<input id="wAmount" placeholder="Amount (USDT)"
+style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
+
+<button class="copy-btn" onclick="withdraw()">Submit Withdraw</button>
+
 </div>
+
 </div>
 
 <!-- ADS -->
 <div id="ads" class="screen">
-<div class="card">
-<h3>Ads Reward</h3>
+
+<div class="card" style="text-align:center">
+<h3>💰 Watch Ads & Earn</h3>
 <button class="task-btn" onclick="watchAd()">Watch Ad</button>
 </div>
+
 </div>
 
 <!-- NAV -->
@@ -140,9 +171,10 @@ document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
 }
 
-/* FIX STATS */
+/* FIX STATS (IMPORTANT) */
 function updateStats(){
 usdtVal = Math.floor(coinsVal / 1000);
+
 coins.innerText = coinsVal;
 usdt.innerText = usdtVal;
 level.innerText = Math.floor(coinsVal / 1000) + 1;
@@ -159,7 +191,7 @@ updateStats();
 refs.innerText = refsVal;
 }
 
-/* FIX TAP (NO DOUBLE BUG) */
+/* FIX TAP (NO +3 BUG) */
 let lastTap = 0;
 
 tapArea.addEventListener("touchstart",(e)=>{
@@ -184,7 +216,7 @@ body:JSON.stringify({multi:fingers})
 
 });
 
-/* PROFILE */
+/* PROFILE FIX */
 const tg = window.Telegram?.WebApp;
 if(tg) tg.expand();
 
@@ -192,12 +224,24 @@ const user = tg?.initDataUnsafe?.user;
 
 if(user){
 username.innerText = user.first_name;
-userid.innerText = "ID:"+user.id;
+userid.innerText = "ID: "+user.id;
 
 let uname = user.username || user.first_name;
 refLink.innerText = "https://t.me/YourBot?start="+uname;
 
 if(user.photo_url) photo.src=user.photo_url;
+}
+
+/* TASKS (RESTORED) */
+function task(type){
+let url=
+type==="telegram"
+?"https://t.me/gangs234"
+:type==="tiktok"
+?"https://tiktok.com"
+:"https://youtube.com";
+
+window.open(url,"_blank");
 }
 
 /* WITHDRAW */
@@ -219,7 +263,7 @@ amount:wAmount.value
 function watchAd(){
 
 if(typeof show_3304242 !== "function"){
-alert("No ads available");
+alert("No ads");
 return;
 }
 
@@ -238,4 +282,4 @@ load();
 </script>
 
 </body>
-</html>
+                        </html>

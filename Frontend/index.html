@@ -37,6 +37,7 @@ font-size:22px;
 color:#ff9800;
 }
 
+/* TAP DESIGN RESTORED */
 .tap{
 width:260px;
 height:260px;
@@ -51,9 +52,37 @@ touch-action:none;
 width:230px;
 height:230px;
 border-radius:50%;
-box-shadow:0 0 40px rgba(255,200,0,0.8);
+box-shadow:0 0 40px rgba(255,200,0,0.8),0 0 80px rgba(255,150,0,0.5);
+animation:glow 2s infinite alternate;
 }
 
+@keyframes glow{
+from{filter:brightness(1);}
+to{filter:brightness(1.4);}
+}
+
+/* LEVEL BAR RESTORED */
+.level-box{
+margin:10px;
+padding:10px;
+border-radius:15px;
+background:rgba(255,255,255,0.05);
+}
+
+.progress{
+height:10px;
+background:#222;
+border-radius:10px;
+overflow:hidden;
+}
+
+.progress-fill{
+height:100%;
+background:linear-gradient(90deg,#ff9800,#ffd54f);
+width:10%;
+}
+
+/* NAV */
 .nav{
 position:fixed;
 bottom:0;
@@ -84,6 +113,14 @@ color:#fff;
 <div class="stat">Level<strong id="level">1</strong></div>
 </div>
 
+<div class="level-box">
+<h3>Next Level</h3>
+<div class="progress">
+<div class="progress-fill" id="progressBar"></div>
+</div>
+</div>
+
+<!-- TAP -->
 <div class="tap" id="tapArea">
 <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg">
 </div>
@@ -105,7 +142,18 @@ color:#fff;
 
 <div class="card">
 <h3>Social Tasks</h3>
-<button onclick="task()">Complete Task</button>
+<button onclick="task('telegram')">Join Telegram</button>
+<button onclick="task('tiktok')">Follow TikTok</button>
+<button onclick="task('youtube')">Subscribe YouTube</button>
+</div>
+
+<!-- MONETIZATION SLOT (SAFE) -->
+<div class="card">
+<h3>Earn More</h3>
+<button onclick="openOfferwall()">Watch Ads / Offers</button>
+<p style="font-size:12px;color:#aaa">
+Opens external reward page (Telegram safe)
+</p>
 </div>
 
 </div>
@@ -136,31 +184,48 @@ color:#fff;
 
 <script>
 
-window.onerror = function(){ return true; };
+window.onerror=function(){return true;};
 
-let coinsVal = 0;
+let coinsVal=0;
 
 function show(s){
 document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
 }
 
-/* SAFE TAP (NO CRASH) */
+/* SAFE TAP */
 document.addEventListener("touchstart",(e)=>{
-try{
 let f = e.touches ? e.touches.length : 1;
 if(f>4) f=4;
 
 coinsVal += f;
 document.getElementById("coins").innerText = coinsVal;
-}catch(err){}
 });
 
-/* SIMPLE TASK */
-function task(){
-alert("Task completed!");
-coinsVal += 100;
+/* SOCIAL TASK */
+function task(type){
+let url =
+type==="telegram"
+?"https://t.me/gangs234"
+:type==="tiktok"
+?"https://tiktok.com"
+:"https://youtube.com";
+
+window.Telegram?.WebApp?.openLink
+? window.Telegram.WebApp.openLink(url)
+: window.open(url,"_blank");
+
+setTimeout(()=>{
+coinsVal += (type==="tiktok"?1000:500);
 document.getElementById("coins").innerText = coinsVal;
+alert("Task completed");
+},4000);
+}
+
+/* SAFE MONETIZATION BUTTON */
+function openOfferwall(){
+window.Telegram?.WebApp?.openLink("https://your-offerwall-link.com")
+|| window.open("https://your-offerwall-link.com","_blank");
 }
 
 function withdraw(){
@@ -170,4 +235,4 @@ alert("Request sent");
 </script>
 
 </body>
-</html>
+  </html>

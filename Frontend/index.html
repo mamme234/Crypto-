@@ -37,7 +37,7 @@ font-size:22px;
 color:#ff9800;
 }
 
-/* LEVEL BAR */
+/* LEVEL */
 .level-box{
 margin:10px;
 padding:10px;
@@ -56,7 +56,7 @@ background:linear-gradient(90deg,#ff9800,#ffd54f);
 width:10%;
 }
 
-/* TAP BUTTON CENTER FIX */
+/* TAP */
 .tap{
 width:260px;
 height:260px;
@@ -66,7 +66,6 @@ align-items:center;
 justify-content:center;
 touch-action:none;
 
-/* CENTER FIX */
 position:absolute;
 top:50%;
 left:50%;
@@ -79,10 +78,6 @@ height:230px;
 border-radius:50%;
 box-shadow:0 0 40px rgba(255,200,0,0.8);
 animation:glow 2s infinite alternate;
-}
-
-.tap:active img{
-transform:scale(0.92);
 }
 
 @keyframes glow{
@@ -141,7 +136,6 @@ color:#fff;
 <div class="stat">Level<strong id="level">1</strong></div>
 </div>
 
-<!-- LEVEL BAR ADDED -->
 <div class="level-box">
 <h3>Level Progress</h3>
 <div class="progress">
@@ -149,10 +143,8 @@ color:#fff;
 </div>
 </div>
 
-<!-- TAP -->
 <div class="tap" id="tapArea">
-<img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png"
-style="filter:drop-shadow(0 0 20px gold);">
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/512px-Bitcoin.svg.png">
 </div>
 
 </div>
@@ -173,18 +165,22 @@ style="filter:drop-shadow(0 0 20px gold);">
 </div>
 
 <div class="card">
-<h3>🔥 Social Tasks</h3>
+<h3>🔥 Social Tasks (STRICT)</h3>
 
 <button class="task-btn" onclick="task('telegram')">
-📢 Join Telegram (+500 coins)
+📢 Join Telegram (Verify Required)
 </button>
 
 <button class="task-btn" onclick="task('tiktok')">
-🎵 Follow TikTok (+1000 coins)
+🎵 Follow TikTok (Verify Required)
 </button>
 
 <button class="task-btn" onclick="task('youtube')">
-▶ Subscribe YouTube (+1250 coins)
+▶ Subscribe YouTube (Verify Required)
+</button>
+
+<button class="task-btn" onclick="verifyTask()">
+✅ Verify Completion
 </button>
 
 </div>
@@ -247,6 +243,7 @@ if (tg) tg.expand();
 
 const user=tg?.initDataUnsafe?.user;
 
+// LOGIN
 if(user && !token){
 fetch(API+"/api/tg-login",{
 method:"POST",
@@ -264,6 +261,7 @@ location.reload();
 });
 }
 
+// LOAD
 async function load(){
 const u=await fetch(API+"/api/user",{headers:{Authorization:"Bearer "+token}}).then(r=>r.json());
 
@@ -288,7 +286,7 @@ const w=await fetch(API+"/api/wallet").then(r=>r.json());
 wallet.innerText=w.ton;
 }
 
-// TAP (IMPROVED MULTI TOUCH)
+// TAP (safe multi-touch)
 let lastTapTime=0;
 
 tapArea.addEventListener("touchstart",(e)=>{
@@ -301,10 +299,6 @@ let fingers = 1;
 
 if(e.touches && e.touches.length){
 fingers = e.touches.length;
-}
-
-if(e.targetTouches && e.targetTouches.length){
-fingers = Math.max(fingers, e.targetTouches.length);
 }
 
 fingers = Math.min(fingers, 4);
@@ -325,18 +319,7 @@ body:JSON.stringify({multi:fingers})
 
 });
 
-// COPY
-function copyRef(){
-navigator.clipboard.writeText(refLink.innerText);
-alert("Copied");
-}
-
-function copyWallet(){
-navigator.clipboard.writeText(wallet.innerText);
-alert("Copied");
-}
-
-// TASK
+// START TASK (NO REWARD HERE)
 function task(type){
 
 let url=
@@ -348,17 +331,50 @@ type==="telegram"
 
 window.open(url,"_blank");
 
-setTimeout(()=>{
+fetch(API+"/api/task/start",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+Authorization:"Bearer "+token
+},
+body:JSON.stringify({type})
+});
 
-let reward=0;
-if(type==="telegram") reward=500;
-if(type==="tiktok") reward=1000;
-if(type==="youtube") reward=1250;
+alert("Task started. Complete it and click VERIFY.");
+}
 
-coinsVal+=reward;
-coins.innerText=coinsVal;
+// VERIFY TASK (STRICT CHECK)
+async function verifyTask(){
 
-},3000);
+const res = await fetch(API+"/api/task/verify",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+Authorization:"Bearer "+token
+}
+});
+
+const data = await res.json();
+
+if(data.success){
+coinsVal += data.reward;
+coins.innerText = coinsVal;
+alert("Verified! Reward added.");
+}else{
+alert("Task not completed yet!");
+}
+
+}
+
+// COPY
+function copyRef(){
+navigator.clipboard.writeText(refLink.innerText);
+alert("Copied");
+}
+
+function copyWallet(){
+navigator.clipboard.writeText(wallet.innerText);
+alert("Copied");
 }
 
 // WITHDRAW

@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Clean Tap Game</title>
+<title>Notcoin Style App</title>
 
 <style>
 body{
@@ -10,11 +10,10 @@ margin:0;
 font-family:Arial;
 background:#0b122a;
 color:white;
-text-align:center;
 }
 
 /* TOP */
-.top{
+.topbar{
 display:flex;
 justify-content:space-between;
 padding:12px;
@@ -28,9 +27,10 @@ align-items:center;
 }
 
 .user img{
-width:40px;
-height:40px;
+width:45px;
+height:45px;
 border-radius:50%;
+border:2px solid gold;
 }
 
 /* STATS */
@@ -40,42 +40,61 @@ justify-content:space-around;
 margin-top:10px;
 }
 
-/* TAP */
-.tap{
-margin-top:80px;
+.box{
+text-align:center;
 }
 
-.btn{
+.box strong{
+display:block;
+font-size:18px;
+color:#facc15;
+}
+
+/* TAP */
+.tap{
+display:flex;
+justify-content:center;
+margin-top:60px;
+}
+
+.tap button{
 width:200px;
 height:200px;
 border-radius:50%;
 background:gold;
-font-size:22px;
 border:none;
+font-size:20px;
 }
 
-/* ENERGY */
-.energy{
-width:80%;
-height:10px;
-background:#222;
-margin:20px auto;
-border-radius:10px;
-overflow:hidden;
-}
+/* SCREENS */
+.screen{display:none;padding:10px;}
+.active{display:block;}
 
-.fill{
-height:100%;
+/* NAV */
+.nav{
+position:fixed;
+bottom:0;
 width:100%;
-background:lime;
-transition:0.2s;
+display:flex;
+background:#111;
+}
+
+.nav button{
+flex:1;
+padding:10px;
+background:none;
+border:none;
+color:white;
 }
 </style>
 </head>
 
 <body>
 
-<div class="top">
+<!-- HOME -->
+<div id="home" class="screen active">
+
+<div class="topbar">
 <div class="user">
 <img id="photo">
 <div>
@@ -87,46 +106,101 @@ transition:0.2s;
 </div>
 
 <div class="stats">
-<div>Coins: <span id="coins">0</span></div>
-<div>USDT: <span id="usdt">0.000</span></div>
-</div>
-
-<div class="energy">
-<div class="fill" id="energyBar"></div>
+<div class="box">Coins<strong id="coins">0</strong></div>
+<div class="box">USDT<strong id="usdt">0.000</strong></div>
 </div>
 
 <div class="tap">
-<button class="btn" id="tapBtn">TAP</button>
+<button id="tapBtn">TAP</button>
+</div>
+
+</div>
+
+<!-- PROFILE -->
+<div id="profile" class="screen">
+<h2>Profile</h2>
+<p id="pName"></p>
+<p id="pUser"></p>
+
+<h3>Referral</h3>
+<input id="refLink" readonly style="width:100%;padding:10px">
+<button onclick="copyRef()" style="width:100%;padding:10px">
+Copy Link
+</button>
+</div>
+
+<!-- WITHDRAW -->
+<div id="withdraw" class="screen">
+
+<h2>Withdraw</h2>
+
+<p>Min: 20 USDT</p>
+
+<input id="wallet" placeholder="Wallet address" style="width:100%;padding:10px">
+<br><br>
+<input id="amount" placeholder="Amount USDT" style="width:100%;padding:10px">
+
+<br><br>
+<button onclick="withdraw()" style="width:100%;padding:10px">
+Withdraw
+</button>
+
+</div>
+
+<!-- DEPOSIT -->
+<div id="deposit" class="screen">
+
+<h2>Deposit</h2>
+
+<input id="depWallet" readonly style="width:100%;padding:10px"
+value="UQAYjMccjJ8Xn1z9hodUImMjJCB2qmWGjlMup9-sVZtEQFWH">
+
+<button onclick="copyWallet()" style="width:100%;padding:10px">
+Copy Deposit Address
+</button>
+
+</div>
+
+<!-- ADS -->
+<div id="ads" class="screen">
+<h2>Ads</h2>
+<button onclick="alert('Ad clicked')">Watch Ad</button>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+<button onclick="show('home')">Home</button>
+<button onclick="show('profile')">Profile</button>
+<button onclick="show('withdraw')">Withdraw</button>
+<button onclick="show('deposit')">Deposit</button>
+<button onclick="show('ads')">Ads</button>
 </div>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <script>
 
-/* SINGLE SOURCE STATE (IMPORTANT FIX) */
 let state = {
 coins:0,
-energy:100,
-lastTap:0
+usdt:0
 };
 
-const maxEnergy = 100;
+/* ELEMENTS */
+const coinsEl = document.getElementById("coins");
+const usdtEl = document.getElementById("usdt");
+const tapBtn = document.getElementById("tapBtn");
 
-/* UI */
+/* SCREEN NAV */
+function show(id){
+document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+
+/* UPDATE UI */
 function render(){
-document.getElementById("coins").innerText = Math.floor(state.coins);
-document.getElementById("usdt").innerText = (state.coins/1000).toFixed(3);
-document.getElementById("energyBar").style.width = state.energy + "%";
-document.getElementById("level").innerText = Math.floor(state.coins/5000)+1;
+coinsEl.innerText = Math.floor(state.coins);
+usdtEl.innerText = state.usdt.toFixed(3);
 }
-
-/* ENERGY REGEN */
-setInterval(()=>{
-if(state.energy < maxEnergy){
-state.energy++;
-render();
-}
-},1000);
 
 /* TELEGRAM */
 const tg = window.Telegram?.WebApp;
@@ -137,29 +211,77 @@ if(tg) tg.expand();
 if(user){
 document.getElementById("name").innerText=user.first_name;
 document.getElementById("uname").innerText="@"+(user.username||"user");
-if(user.photo_url) document.getElementById("photo").src=user.photo_url;
+
+document.getElementById("pName").innerText="Name: "+user.first_name;
+document.getElementById("pUser").innerText="ID: "+user.id;
+
+document.getElementById("refLink").value=
+"https://t.me/Studybuddy_2025Bot?start="+user.id;
+
+if(user.photo_url){
+document.getElementById("photo").src=user.photo_url;
+}
 }
 
-/* TAP (100% FIXED - NO DOUBLE COUNT) */
+/* EXACT FINGER TAP SYSTEM */
+tapBtn.addEventListener("touchstart",tap,{passive:false});
 tapBtn.addEventListener("click",tap);
 
-function tap(){
+function tap(e){
 
-if(state.energy <= 0) return;
+e.preventDefault();
 
-let now = Date.now();
+let fingers = 1;
 
-/* anti double click */
-if(now - state.lastTap < 120) return;
+/* finger count */
+if(e.touches){
+fingers = e.touches.length;
+}
 
-state.lastTap = now;
+if(fingers > 4) fingers = 4;
 
-/* GAME LOGIC */
-state.energy -= 1;
-state.coins += 1;
+/* EXACT RULE */
+state.coins += fingers;
 
-/* UPDATE */
+/* USDT */
+state.usdt = state.coins / 1000;
+
+/* LEVEL */
+document.getElementById("level").innerText =
+Math.floor(state.coins / 5000) + 1;
+
 render();
+}
+
+/* WITHDRAW */
+function withdraw(){
+
+let w = document.getElementById("wallet").value;
+let a = parseFloat(document.getElementById("amount").value);
+
+if(a < 20){
+alert("Minimum 20 USDT");
+return;
+}
+
+if(a > state.usdt){
+alert("Not enough USDT");
+return;
+}
+
+alert("Withdraw request sent!");
+}
+
+/* COPY REF */
+function copyRef(){
+navigator.clipboard.writeText(document.getElementById("refLink").value);
+alert("Copied");
+}
+
+/* COPY DEPOSIT */
+function copyWallet(){
+navigator.clipboard.writeText(document.getElementById("depWallet").value);
+alert("Copied");
 }
 
 render();

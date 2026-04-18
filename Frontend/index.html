@@ -4,23 +4,6 @@
 <meta charset="UTF-8">
 <title>Mini Earn App</title>
 
-<script>
-/* CRASH PROTECTION */
-window.onerror = function(){ return true; };
-window.onunhandledrejection = function(){ return true; };
-
-/* SAFE ADS (ONLY IN CHROME, NOT TELEGRAM) */
-try {
-if (!window.Telegram || !window.Telegram.WebApp) {
-let ad = document.createElement("script");
-ad.src = "https://quge5.com/88/tag.min.js";
-ad.setAttribute("data-zone","230862");
-ad.async = true;
-document.head.appendChild(ad);
-}
-} catch(e){}
-</script>
-
 <style>
 body{
 margin:0;
@@ -54,7 +37,6 @@ font-size:22px;
 color:#ff9800;
 }
 
-/* TAP */
 .tap{
 width:260px;
 height:260px;
@@ -72,7 +54,6 @@ border-radius:50%;
 box-shadow:0 0 40px rgba(255,200,0,0.8);
 }
 
-/* NAV */
 .nav{
 position:fixed;
 bottom:0;
@@ -123,16 +104,8 @@ color:#fff;
 </div>
 
 <div class="card">
-<h3>Referral</h3>
-<p id="refLink">Loading...</p>
-<button onclick="copyRef()">Copy Link</button>
-</div>
-
-<div class="card">
 <h3>Social Tasks</h3>
-<button onclick="task('telegram')">Join Telegram</button>
-<button onclick="task('tiktok')">Follow TikTok</button>
-<button onclick="task('youtube')">Subscribe YouTube</button>
+<button onclick="task()">Complete Task</button>
 </div>
 
 </div>
@@ -161,132 +134,40 @@ color:#fff;
 <button onclick="show('withdraw')">Withdraw</button>
 </div>
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-
 <script>
 
-let API="https://crypto-4bbj.onrender.com";
-let token=localStorage.getItem("token");
+window.onerror = function(){ return true; };
 
-let coinsVal=0, usdtVal=0, refsVal=0;
+let coinsVal = 0;
 
 function show(s){
 document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
 }
 
-/* TELEGRAM SAFE */
-const tg = window.Telegram ? window.Telegram.WebApp : null;
-if(tg) tg.expand();
-
-const user = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user)
-? tg.initDataUnsafe.user
-: {id:"0",first_name:"User"};
-
-/* LOGIN */
-if(user && !token){
-fetch(API+"/api/tg-login",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-id:user.id,
-name:user.first_name
-})
-})
-.then(r=>r.json())
-.then(d=>{
-localStorage.setItem("token",d.token);
-location.reload();
-});
-}
-
-/* LOAD */
-async function load(){
-try{
-const res = await fetch(API+"/api/user",{headers:{Authorization:"Bearer "+token}});
-const u = await res.json();
-
-coinsVal=u.coins||0;
-usdtVal=u.usdt||0;
-refsVal=u.referrals||0;
-
-coins.innerText=coinsVal;
-usdt.innerText=usdtVal;
-refs.innerText=refsVal;
-
-level.innerText=Math.floor((coinsVal+usdtVal*1000)/1000)+1;
-
-userid.innerText="ID: "+user.id;
-
-refLink.innerText="https://t.me/YourBot?start="+user.id;
-
-}catch(e){}
-}
-
-/* TAP FIX */
+/* SAFE TAP (NO CRASH) */
 document.addEventListener("touchstart",(e)=>{
-
 try{
-let fingers = e.touches ? e.touches.length : 1;
-if(fingers>4) fingers=4;
+let f = e.touches ? e.touches.length : 1;
+if(f>4) f=4;
 
-coinsVal += fingers;
-
-coins.innerText=coinsVal;
-
-}catch(e){}
-
+coinsVal += f;
+document.getElementById("coins").innerText = coinsVal;
+}catch(err){}
 });
 
-/* SOCIAL TASK FIXED */
-function task(type){
-
-let url =
-type==="telegram"
-?"https://t.me/gangs234"
-:type==="tiktok"
-?"https://tiktok.com/@mammeliyas"
-:"https://youtube.com/@Mamme234";
-
-const tg = window.Telegram?.WebApp;
-
-if(tg && tg.openLink){
-tg.openLink(url);
-}else{
-window.open(url,"_blank");
+/* SIMPLE TASK */
+function task(){
+alert("Task completed!");
+coinsVal += 100;
+document.getElementById("coins").innerText = coinsVal;
 }
 
-setTimeout(()=>{
-
-let reward=0;
-if(type==="telegram") reward=500;
-if(type==="tiktok") reward=1000;
-if(type==="youtube") reward=1250;
-
-coinsVal+=reward;
-
-coins.innerText=coinsVal;
-
-alert("Task completed +"+reward);
-
-},5000);
-
-}
-
-/* COPY */
-function copyRef(){
-navigator.clipboard.writeText(refLink.innerText);
-alert("Copied");
-}
-
-/* WITHDRAW */
 function withdraw(){
 alert("Request sent");
 }
 
-load();
-
 </script>
 
 </body>
-  </html>
+</html>

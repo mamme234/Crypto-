@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Earn App Stable</title>
+<title>Earn App Full</title>
 
 <style>
 body{
@@ -22,8 +22,8 @@ background:rgba(255,255,255,0.05);
 
 .user{
 display:flex;
-gap:10px;
 align-items:center;
+gap:10px;
 }
 
 .user img{
@@ -43,7 +43,7 @@ padding:10px;
 
 .card{
 background:rgba(255,255,255,0.05);
-padding:15px;
+padding:12px;
 border-radius:10px;
 text-align:center;
 }
@@ -62,17 +62,17 @@ margin-top:30px;
 }
 
 .tap button{
-width:200px;
-height:200px;
+width:180px;
+height:180px;
 border-radius:50%;
 background:gold;
-font-size:20px;
 border:none;
+font-size:20px;
 }
 
-/* SCREENS */
+/* SCREEN */
 .screen{display:none;}
-.active{display:block;}
+.active{display:block;padding:10px;}
 
 /* NAV */
 .nav{
@@ -100,13 +100,13 @@ color:white;
 
 <div class="topbar">
 <div class="user">
-<img id="photo" src="">
+<img id="photo">
 <div>
 <div id="name">User</div>
 <div id="uname">@user</div>
 </div>
 </div>
-<div>Level <span id="level">1</span></div>
+<div>Lv <span id="level">1</span></div>
 </div>
 
 <div class="stats">
@@ -122,17 +122,47 @@ color:white;
 
 <!-- PROFILE -->
 <div id="profile" class="screen">
-<h3>Profile Screen</h3>
+
+<h2>Profile</h2>
+
+<p id="pName"></p>
+<p id="pUser"></p>
+
+<div class="card">
+Referral Link:
+<p id="ref"></p>
+</div>
+
 </div>
 
 <!-- WITHDRAW -->
 <div id="withdraw" class="screen">
-<h3>Withdraw Screen</h3>
+
+<h2>Withdraw</h2>
+
+<div class="card">
+<p>Min: 20 USDT</p>
+<p>Need 10 referrals or deposit 5 USDT</p>
+</div>
+
+<input placeholder="Wallet address" style="width:100%;padding:10px;">
+<br><br>
+<input placeholder="Amount USDT" style="width:100%;padding:10px;">
+
+<br><br>
+<button style="width:100%;padding:10px;">Withdraw</button>
+
 </div>
 
 <!-- ADS -->
 <div id="ads" class="screen">
-<h3>Ads Screen</h3>
+
+<h2>Ads</h2>
+
+<div class="card">
+<button onclick="alert('Ad clicked')">Watch Ad</button>
+</div>
+
 </div>
 
 <!-- NAV -->
@@ -147,29 +177,18 @@ color:white;
 
 <script>
 
-const API="https://crypto-4bbj.onrender.com";
-
-/* SAFE VARIABLES (IMPORTANT FIX) */
 let coins = 0;
 let usdt = 0;
-let token = null;
 let lastTap = 0;
 
-/* ELEMENTS (FIX "NOT DEFINED") */
 const coinsEl = document.getElementById("coins");
 const usdtEl = document.getElementById("usdt");
 const tapBtn = document.getElementById("tapBtn");
 
-/* SCREEN NAV */
+/* NAV */
 function show(id){
 document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
-}
-
-/* UPDATE UI */
-function update(){
-coinsEl.innerText = Math.floor(coins);
-usdtEl.innerText = usdt.toFixed(3);
 }
 
 /* TELEGRAM */
@@ -179,18 +198,32 @@ const user = tg?.initDataUnsafe?.user;
 if(tg) tg.expand();
 
 if(user){
+
 document.getElementById("name").innerText=user.first_name;
-document.getElementById("uname").innerText="@"+(user.username||"no_user");
-if(user.photo_url) document.getElementById("photo").src=user.photo_url;
+document.getElementById("uname").innerText="@"+(user.username||"user");
+
+document.getElementById("pName").innerText="Name: "+user.first_name;
+document.getElementById("pUser").innerText="ID: "+user.id;
+
+document.getElementById("ref").innerText=
+"https://t.me/YourBot?start="+user.id;
+
+if(user.photo_url)
+document.getElementById("photo").src=user.photo_url;
+
 }
 
-/* TAP FIX (NO CRASH) */
-tapBtn.addEventListener("click",tapHandler);
-tapBtn.addEventListener("touchstart",tapHandler);
+/* UPDATE */
+function update(){
+coinsEl.innerText = Math.floor(coins);
+usdtEl.innerText = usdt.toFixed(3);
+}
 
-function tapHandler(e){
+/* TAP */
+tapBtn.addEventListener("click",tap);
+tapBtn.addEventListener("touchstart",tap);
 
-e.preventDefault();
+function tap(e){
 
 let now = Date.now();
 let fingers = e.touches ? Math.min(e.touches.length,4) : 1;
@@ -200,53 +233,13 @@ if(now - lastTap < 200) bonus = 1.2;
 
 lastTap = now;
 
-/* SAFE CALC */
 coins += fingers * bonus;
 usdt = coins / 1000;
 
 update();
-
-/* OPTIONAL BACKEND (SAFE) */
-if(token){
-fetch(API+"/api/tap",{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-Authorization:"Bearer "+token
-},
-body:JSON.stringify({multi:fingers})
-}).catch(()=>{});
 }
-
-}
-
-/* LOGIN SAFE */
-async function login(){
-
-try{
-
-const res = await fetch(API+"/api/login",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-id:user?.id,
-name:user?.first_name,
-ref:user?.username
-})
-});
-
-const d = await res.json();
-token = d.token;
-
-}catch(e){
-setTimeout(login,3000);
-}
-
-}
-
-login();
 
 </script>
 
 </body>
-</html>
+  </html>

@@ -1,51 +1,159 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Earn Pro App</title>
+<meta charset="UTF-8">
+<title>Earn Pro</title>
 
 <script src="https://libtl.com/sdk.js"
 data-zone="3304242"
 data-sdk="show_3304242"></script>
 
 <style>
-body{margin:0;font-family:Arial;background:#0f172a;color:white;}
-.card{background:#1e293b;margin:10px;padding:15px;border-radius:10px;}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.stat{text-align:center;}
-.stat strong{font-size:20px;color:#facc15;}
-.tap{width:220px;margin:auto;}
-.tap img{width:200px;border-radius:50%;}
-button{width:100%;padding:10px;margin-top:5px;}
-.nav{position:fixed;bottom:0;width:100%;display:flex;background:#111;}
-.nav button{flex:1;}
+body{
+margin:0;
+font-family:Arial;
+background:linear-gradient(180deg,#0b122a,#020617);
+color:white;
+}
+
+/* TOP USER BAR */
+.topbar{
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:12px 15px;
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(10px);
+}
+
+.user{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.user img{
+width:45px;
+height:45px;
+border-radius:50%;
+border:2px solid gold;
+}
+
+.user div{
+line-height:1.2;
+}
+
+.username{
+font-weight:bold;
+}
+
+.small{
+font-size:12px;
+opacity:0.7;
+}
+
+/* STATS */
+.stats{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+padding:10px;
+}
+
+.card{
+background:rgba(255,255,255,0.05);
+padding:15px;
+border-radius:12px;
+text-align:center;
+}
+
+.card strong{
+display:block;
+font-size:20px;
+color:#facc15;
+}
+
+/* TAP */
+.tap-area{
+display:flex;
+justify-content:center;
+align-items:center;
+margin-top:40px;
+}
+
+.tap-btn{
+width:220px;
+height:220px;
+border-radius:50%;
+background:radial-gradient(circle,#facc15,#f59e0b);
+box-shadow:0 0 30px gold;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:18px;
+font-weight:bold;
+user-select:none;
+}
+
+.tap-btn:active{
+transform:scale(0.95);
+}
+
+/* NAV */
+.nav{
+position:fixed;
+bottom:0;
+width:100%;
+display:flex;
+background:#0f172a;
+}
+
+.nav button{
+flex:1;
+padding:12px;
+background:none;
+border:none;
+color:white;
+}
 </style>
 </head>
 
 <body>
 
-<div class="card grid">
-<div class="stat">Coins<br><strong id="coins">0</strong></div>
-<div class="stat">USDT<br><strong id="usdt">0</strong></div>
+<!-- TOP USER PROFILE -->
+<div class="topbar">
+
+<div class="user">
+<img id="photo" src="https://i.imgur.com/8Km9tLL.png">
+<div>
+<div class="username" id="name">Loading...</div>
+<div class="small" id="uname">@user</div>
+</div>
 </div>
 
-<div class="tap" id="tapArea">
-<img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg">
+<div class="small">
+Level: <span id="level">1</span>
 </div>
 
-<div class="card">
-<button onclick="task('telegram')">Telegram +500</button>
-<button onclick="task('tiktok')">TikTok +700</button>
-<button onclick="task('youtube')">YouTube +1000</button>
 </div>
 
-<div class="card">
-<input id="addr" placeholder="Wallet">
-<input id="amt" placeholder="Amount">
-<button onclick="withdraw()">Withdraw</button>
+<!-- STATS -->
+<div class="stats">
+<div class="card">Coins<strong id="coins">0</strong></div>
+<div class="card">USDT<strong id="usdt">0</strong></div>
 </div>
 
+<!-- TAP -->
+<div class="tap-area">
+<div class="tap-btn" id="tapBtn">TAP</div>
+</div>
+
+<!-- NAV -->
 <div class="nav">
-<button onclick="show()">Home</button>
+<button>Home</button>
+<button>Tasks</button>
+<button>Withdraw</button>
+<button>Profile</button>
 </div>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -55,11 +163,19 @@ button{width:100%;padding:10px;margin-top:5px;}
 const API="https://crypto-4bbj.onrender.com";
 let token;
 
+/* TELEGRAM USER */
 const tg=window.Telegram.WebApp;
 const user=tg.initDataUnsafe.user;
 
+tg.expand();
+
+/* TOP PROFILE */
+document.getElementById("name").innerText=user.first_name;
+document.getElementById("uname").innerText="@"+(user.username||"no_username");
+
 /* LOGIN */
 async function login(){
+
 const res=await fetch(API+"/api/login",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
@@ -69,68 +185,56 @@ name:user.first_name,
 ref:user.username
 })
 });
+
 const d=await res.json();
 token=d.token;
-load();
-}
-login();
 
-/* LOAD */
-async function load(){
-const r=await fetch(API+"/api/user",{
+loadUser();
+}
+
+/* LOAD DATA */
+async function loadUser(){
+
+const res=await fetch(API+"/api/user",{
 headers:{Authorization:"Bearer "+token}
 });
-const d=await r.json();
+
+const d=await res.json();
+
 coins.innerText=d.coins;
 usdt.innerText=d.usdt;
+level.innerText=d.level;
 }
 
-/* TAP */
-tapArea.addEventListener("touchstart",async e=>{
-let f=Math.min(e.touches.length,4);
+/* TAP SYSTEM (CONNECTED) */
+tapBtn.addEventListener("touchstart",async (e)=>{
 
-const r=await fetch(API+"/api/tap",{
+let fingers=Math.min(e.touches.length,4);
+
+const res=await fetch(API+"/api/tap",{
 method:"POST",
 headers:{
 "Content-Type":"application/json",
 Authorization:"Bearer "+token
 },
-body:JSON.stringify({multi:f})
+body:JSON.stringify({multi:fingers})
 });
 
-const d=await r.json();
+const d=await res.json();
+
 coins.innerText=d.coins;
 usdt.innerText=d.usdt;
+level.innerText=d.level;
+
 });
 
-/* TASK */
-async function task(t){
-await fetch(API+"/api/task",{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-Authorization:"Bearer "+token
-},
-body:JSON.stringify({type:t})
-});
-load();
+/* PROFILE IMAGE */
+if(user.photo_url){
+document.getElementById("photo").src=user.photo_url;
 }
 
-/* WITHDRAW */
-async function withdraw(){
-await fetch(API+"/api/withdraw",{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-Authorization:"Bearer "+token
-},
-body:JSON.stringify({
-amount:amt.value,
-address:addr.value
-})
-});
-alert("Sent");
-}
+/* START */
+login();
 
 </script>
 

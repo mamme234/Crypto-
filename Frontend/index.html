@@ -1,158 +1,66 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Mini Earn App</title>
+<title>Earn Pro App</title>
 
 <script src="https://libtl.com/sdk.js"
 data-zone="3304242"
 data-sdk="show_3304242"></script>
 
 <style>
-body{
-margin:0;
-font-family:Arial;
-background:linear-gradient(180deg,#0b1220,#020617);
-color:#fff;
-}
-
-.screen{display:none;padding:15px;}
-.active{display:block;}
-
-.card{
-background:#1a1a1a;
-padding:15px;
-margin:10px;
-border-radius:15px;
-}
-
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:10px;
-}
-
+body{margin:0;font-family:Arial;background:#0f172a;color:white;}
+.card{background:#1e293b;margin:10px;padding:15px;border-radius:10px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .stat{text-align:center;}
-.stat strong{font-size:20px;color:#ff9800;}
-
-.tap{
-width:240px;
-height:240px;
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-}
-
-.tap img{width:220px;border-radius:50%;}
-
-.nav{
-position:fixed;
-bottom:0;
-width:100%;
-display:flex;
-background:#111;
-}
-
-.nav button{
-flex:1;
-padding:10px;
-background:#222;
-color:#fff;
-border:none;
-}
+.stat strong{font-size:20px;color:#facc15;}
+.tap{width:220px;margin:auto;}
+.tap img{width:200px;border-radius:50%;}
+button{width:100%;padding:10px;margin-top:5px;}
+.nav{position:fixed;bottom:0;width:100%;display:flex;background:#111;}
+.nav button{flex:1;}
 </style>
 </head>
 
 <body>
 
-<!-- HOME -->
-<div id="home" class="screen active">
-
 <div class="card grid">
 <div class="stat">Coins<br><strong id="coins">0</strong></div>
 <div class="stat">USDT<br><strong id="usdt">0</strong></div>
-<div class="stat">Refs<br><strong id="refs">0</strong></div>
-<div class="stat">Level<br><strong id="level">1</strong></div>
 </div>
 
 <div class="tap" id="tapArea">
 <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg">
 </div>
 
-</div>
-
-<!-- PROFILE -->
-<div id="profile" class="screen">
-
 <div class="card">
-<h3 id="username"></h3>
-<p id="userid"></p>
+<button onclick="task('telegram')">Telegram +500</button>
+<button onclick="task('tiktok')">TikTok +700</button>
+<button onclick="task('youtube')">YouTube +1000</button>
 </div>
 
 <div class="card">
-<h3>Referral Link</h3>
-<p id="refLink"></p>
+<input id="addr" placeholder="Wallet">
+<input id="amt" placeholder="Amount">
+<button onclick="withdraw()">Withdraw</button>
 </div>
 
-</div>
-
-<!-- WITHDRAW -->
-<div id="withdraw" class="screen">
-
-<div class="card">
-<h3>Withdraw</h3>
-
-<input id="wAddress" placeholder="Wallet Address"
-style="width:100%;padding:10px">
-
-<br><br>
-
-<input id="wAmount" placeholder="USDT Amount"
-style="width:100%;padding:10px">
-
-<br><br>
-
-<button onclick="withdraw()">Request Withdraw</button>
-</div>
-
-</div>
-
-<!-- ADS -->
-<div id="ads" class="screen">
-
-<div class="card">
-<h3>Watch Ads</h3>
-<button onclick="watchAd()">Watch Monetag Ad</button>
-<p id="adTimer"></p>
-</div>
-
-</div>
-
-<!-- NAV -->
 <div class="nav">
-<button onclick="show('home')">Home</button>
-<button onclick="show('profile')">Profile</button>
-<button onclick="show('withdraw')">Withdraw</button>
-<button onclick="show('ads')">Ads</button>
+<button onclick="show()">Home</button>
 </div>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <script>
 
-const API = "https://crypto-4bbj.onrender.com";
-let token = localStorage.getItem("token");
+const API="https://crypto-4bbj.onrender.com";
+let token;
 
-/* SCREEN */
-function show(s){
-document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
-document.getElementById(s).classList.add("active");
-}
+const tg=window.Telegram.WebApp;
+const user=tg.initDataUnsafe.user;
 
 /* LOGIN */
-async function login(user){
-const res = await fetch(API+"/api/login",{
+async function login(){
+const res=await fetch(API+"/api/login",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
@@ -161,135 +69,70 @@ name:user.first_name,
 ref:user.username
 })
 });
-
-const data = await res.json();
-token = data.token;
-localStorage.setItem("token",token);
-
-loadUser();
+const d=await res.json();
+token=d.token;
+load();
 }
+login();
 
-/* LOAD USER */
-async function loadUser(){
-if(!token) return;
-
-const res = await fetch(API+"/api/user",{
+/* LOAD */
+async function load(){
+const r=await fetch(API+"/api/user",{
 headers:{Authorization:"Bearer "+token}
 });
-
-const d = await res.json();
-
-coins.innerText = d.coins;
-usdt.innerText = d.usdt;
-refs.innerText = d.refs;
-level.innerText = d.level || 1;
+const d=await r.json();
+coins.innerText=d.coins;
+usdt.innerText=d.usdt;
 }
 
-/* TAP FIX */
-tapArea.addEventListener("touchstart",async (e)=>{
+/* TAP */
+tapArea.addEventListener("touchstart",async e=>{
+let f=Math.min(e.touches.length,4);
 
-if(!token) return;
-
-let fingers = Math.min(e.touches.length,4);
-
-const res = await fetch(API+"/api/tap",{
+const r=await fetch(API+"/api/tap",{
 method:"POST",
 headers:{
 "Content-Type":"application/json",
 Authorization:"Bearer "+token
 },
-body:JSON.stringify({multi:fingers})
+body:JSON.stringify({multi:f})
 });
 
-const d = await res.json();
-
-coins.innerText = d.coins;
-usdt.innerText = d.usdt;
-level.innerText = d.level;
-
+const d=await r.json();
+coins.innerText=d.coins;
+usdt.innerText=d.usdt;
 });
 
-/* TELEGRAM USER */
-const tg = window.Telegram?.WebApp;
-if(tg) tg.expand();
-
-const user = tg?.initDataUnsafe?.user;
-
-if(user){
-
-username.innerText = user.first_name;
-userid.innerText = "ID: "+user.id;
-
-refLink.innerText =
-"https://t.me/YourBot?start="+user.username;
-
-login(user);
+/* TASK */
+async function task(t){
+await fetch(API+"/api/task",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+Authorization:"Bearer "+token
+},
+body:JSON.stringify({type:t})
+});
+load();
 }
 
 /* WITHDRAW */
 async function withdraw(){
-
-const res = await fetch(API+"/api/withdraw",{
+await fetch(API+"/api/withdraw",{
 method:"POST",
 headers:{
 "Content-Type":"application/json",
 Authorization:"Bearer "+token
 },
 body:JSON.stringify({
-amount:wAmount.value,
-address:wAddress.value
+amount:amt.value,
+address:addr.value
 })
 });
-
-const d = await res.json();
-alert(d.error || "Sent");
-}
-
-/* ADS */
-let cooldown=false;
-
-function watchAd(){
-
-if(cooldown){
-alert("Wait 60 sec");
-return;
-}
-
-if(typeof show_3304242 !== "function"){
-alert("No ads available");
-return;
-}
-
-show_3304242().then(()=>{
-
-fetch(API+"/api/tap",{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-Authorization:"Bearer "+token
-},
-body:JSON.stringify({multi:3})
-});
-
-alert("Reward added");
-
-cooldown=true;
-
-let t=60;
-let i=setInterval(()=>{
-t--;
-adTimer.innerText=t+"s";
-if(t<=0){
-clearInterval(i);
-cooldown=false;
-}
-},1000);
-
-});
-
+alert("Sent");
 }
 
 </script>
 
 </body>
-  </html>
+</html>

@@ -188,16 +188,12 @@ color:#fff;
 
 </div>
 
-<!-- ADS SCREEN -->
+<!-- ADS -->
 <div id="ads" class="screen">
 
 <div class="card" style="text-align:center">
 <h3>💰 Watch Ads & Earn</h3>
-
-<button class="task-btn" onclick="watchAdReward()">
-▶ Watch Monetag Ad
-</button>
-
+<button class="task-btn" onclick="watchAdReward()">Watch Ad</button>
 <p id="adTimer"></p>
 </div>
 
@@ -218,12 +214,10 @@ color:#fff;
 const API="https://crypto-4bbj.onrender.com";
 let token=localStorage.getItem("token");
 
-/* ===== FIXED GLOBAL VALUES ===== */
-let coinsVal = 0;
-let usdtVal = 0;
-let refsVal = 0;
+let coinsVal=0;
+let usdtVal=0;
+let refsVal=0;
 
-/* SCREEN */
 function show(s){
 document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
@@ -235,51 +229,62 @@ if (tg) tg.expand();
 
 const user = tg?.initDataUnsafe?.user;
 
-/* PROFILE FIX */
+/* PROFILE */
 if(user){
 username.innerText = user.first_name;
 userid.innerText = "ID: " + user.id + (user.username ? " | @" + user.username : "");
-
-refLink.innerText =
-"https://t.me/Studybuddy_2025Bot?start=" + user.id;
-
-if(user.photo_url){
-photo.src = user.photo_url;
-}
+refLink.innerText = "https://t.me/Studybuddy_2025Bot?start=" + user.id;
+if(user.photo_url) photo.src = user.photo_url;
 }
 
-/* TAP FIX (1 finger = 1 coin, 2 fingers = x2 etc) */
+/* LOAD */
+async function load(){
+try{
+const u = await fetch(API+"/api/user",{headers:{Authorization:"Bearer "+token}}).then(r=>r.json());
+
+coinsVal = u.coins || 0;
+refsVal = u.referrals || 0;
+
+usdtVal = Math.floor(coinsVal / 1000);
+
+coins.innerText = coinsVal;
+usdt.innerText = usdtVal;
+refs.innerText = refsVal;
+
+level.innerText = Math.floor(coinsVal / 1000) + 1;
+
+}catch(e){}
+}
+
+/* TAP FIX (YOUR REQUEST) */
 tapArea.addEventListener("touchstart",(e)=>{
 
 let fingers = e.touches?.length || 1;
-fingers = Math.min(fingers,4);
+fingers = Math.min(fingers, 4);
 
+/* 1 finger = 1 coin, 2 fingers = 2 coins */
 coinsVal += fingers;
 
-coins.innerText = coinsVal;
-
-/* USDT FIX: 1000 coins = 1 USDT */
-usdtVal = (coinsVal / 1000).toFixed(2);
-usdt.innerText = usdtVal;
+/* USDT FIX */
+usdtVal = Math.floor(coinsVal / 1000);
 
 /* LEVEL FIX */
 level.innerText = Math.floor(coinsVal / 1000) + 1;
 
-/* REF FIX (simple example) */
-refsVal = Math.floor(coinsVal / 5000);
-refs.innerText = refsVal;
+/* UI */
+coins.innerText = coinsVal;
+usdt.innerText = usdtVal;
 
 });
 
 /* TASK */
 function task(type){
-let url=
+let url =
 type==="telegram"
 ?"https://t.me/gangs234"
 :type==="tiktok"
 ?"https://tiktok.com"
 :"https://youtube.com";
-
 window.open(url,"_blank");
 }
 
@@ -289,62 +294,49 @@ navigator.clipboard.writeText(refLink.innerText);
 alert("Copied");
 }
 
-/* ADS FIX */
-let adCooldown = false;
+/* ADS SAFE */
+let adCooldown=false;
 
 function watchAdReward(){
 
-if(adCooldown){
-alert("Wait 60 seconds");
-return;
-}
+if(adCooldown) return alert("Wait 60s");
 
 if(typeof show_3304242 !== "function"){
-alert("Ad not ready or no ads available");
-return;
+return alert("No ads available");
 }
 
-/* Monetag proper call */
 show_3304242().then(()=>{
 
 let reward = 310 + Math.floor(Math.random()*90);
 
 coinsVal += reward;
+usdtVal = Math.floor(coinsVal / 1000);
+
 coins.innerText = coinsVal;
-
-alert("+"+reward+" coins");
-
-/* update USDT + level */
-usdtVal = (coinsVal / 1000).toFixed(2);
 usdt.innerText = usdtVal;
 
-level.innerText = Math.floor(coinsVal / 1000) + 1;
+adCooldown=true;
 
-adCooldown = true;
+let t=60;
+adTimer.innerText="Wait "+t+"s";
 
-let t = 60;
-adTimer.innerText = "Next ad in: " + t + "s";
-
-let timer = setInterval(()=>{
-
+let x=setInterval(()=>{
 t--;
-adTimer.innerText = "Next ad in: " + t + "s";
-
+adTimer.innerText="Wait "+t+"s";
 if(t<=0){
-clearInterval(timer);
-adCooldown = false;
-adTimer.innerText = "Ready";
+clearInterval(x);
+adCooldown=false;
+adTimer.innerText="";
 }
-
 },1000);
 
-}).catch(()=>{
-alert("No ads available now");
 });
 
 }
 
+load();
+
 </script>
 
 </body>
-        </html>
+</html>

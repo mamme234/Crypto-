@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Crypto Tap Game</title>
+<title>Crypto Tap Pro</title>
 
 <style>
 body{
@@ -12,15 +12,13 @@ background:radial-gradient(circle at top,#1b2a4a,#050914 70%);
 color:white;
 }
 
-/* TOP BAR */
+/* TOP */
 .topbar{
 display:flex;
 justify-content:space-between;
-align-items:center;
 padding:14px;
 background:rgba(255,255,255,0.06);
 backdrop-filter:blur(10px);
-border-bottom:1px solid rgba(255,255,255,0.08);
 }
 
 .user{
@@ -30,18 +28,17 @@ align-items:center;
 }
 
 .user img{
-width:46px;
-height:46px;
+width:45px;
+height:45px;
 border-radius:50%;
-border:2px solid #facc15;
-box-shadow:0 0 15px rgba(250,204,21,0.5);
+border:2px solid gold;
 }
 
 /* STATS */
 .stats{
 display:flex;
 justify-content:space-around;
-margin-top:12px;
+margin-top:10px;
 }
 
 .box{
@@ -50,7 +47,6 @@ padding:12px;
 border-radius:14px;
 width:40%;
 text-align:center;
-backdrop-filter:blur(8px);
 }
 
 .box strong{
@@ -63,57 +59,33 @@ color:#facc15;
 .tap{
 display:flex;
 justify-content:center;
-margin-top:70px;
+margin-top:60px;
 }
 
 .tap button{
-width:220px;
-height:220px;
+width:210px;
+height:210px;
 border-radius:50%;
 border:none;
 font-size:22px;
-font-weight:bold;
-color:#111;
 background:radial-gradient(circle,#ffe066,#facc15);
 box-shadow:0 0 40px rgba(250,204,21,0.6);
-transition:0.15s;
 }
 
-.tap button:active{
-transform:scale(0.92);
-}
-
-/* SCREENS */
+/* SCREEN */
 .screen{
 display:none;
 padding:15px;
-animation:fade 0.2s ease;
 }
 
 .active{display:block;}
 
-@keyframes fade{
-from{opacity:0;transform:translateY(10px);}
-to{opacity:1;transform:translateY(0);}
-}
-
-/* INPUTS */
-input{
-width:100%;
+/* CARDS */
+.card{
+background:rgba(255,255,255,0.06);
 padding:12px;
-border-radius:10px;
-border:none;
-background:rgba(255,255,255,0.08);
-color:white;
-margin-top:8px;
-}
-
-/* BUTTONS */
-button{
-border:none;
-border-radius:10px;
-padding:12px;
-font-weight:bold;
+border-radius:12px;
+margin-top:10px;
 }
 
 /* NAV */
@@ -123,8 +95,6 @@ bottom:0;
 width:100%;
 display:flex;
 background:rgba(0,0,0,0.6);
-backdrop-filter:blur(10px);
-border-top:1px solid rgba(255,255,255,0.1);
 }
 
 .nav button{
@@ -132,7 +102,7 @@ flex:1;
 padding:12px;
 background:none;
 color:white;
-font-size:13px;
+border:none;
 }
 </style>
 </head>
@@ -164,65 +134,71 @@ font-size:13px;
 
 </div>
 
-<!-- PROFILE -->
+<!-- PROFILE (WITHDRAW + ADS + TASKS) -->
 <div id="profile" class="screen">
 
-<h2>Profile</h2>
+<h2>👤 Profile</h2>
 
 <p id="pName"></p>
 <p id="pUser"></p>
 
-<h3>Referral Link</h3>
-<input id="refLink" readonly>
-<button onclick="copyRef()" style="width:100%;margin-top:8px">
+<!-- REF -->
+<div class="card">
+<h3>🔗 Referral</h3>
+<input id="refLink" readonly style="width:100%;padding:10px">
+<button onclick="copyRef()" style="width:100%;margin-top:5px">
 Copy Link
 </button>
-
 </div>
 
-<!-- WITHDRAW -->
-<div id="withdraw" class="screen">
-
-<h2>Withdraw</h2>
-
-<p>Min: 20 USDT</p>
-
-<input id="wallet" placeholder="Wallet address">
-<input id="amount" placeholder="Amount USDT">
-
-<button onclick="withdraw()" style="width:100%;margin-top:10px">
-Withdraw
-</button>
-
-</div>
-
-<!-- DEPOSIT -->
-<div id="deposit" class="screen">
-
-<h2>Deposit</h2>
-
-<input id="depWallet" readonly
-value="UQAYjMccjJ8Xn1z9hodUImMjJCB2qmWGjlMup9-sVZtEQFWH">
-
-<button onclick="copyWallet()" style="width:100%;margin-top:10px">
-Copy Address
-</button>
-
+<!-- SOCIAL TASKS -->
+<div class="card">
+<h3>🔥 Social Tasks</h3>
+<button onclick="openTask('telegram')">Join Telegram (+500)</button>
+<button onclick="openTask('youtube')">Subscribe YouTube (+1000)</button>
+<button onclick="openTask('tiktok')">Follow TikTok (+700)</button>
 </div>
 
 <!-- ADS -->
-<div id="ads" class="screen">
-<h2>Ads</h2>
-<button onclick="alert('Ad clicked')">Watch Ad</button>
+<div class="card">
+<h3>💰 Ads Reward</h3>
+<button onclick="watchAd()">Watch Ad</button>
+</div>
+
+<!-- WITHDRAW (INSIDE PROFILE) -->
+<div class="card">
+<h3>💸 Withdraw</h3>
+<p>Min: 20 USDT</p>
+
+<input id="wallet" placeholder="Wallet address" style="width:100%;padding:10px">
+<input id="amount" placeholder="Amount USDT" style="width:100%;padding:10px">
+
+<button onclick="withdraw()" style="width:100%;margin-top:5px">
+Withdraw
+</button>
+</div>
+
+</div>
+
+<!-- DEPOSIT (ONLY HERE) -->
+<div id="withdraw" class="screen">
+
+<h2>💰 Deposit</h2>
+
+<input id="depWallet" readonly style="width:100%;padding:10px"
+value="UQAYjMccjJ8Xn1z9hodUImMjJCB2qmWGjlMup9-sVZtEQFWH">
+
+<button onclick="copyWallet()" style="width:100%;margin-top:10px">
+Copy Deposit Address
+</button>
+
 </div>
 
 <!-- NAV -->
 <div class="nav">
 <button onclick="show('home')">Home</button>
 <button onclick="show('profile')">Profile</button>
-<button onclick="show('withdraw')">Withdraw</button>
-<button onclick="show('deposit')">Deposit</button>
-<button onclick="show('ads')">Ads</button>
+<button onclick="show('withdraw')">Deposit</button>
 </div>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -245,7 +221,7 @@ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 }
 
-/* RENDER */
+/* UPDATE */
 function render(){
 coinsEl.innerText = Math.floor(state.coins);
 usdtEl.innerText = state.usdt.toFixed(3);
@@ -273,7 +249,7 @@ document.getElementById("photo").src=user.photo_url;
 }
 }
 
-/* TAP SYSTEM (FIXED 1–4 FINGERS EXACT) */
+/* TAP */
 tapBtn.addEventListener("touchstart",tap,{passive:false});
 tapBtn.addEventListener("click",tap);
 
@@ -281,23 +257,38 @@ function tap(e){
 
 e.preventDefault();
 
-let fingers = 1;
+let fingers = e.touches ? Math.min(e.touches.length,4) : 1;
 
-if(e.touches){
-fingers = e.touches.length;
-}
-
-if(fingers > 4) fingers = 4;
-
-/* EXACT COIN RULE */
 state.coins += fingers;
-
-/* USDT */
 state.usdt = state.coins / 1000;
 
 document.getElementById("level").innerText =
 Math.floor(state.coins / 5000) + 1;
 
+render();
+}
+
+/* TASKS */
+function openTask(type){
+
+if(type==="telegram") window.open("https://t.me/Studybuddy_2025Bot","_blank");
+if(type==="youtube") window.open("https://youtube.com","_blank");
+if(type==="tiktok") window.open("https://tiktok.com","_blank");
+
+setTimeout(()=>{
+state.coins += (type==="telegram"?500:type==="youtube"?1000:700);
+state.usdt = state.coins / 1000;
+render();
+alert("Reward added!");
+},4000);
+
+}
+
+/* ADS */
+function watchAd(){
+alert("Ad watched +300 coins");
+state.coins += 300;
+state.usdt = state.coins / 1000;
 render();
 }
 
@@ -320,13 +311,12 @@ return;
 alert("Withdraw request sent!");
 }
 
-/* COPY REF */
+/* COPY */
 function copyRef(){
 navigator.clipboard.writeText(document.getElementById("refLink").value);
 alert("Copied");
 }
 
-/* COPY DEP */
 function copyWallet(){
 navigator.clipboard.writeText(document.getElementById("depWallet").value);
 alert("Copied");

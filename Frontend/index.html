@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <title>Mini Earn App</title>
 
+<!-- MONETAG SDK (DO NOT CHANGE) -->
+<script src='//libtl.com/sdk.js' data-zone='10892289' data-sdk='show_10892289'></script>
+
 <style>
 body{
 margin:0;
@@ -37,7 +40,7 @@ font-size:22px;
 color:#ff9800;
 }
 
-/* TAP DESIGN RESTORED */
+/* TAP DESIGN */
 .tap{
 width:260px;
 height:260px;
@@ -52,34 +55,7 @@ touch-action:none;
 width:230px;
 height:230px;
 border-radius:50%;
-box-shadow:0 0 40px rgba(255,200,0,0.8),0 0 80px rgba(255,150,0,0.5);
-animation:glow 2s infinite alternate;
-}
-
-@keyframes glow{
-from{filter:brightness(1);}
-to{filter:brightness(1.4);}
-}
-
-/* LEVEL BAR RESTORED */
-.level-box{
-margin:10px;
-padding:10px;
-border-radius:15px;
-background:rgba(255,255,255,0.05);
-}
-
-.progress{
-height:10px;
-background:#222;
-border-radius:10px;
-overflow:hidden;
-}
-
-.progress-fill{
-height:100%;
-background:linear-gradient(90deg,#ff9800,#ffd54f);
-width:10%;
+box-shadow:0 0 40px rgba(255,200,0,0.8);
 }
 
 /* NAV */
@@ -113,20 +89,22 @@ color:#fff;
 <div class="stat">Level<strong id="level">1</strong></div>
 </div>
 
-<div class="level-box">
-<h3>Next Level</h3>
-<div class="progress">
-<div class="progress-fill" id="progressBar"></div>
-</div>
-</div>
-
-<!-- TAP -->
-<div class="tap" id="tapArea">
+<div class="tap">
 <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg">
 </div>
 
-<div style="text-align:center;font-size:12px;color:#aaa">
-1 finger = 1 coin | max 4 fingers
+<!-- ADS BUTTON (IMPORTANT FOR STATS) -->
+<div class="card" style="text-align:center">
+<h3>💰 Earn More</h3>
+<button onclick="watchAd()" style="
+padding:12px;
+background:orange;
+border:none;
+color:#fff;
+border-radius:10px;
+font-weight:bold;">
+Watch Ad
+</button>
 </div>
 
 </div>
@@ -140,22 +118,6 @@ color:#fff;
 <p id="userid"></p>
 </div>
 
-<div class="card">
-<h3>Social Tasks</h3>
-<button onclick="task('telegram')">Join Telegram</button>
-<button onclick="task('tiktok')">Follow TikTok</button>
-<button onclick="task('youtube')">Subscribe YouTube</button>
-</div>
-
-<!-- MONETIZATION SLOT (SAFE) -->
-<div class="card">
-<h3>Earn More</h3>
-<button onclick="openOfferwall()">Watch Ads / Offers</button>
-<p style="font-size:12px;color:#aaa">
-Opens external reward page (Telegram safe)
-</p>
-</div>
-
 </div>
 
 <!-- WITHDRAW -->
@@ -165,12 +127,6 @@ Opens external reward page (Telegram safe)
 <h3>Withdraw Rules</h3>
 <p>Minimum withdraw: 20 USDT</p>
 <p>Need 10 referrals OR deposit 5 USDT</p>
-</div>
-
-<div class="card">
-<input id="wAddress" placeholder="Wallet address" style="width:100%;padding:10px;">
-<input id="wAmount" placeholder="Amount" style="width:100%;padding:10px;margin-top:10px;">
-<button onclick="withdraw()">Submit</button>
 </div>
 
 </div>
@@ -193,7 +149,7 @@ document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
 }
 
-/* SAFE TAP */
+/* TAP SYSTEM */
 document.addEventListener("touchstart",(e)=>{
 let f = e.touches ? e.touches.length : 1;
 if(f>4) f=4;
@@ -202,37 +158,36 @@ coinsVal += f;
 document.getElementById("coins").innerText = coinsVal;
 });
 
-/* SOCIAL TASK */
-function task(type){
-let url =
-type==="telegram"
-?"https://t.me/gangs234"
-:type==="tiktok"
-?"https://tiktok.com"
-:"https://youtube.com";
+/* 🔥 MONETAG REWARDED AD (FIXED) */
+function watchAd(){
 
-window.Telegram?.WebApp?.openLink
-? window.Telegram.WebApp.openLink(url)
-: window.open(url,"_blank");
+try {
 
-setTimeout(()=>{
-coinsVal += (type==="tiktok"?1000:500);
+if(typeof show_10892289 === "function"){
+
+show_10892289().then(()=>{
+
+// REWARD USER AFTER AD
+coinsVal += 100;
 document.getElementById("coins").innerText = coinsVal;
-alert("Task completed");
-},4000);
+
+alert("You earned 100 coins!");
+
+}).catch(()=>{
+alert("Ad not completed");
+});
+
+} else {
+alert("Ads not loaded yet");
 }
 
-/* SAFE MONETIZATION BUTTON */
-function openOfferwall(){
-window.Telegram?.WebApp?.openLink("https://your-offerwall-link.com")
-|| window.open("https://your-offerwall-link.com","_blank");
+} catch(e){
+console.log("ad error", e);
 }
 
-function withdraw(){
-alert("Request sent");
 }
 
 </script>
 
 </body>
-  </html>
+                                     </html>

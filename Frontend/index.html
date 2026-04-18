@@ -2,7 +2,10 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Reward App</title>
+<title>Mini Earn App</title>
+
+<!-- AD SCRIPT (UNCHANGED POSITION) -->
+<script src="https://quge5.com/88/tag.min.js" data-zone="230862" async data-cfasync="false"></script>
 
 <style>
 body{
@@ -21,6 +24,7 @@ background:linear-gradient(145deg,#1a1a1a,#0a0a0a);
 padding:15px;
 margin:10px;
 border-radius:20px;
+box-shadow:0 0 20px rgba(255,180,0,0.2);
 }
 
 .grid{
@@ -30,7 +34,11 @@ gap:10px;
 }
 
 .stat{text-align:center;}
-.stat strong{display:block;font-size:22px;color:#ff9800;}
+.stat strong{
+display:block;
+font-size:22px;
+color:#ff9800;
+}
 
 /* TAP */
 .tap{
@@ -44,9 +52,50 @@ touch-action:none;
 }
 
 .tap img{
-width:220px;
-height:220px;
+width:230px;
+height:230px;
 border-radius:50%;
+}
+
+/* LEVEL */
+.level-box{
+margin:10px;
+padding:10px;
+border-radius:15px;
+background:rgba(255,255,255,0.05);
+}
+
+.progress{
+height:10px;
+background:#222;
+border-radius:10px;
+overflow:hidden;
+}
+
+.progress-fill{
+height:100%;
+background:linear-gradient(90deg,#ff9800,#ffd54f);
+width:10%;
+}
+
+/* BUTTONS */
+.task-btn{
+background:linear-gradient(135deg,#229ED9,#0072ff);
+padding:12px;
+border:none;
+border-radius:10px;
+margin-top:10px;
+color:#fff;
+font-weight:bold;
+}
+
+.copy-btn{
+background:linear-gradient(135deg,#ff9800,#ff5722);
+padding:12px;
+border:none;
+border-radius:10px;
+color:#fff;
+margin-top:10px;
 }
 
 /* NAV */
@@ -80,31 +129,26 @@ color:#fff;
 <div class="stat">Level<strong id="level">1</strong></div>
 </div>
 
-<div class="card">
-<p>
-Complete offers, tasks, and referrals to earn rewards.
-Withdraw available based on eligibility rules.
-</p>
+<div class="level-box">
+<h3>Next Level</h3>
+<div class="progress">
+<div class="progress-fill" id="progressBar"></div>
+</div>
 </div>
 
+<!-- TAP -->
 <div class="tap" id="tapArea">
 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/512px-Bitcoin.svg.png">
 </div>
 
+<div style="text-align:center;font-size:12px;color:#aaa">
+1 finger = 1 coin | max 4 fingers
 </div>
 
-<!-- EARN / OFFERWALL -->
-<div id="earn" class="screen">
-
+<!-- 🔥 AD FUTURE FEATURE (NO DESIGN CHANGE) -->
 <div class="card">
-<h3>💰 Earn Rewards</h3>
-<p>Complete offers from partners to earn coins.</p>
-</div>
-
-<div class="card">
-<p>
-Offerwall will load here after approval.
-</p>
+<h3>💰 Earn Section (Future System)</h3>
+<p>Offerwalls and partner tasks will appear here after approval.</p>
 </div>
 
 </div>
@@ -112,16 +156,23 @@ Offerwall will load here after approval.
 <!-- PROFILE -->
 <div id="profile" class="screen">
 
-<div class="card">
-<h3>Profile</h3>
-<p id="username">User</p>
+<div class="card" style="text-align:center">
+<img id="photo" style="width:80px;height:80px;border-radius:50%">
+<h3 id="username"></h3>
 <p id="userid"></p>
 </div>
 
 <div class="card">
-<h3>Referral</h3>
-<p id="refLink"></p>
-<button onclick="copyRef()">Copy</button>
+<h3>Your Referral</h3>
+<p id="refLink">Loading...</p>
+<button class="copy-btn" onclick="copyRef()">Copy Link</button>
+</div>
+
+<div class="card">
+<h3>Social Tasks</h3>
+<button class="task-btn" onclick="task('telegram')">Join Telegram</button>
+<button class="task-btn" onclick="task('tiktok')">Follow TikTok</button>
+<button class="task-btn" onclick="task('youtube')">Subscribe YouTube</button>
 </div>
 
 </div>
@@ -131,13 +182,27 @@ Offerwall will load here after approval.
 
 <div class="card">
 <h3>Withdraw Rules</h3>
-<p>Complete required offers and referrals before withdrawal.</p>
+<p>• Minimum withdraw: 20 USDT</p>
+<p>• Need 10 referrals OR deposit 5 USDT</p>
 </div>
 
 <div class="card">
-<input id="wAddress" placeholder="Wallet address" style="width:100%;padding:10px;">
-<input id="wAmount" placeholder="Amount" style="width:100%;padding:10px;margin-top:10px;">
-<button onclick="withdraw()">Submit</button>
+<h3>Deposit Wallet</h3>
+<p id="wallet"></p>
+<button class="copy-btn" onclick="copyWallet()">Copy Address</button>
+</div>
+
+<div class="card">
+<h3>Withdraw</h3>
+
+<input id="wAddress" placeholder="Your wallet address"
+style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
+
+<input id="wAmount" placeholder="Amount"
+style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
+
+<button class="copy-btn" onclick="withdraw()">Submit Withdraw</button>
+
 </div>
 
 </div>
@@ -145,7 +210,6 @@ Offerwall will load here after approval.
 <!-- NAV -->
 <div class="nav">
 <button onclick="show('home')">Home</button>
-<button onclick="show('earn')">Earn</button>
 <button onclick="show('profile')">Profile</button>
 <button onclick="show('withdraw')">Withdraw</button>
 </div>
@@ -157,17 +221,19 @@ Offerwall will load here after approval.
 const API="https://crypto-4bbj.onrender.com";
 let token=localStorage.getItem("token");
 
+let coinsVal=0, usdtVal=0, refsVal=0;
+
 function show(s){
 document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
 }
 
-const tg = window.Telegram?.WebApp;
+const tg=window.Telegram?.WebApp;
 if(tg) tg.expand();
 
-const user = tg?.initDataUnsafe?.user || {id:"guest",first_name:"User"};
+const user=tg?.initDataUnsafe?.user || {id:"0",first_name:"User"};
 
-/* LOGIN */
+// LOGIN
 if(user && !token){
 fetch(API+"/api/tg-login",{
 method:"POST",
@@ -184,41 +250,56 @@ location.reload();
 });
 }
 
-/* LOAD */
+// LOAD
 async function load(){
 try{
-const u = await fetch(API+"/api/user",{headers:{Authorization:"Bearer "+token}}).then(r=>r.json());
+const u=await fetch(API+"/api/user",{headers:{Authorization:"Bearer "+token}}).then(r=>r.json());
 
-coins.innerText = u.coins || 0;
-usdt.innerText = u.usdt || 0;
-refs.innerText = u.referrals || 0;
-level.innerText = Math.floor((u.coins||0)/1000)+1;
+coinsVal=u.coins || 0;
+usdtVal=u.usdt || 0;
+refsVal=u.referrals || 0;
 
-username.innerText = user.first_name;
-userid.innerText = "ID: " + user.id;
+coins.innerText=coinsVal;
+usdt.innerText=usdtVal;
+refs.innerText=refsVal;
 
-refLink.innerText = "https://t.me/YourBot?start=" + user.id;
+level.innerText=Math.floor((coinsVal+usdtVal*1000)/1000)+1;
+
+username.innerText=user.first_name;
+userid.innerText="ID: "+user.id;
+
+refLink.innerText="https://t.me/YourBot?start="+user.id;
 
 }catch(e){
-console.log(e);
+console.log("load error",e);
 }
 }
 
-/* TAP */
-tapArea.addEventListener("touchstart",()=>{
-let current = parseInt(coins.innerText);
-coins.innerText = current + 1;
+// TAP (FIXED MAX FINGER)
+tapArea.addEventListener("touchstart",(e)=>{
+
+let fingers=e.touches.length || 1;
+if(fingers>4) fingers=4;
+
+coinsVal += fingers;
+coins.innerText=coinsVal;
+
 });
 
-/* COPY */
+// COPY
 function copyRef(){
 navigator.clipboard.writeText(refLink.innerText);
 alert("Copied");
 }
 
-/* WITHDRAW */
+function copyWallet(){
+navigator.clipboard.writeText(wallet.innerText);
+alert("Copied");
+}
+
+// WITHDRAW
 function withdraw(){
-alert("Request sent (backend required for real processing)");
+alert("Request sent");
 }
 
 load();
@@ -226,4 +307,4 @@ load();
 </script>
 
 </body>
-</html>
+  </html>

@@ -2,116 +2,138 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const axios = require("axios");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const MONGO_URL = process.env.MONGO_URL;
+mongoose.connect(process.env.MONGO_URL);
+
 const JWT_SECRET = process.env.JWT_SECRET;
 
-mongoose.connect(MONGO_URL);
-
-// ================= USER MODEL =================
+// ================= USER =================
 const User = mongoose.model("User", new mongoose.Schema({
-telegramId: String,
-name: String,
-photo: String,
+telegramId:String,
+name:String,
+coins:{type:Number,default:0},
+usdt:{type:Number,default:0},
+refs:{type:Number,default:0},
+lastTap:{type:Number,default:0}
+}));
 
-coins: { type: Number, default: 0 },
-usdt: { type: Number, default: 0 },
-referrals: { type: Number, default: 0 },
-
-refUsers: { type: Array, default: [] }
+// ================= WITHDRAW =================
+const Withdraw = mongoose.model("Withdraw", new mongoose.Schema({
+userId:String,
+amount:Number,
+address:String,
+status:{type:String,default:"pending"}, // pending | processing | paid | failed
+txId:String,
+createdAt:{type:Date,default:Date.now}
 }));
 
 // ================= AUTH =================
 function auth(req,res,next){
-const token = req.headers.authorization;
-if(!token) return res.json({message:"no token"});
-
+const t=req.headers.authorization;
+if(!t) return res.json({error:"no token"});
 try{
-req.userId = jwt.verify(token.split(" ")[1], JWT_SECRET).id;
+req.userId=jwt.verify(t.split(" ")[1],JWT_SECRET).id;
 next();
 }catch{
-res.json({message:"invalid token"});
+res.json({error:"invalid"});
 }
 }
 
-// ================= LOGIN =================
-app.post("/api/tg-login", async (req,res)=>{
-const {id,name,photo} = req.body;
-
-let u = await User.findOne({telegramId:id});
-
-if(!u){
-u = await User.create({telegramId:id,name,photo});
-}
-
-const token = jwt.sign({id:u._id}, JWT_SECRET);
-res.json({token});
-});
-
-// ================= GET USER =================
+// ================= USER =================
 app.get("/api/user", auth, async (req,res)=>{
 const u = await User.findById(req.userId);
-
-res.json({
-coins: u.coins,
-usdt: u.usdt,
-referrals: u.referrals
-});
+res.json(u);
 });
 
-// ================= TAP SYSTEM =================
+// ================= TAP =================
 app.post("/api/tap", auth, async (req,res)=>{
 const u = await User.findById(req.userId);
 
-let multi = Math.min(Math.max(req.body.multi || 1,1),4);
+let now = Date.now();
+if(now - u.lastTap < 200) return res.json(u);
 
-u.coins += multi;
+u.lastTap = now;
 
-// convert
+let tap = Math.min(Math.max(req.body.multi || 1,1),4);
+
+u.coins += tap;
 u.usdt = Math.floor(u.coins / 1000);
 
 await u.save();
 
-res.json({
-coins: u.coins,
-usdt: u.usdt
-});
+res.json(u);
 });
 
-// ================= REFERRAL =================
-app.post("/api/ref", auth, async (req,res)=>{
-const {refId} = req.body;
-
-const user = await User.findById(req.userId);
-const refUser = await User.findOne({telegramId:refId});
-
-if(refUser && refUser._id != user._id){
-refUser.referrals += 1;
-refUser.coins += 100;
-
-await refUser.save();
-}
-
-res.json({ok:true});
-});
-
-// ================= WITHDRAW =================
+// ================= WITHDRAW REQUEST =================
 app.post("/api/withdraw", auth, async (req,res)=>{
-const {amount} = req.body;
-
+const {amount,address} = req.body;
 const u = await User.findById(req.userId);
 
-if(amount < 20) return res.json({message:"Min 20 USDT"});
-if(u.usdt < amount) return res.json({message:"Not enough USDT"});
+if(amount < 20) return res.json({error:"min 20 USDT"});
+if(u.usdt < amount) return res.json({error:"not enough"});
 
+// lock funds (important)
 u.usdt -= amount;
 await u.save();
 
-res.json({message:"Withdraw sent"});
+const w = await Withdraw.create({
+userId:u._id,
+amount,
+address,
+status:"pending"
 });
 
-app.listen(3000,()=>console.log("Server running"));
+res.json({success:true,withdraw:w});
+});
+
+// ================= ADMIN PAYOUT (BINANCE PAY READY) =================
+app.post("/api/admin/pay", async (req,res)=>{
+const {id} = req.body;
+
+const w = await Withdraw.findById(id);
+if(!w) return res.json({error:"not found"});
+
+try{
+
+// PLACEHOLDER FOR REAL API (Binance Pay / NowPayments)
+const response = await axios.post("https://api.paymentprovider.com/send",{
+address:w.address,
+amount:w.amount
+});
+
+// if success
+w.status="paid";
+w.txId=response.data.txId || "manual";
+await w.save();
+
+res.json({success:true});
+
+}catch(e){
+
+w.status="failed";
+await w.save();
+
+res.json({error:"payment failed"});
+}
+});
+
+// ================= ADMIN LIST =================
+app.get("/api/admin/withdraws", async (req,res)=>{
+const list = await Withdraw.find().sort({createdAt:-1});
+res.json(list);
+});
+
+// ================= STATS =================
+app.get("/api/admin/stats", async (req,res)=>{
+const users = await User.countDocuments();
+const withdraws = await Withdraw.countDocuments();
+
+res.json({users,withdraws});
+});
+
+app.listen(3000,()=>console.log("v10 PAYOUT READY"));

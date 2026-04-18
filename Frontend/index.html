@@ -4,8 +4,10 @@
 <meta charset="UTF-8">
 <title>Mini Earn App</title>
 
-<!-- ✅ MONETAG (ADDED ONLY) -->
-<script src='//libtl.com/sdk.js' data-zone='10892289' data-sdk='show_10892289'></script>
+<!-- ✅ MONETAG ADDED -->
+<script src="https://libtl.com/sdk.js"
+data-zone="10892291"
+data-sdk="show_10892291"></script>
 
 <style>
 body{
@@ -123,30 +125,14 @@ border:none;
 background:#111;
 color:#fff;
 }
-
-/* ================= NEW ADS SCREEN ================= */
-.ads-box{
-text-align:center;
-padding:20px;
-}
-
-.ads-btn{
-background:linear-gradient(135deg,#00c6ff,#0072ff);
-padding:15px;
-border:none;
-border-radius:12px;
-color:white;
-font-weight:bold;
-width:100%;
-margin-top:20px;
-}
 </style>
 </head>
 
 <body>
 
-<!-- HOME (UNCHANGED) -->
+<!-- HOME -->
 <div id="home" class="screen active">
+
 <div class="card grid">
 <div class="stat">Coins<strong id="coins">0</strong></div>
 <div class="stat">USDT<strong id="usdt">0</strong></div>
@@ -164,10 +150,12 @@ margin-top:20px;
 <div class="tap" id="tapArea">
 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/512px-Bitcoin.svg.png">
 </div>
+
 </div>
 
-<!-- PROFILE (UNCHANGED) -->
+<!-- PROFILE -->
 <div id="profile" class="screen">
+
 <div class="card" style="text-align:center">
 <img id="photo" style="width:90px;height:90px;border-radius:50%;border:3px solid #ff9800;">
 <h3 id="username"></h3>
@@ -179,34 +167,46 @@ margin-top:20px;
 <p id="refLink"></p>
 <button class="copy-btn" onclick="copyRef()">Copy Link</button>
 </div>
-</div>
 
-<!-- WITHDRAW (UNCHANGED) -->
-<div id="withdraw" class="screen">
 <div class="card">
-<h3>Withdraw</h3>
-<input id="wAddress" placeholder="Wallet address" style="width:100%;padding:10px;">
-<input id="wAmount" placeholder="Amount" style="width:100%;padding:10px;margin-top:10px;">
-<button class="copy-btn" onclick="withdraw()">Submit</button>
-</div>
+<h3>🔥 Social Tasks</h3>
+
+<button class="task-btn" onclick="task('telegram')">Join Telegram</button>
+<button class="task-btn" onclick="task('tiktok')">Follow TikTok</button>
+<button class="task-btn" onclick="task('youtube')">Subscribe YouTube</button>
+
 </div>
 
-<!-- ================= NEW ADS SCREEN ================= -->
+</div>
+
+<!-- WITHDRAW -->
+<div id="withdraw" class="screen">
+
+<div class="card">
+<h3>Withdraw Rules</h3>
+<p>• Minimum withdraw: 20 USDT</p>
+</div>
+
+</div>
+
+<!-- ADS SCREEN (UNCHANGED DESIGN IDEA) -->
 <div id="ads" class="screen">
 
-<div class="card ads-box">
-<h2>💰 Watch Ads & Earn</h2>
-<p>Earn coins by watching ads</p>
+<div class="card" style="text-align:center">
 
-<button class="ads-btn" onclick="watchAdReward()">
-▶ Watch Monetag Ad
+<h3>💰 Watch Ads & Earn</h3>
+
+<button class="task-btn" onclick="watchAdReward()">
+▶ Watch Ad
 </button>
 
-</div>
+<p id="adTimer" style="margin-top:10px;color:#ff9800;"></p>
 
 </div>
 
-<!-- NAV (UPDATED ONLY ADD ADS BUTTON) -->
+</div>
+
+<!-- NAV -->
 <div class="nav">
 <button onclick="show('home')">Home</button>
 <button onclick="show('profile')">Profile</button>
@@ -214,55 +214,44 @@ margin-top:20px;
 <button onclick="show('ads')">Ads</button>
 </div>
 
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
 <script>
 
-let coinsVal = 0;
-let adCooldown = false;
+const API="https://crypto-4bbj.onrender.com";
+let token=localStorage.getItem("token");
+
+let coinsVal=0, usdtVal=0, refsVal=0;
 
 function show(s){
 document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
 }
 
+const tg = window.Telegram?.WebApp;
+if (tg) tg.expand();
+
+const user=tg?.initDataUnsafe?.user;
+
 /* TAP */
 tapArea.addEventListener("touchstart",(e)=>{
-let f = e.touches?.length || 1;
-coinsVal += Math.min(f,4);
+let fingers = e.touches?.length || 1;
+fingers = Math.min(fingers,4);
+coinsVal += fingers;
 coins.innerText = coinsVal;
 });
 
-/* ================= MONETAG ADS (ADDED ONLY) ================= */
+/* TASK */
+function task(type){
 
-function watchAdReward(){
+let url=
+type==="telegram"
+?"https://t.me/gangs234"
+:type==="tiktok"
+?"https://tiktok.com"
+:"https://youtube.com";
 
-if(adCooldown){
-alert("Wait 60 seconds");
-return;
-}
-
-if(typeof show_10892289 !== "function"){
-alert("Ads not ready");
-return;
-}
-
-adCooldown = true;
-setTimeout(()=> adCooldown = false, 60000);
-
-show_10892289({type:'inApp'}).then(()=>{
-
-let reward = 310 + Math.floor(Math.random()*90);
-
-coinsVal += reward;
-coins.innerText = coinsVal;
-
-alert("+" + reward + " coins earned!");
-
-}).catch(()=>{
-
-show_10892289('pop');
-
-});
-
+window.open(url,"_blank");
 }
 
 /* COPY */
@@ -271,9 +260,76 @@ navigator.clipboard.writeText(refLink.innerText);
 alert("Copied");
 }
 
-/* WITHDRAW */
-function withdraw(){
-alert("Sent");
+/* ================= ADS SYSTEM FIXED ================= */
+
+let adCooldown = false;
+
+function watchAdReward(){
+
+if(adCooldown){
+alert("Wait 60 seconds");
+return;
+}
+
+if(typeof show_10892291 !== "function"){
+alert("Ad not loaded yet");
+return;
+}
+
+adCooldown = true;
+
+setTimeout(()=>{
+adCooldown = false;
+adTimer.innerText = "Ready";
+},65000);
+
+try{
+
+const ad = show_10892291();
+
+if(ad && typeof ad.then === "function"){
+
+ad.then(()=> giveReward())
+.catch(()=> alert("Ad not available"));
+
+}else{
+
+giveReward();
+
+}
+
+}catch(e){
+alert("Ad error");
+adCooldown = false;
+}
+
+}
+
+function giveReward(){
+
+let reward = 310 + Math.floor(Math.random()*90);
+
+coinsVal += reward;
+coins.innerText = coinsVal;
+
+alert("+" + reward + " coins");
+
+let t = 60;
+adTimer.innerText = "Next ad in: " + t + "s";
+
+let timer = setInterval(()=>{
+
+t--;
+adTimer.innerText = "Next ad in: " + t + "s";
+
+if(t <= 0){
+clearInterval(timer);
+adCooldown = false;
+adTimer.innerText = "Ready";
+}
+
+},1000);
+
 }
 
 </script>

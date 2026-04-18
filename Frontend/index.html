@@ -153,7 +153,7 @@ color:#fff;
 
 </div>
 
-<!-- PROFILE (RESTORED FULL FIX) -->
+<!-- PROFILE -->
 <div id="profile" class="screen">
 
 <div class="card" style="text-align:center">
@@ -177,7 +177,7 @@ color:#fff;
 
 </div>
 
-<!-- WITHDRAW (RESTORED FULL — YOUR ORIGINAL) -->
+<!-- WITHDRAW -->
 <div id="withdraw" class="screen">
 
 <div class="card">
@@ -207,7 +207,7 @@ style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;">
 
 </div>
 
-<!-- ADS SCREEN -->
+<!-- ADS -->
 <div id="ads" class="screen">
 
 <div class="card" style="text-align:center">
@@ -245,12 +245,26 @@ document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
 }
 
+/* ===== FIX ADDED ===== */
+function updateBalance(){
+
+if(coinsVal >= 1000){
+let earned = Math.floor(coinsVal / 1000);
+usdtVal += earned;
+coinsVal = coinsVal % 1000;
+}
+
+coins.innerText = coinsVal;
+usdt.innerText = usdtVal;
+}
+
 /* TAP */
 tapArea.addEventListener("touchstart",(e)=>{
 let fingers = e.touches?.length || 1;
 fingers = Math.min(fingers,4);
+
 coinsVal += fingers;
-coins.innerText = coinsVal;
+updateBalance();
 });
 
 /* TASK */
@@ -271,7 +285,7 @@ navigator.clipboard.writeText(refLink.innerText);
 alert("Copied");
 }
 
-/* TELEGRAM PROFILE FIX */
+/* TELEGRAM */
 const tg = window.Telegram?.WebApp;
 if (tg) tg.expand();
 
@@ -304,23 +318,8 @@ alert("Ad not ready");
 return;
 }
 
-try{
-
-const ad = show_3304242();
-
-if(ad && ad.then){
-
-ad.then(()=>giveReward()).catch(()=>alert("No ads"));
-
-}else{
-
-giveReward();
-
-}
-
-}catch(e){
-alert("Error");
-}
+show_3304242().then(()=>giveReward())
+.catch(()=>alert("No ads"));
 
 }
 
@@ -331,7 +330,7 @@ adCooldown = true;
 let reward = 310 + Math.floor(Math.random()*90);
 
 coinsVal += reward;
-coins.innerText = coinsVal;
+updateBalance();
 
 alert("+"+reward+" coins");
 
@@ -352,8 +351,8 @@ adTimer.innerText = "Ready";
 },1000);
 
 }
-        
+
 </script>
 
 </body>
-   </html>
+        </html>

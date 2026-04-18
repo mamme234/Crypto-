@@ -7,39 +7,40 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-mongoose.connect(process.env.MONGO_URL);
-
+const MONGO_URL = process.env.MONGO_URL;
 const JWT_SECRET = process.env.JWT_SECRET;
 
+mongoose.connect(MONGO_URL);
+
+// ================= USER MODEL =================
 const User = mongoose.model("User", new mongoose.Schema({
-telegramId:String,
-name:String,
-photo:String,
+telegramId: String,
+name: String,
+photo: String,
 
-coins:{type:Number,default:0},
-usdt:{type:Number,default:0},
-referrals:{type:Number,default:0},
+coins: { type: Number, default: 0 },
+usdt: { type: Number, default: 0 },
+referrals: { type: Number, default: 0 },
 
-tasks:{type:Object,default:{}},
-refUsers:{type:Array,default:[]},
-
-unlocked:{type:Boolean,default:false}
+refUsers: { type: Array, default: [] }
 }));
 
+// ================= AUTH =================
 function auth(req,res,next){
-const t=req.headers.authorization;
-if(!t) return res.json({message:"no token"});
+const token = req.headers.authorization;
+if(!token) return res.json({message:"no token"});
+
 try{
-req.userId=jwt.verify(t.split(" ")[1],JWT_SECRET).id;
+req.userId = jwt.verify(token.split(" ")[1], JWT_SECRET).id;
 next();
 }catch{
-res.json({message:"invalid"});
+res.json({message:"invalid token"});
 }
 }
 
-// LOGIN + REF
+// ================= LOGIN =================
 app.post("/api/tg-login", async (req,res)=>{
-const {id,name,photo,ref,username} = req.body;
+const {id,name,photo} = req.body;
 
 let u = await User.findOne({telegramId:id});
 
@@ -47,87 +48,70 @@ if(!u){
 u = await User.create({telegramId:id,name,photo});
 }
 
-if(ref && ref != id){
-const r = await User.findOne({telegramId:ref});
-if(r){
-const exists = r.refUsers.some(x=>x.id==id);
-if(!exists){
-r.referrals += 1;
-r.coins += 100;
-r.refUsers.push({id,name,photo});
-await r.save();
-}
-}
-}
-
-const token = jwt.sign({id:u._id},JWT_SECRET);
+const token = jwt.sign({id:u._id}, JWT_SECRET);
 res.json({token});
 });
 
-// USER
+// ================= GET USER =================
 app.get("/api/user", auth, async (req,res)=>{
 const u = await User.findById(req.userId);
 
 res.json({
-coins:u.coins,
-usdt:u.usdt,
-referrals:u.referrals
+coins: u.coins,
+usdt: u.usdt,
+referrals: u.referrals
 });
 });
 
-// TAP
+// ================= TAP SYSTEM =================
 app.post("/api/tap", auth, async (req,res)=>{
-let multi = Math.max(1,Math.min(req.body.multi || 1,4));
-
 const u = await User.findById(req.userId);
+
+let multi = Math.min(Math.max(req.body.multi || 1,1),4);
 
 u.coins += multi;
 
-u.usdt = Math.floor(u.coins/1000);
-u.coins = u.coins%1000;
+// convert
+u.usdt = Math.floor(u.coins / 1000);
 
 await u.save();
 
-res.json(u);
+res.json({
+coins: u.coins,
+usdt: u.usdt
+});
 });
 
-// TASK
-app.post("/api/task", auth, async (req,res)=>{
-const {type} = req.body;
-const u = await User.findById(req.userId);
+// ================= REFERRAL =================
+app.post("/api/ref", auth, async (req,res)=>{
+const {refId} = req.body;
 
-if(!u.tasks) u.tasks={};
+const user = await User.findById(req.userId);
+const refUser = await User.findOne({telegramId:refId});
 
-if(u.tasks[type]) return res.json({message:"done"});
+if(refUser && refUser._id != user._id){
+refUser.referrals += 1;
+refUser.coins += 100;
 
-let reward = 0;
-if(type=="telegram") reward=500;
-if(type=="tiktok") reward=700;
-if(type=="youtube") reward=1000;
+await refUser.save();
+}
 
-u.coins += reward;
-u.tasks[type]=true;
-
-u.usdt=Math.floor(u.coins/1000);
-u.coins=u.coins%1000;
-
-await u.save();
-
-res.json({message:"ok"});
+res.json({ok:true});
 });
 
-// WITHDRAW
+// ================= WITHDRAW =================
 app.post("/api/withdraw", auth, async (req,res)=>{
-const {amount,address}=req.body;
+const {amount} = req.body;
+
 const u = await User.findById(req.userId);
 
-if(amount<20) return res.json({message:"min 20"});
-if(u.usdt<amount) return res.json({message:"no balance"});
+if(amount < 20) return res.json({message:"Min 20 USDT"});
+if(u.usdt < amount) return res.json({message:"Not enough USDT"});
 
 u.usdt -= amount;
 await u.save();
 
-res.json({message:"withdraw sent"});
+res.json({message:"Withdraw sent"});
 });
 
-app.listen(3000);
+app.listen(3000,()=>console.log("Server running"));

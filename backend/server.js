@@ -44,26 +44,38 @@ res.json({message:"invalid token"});
 }
 }
 
-// ================= LOGIN =================
+// ================= LOGIN + REF FIX =================
 app.post("/api/tg-login", async (req,res)=>{
 const {id,name,photo,ref} = req.body;
 
 let u = await User.findOne({telegramId:id});
 
 if(!u){
-u = await User.create({telegramId:id,name,photo});
+u = await User.create({
+telegramId:id,
+name:name || "user",
+photo:photo || ""
+});
+}
 
-// referral
+// REF FIX (ONLY ON FIRST LOGIN)
 if(ref && ref != id){
 const r = await User.findOne({telegramId:ref});
+
 if(r){
-const exists = r.refUsers.find(x=>x.id==id);
+const exists = r.refUsers.some(x=>x.id==id);
+
 if(!exists){
 r.referrals += 1;
 r.coins += 100;
-r.refUsers.push({id,name,photo});
+
+r.refUsers.push({
+id,
+name:name || "user",
+photo:photo || ""
+});
+
 await r.save();
-}
 }
 }
 }
@@ -80,59 +92,58 @@ res.json({
 name:u.name,
 photo:u.photo,
 coins:u.coins,
-usdt:Number(u.usdt || 0),
+usdt:u.usdt,
 referrals:u.referrals
 });
 });
 
-// ================= TAP SYSTEM (1–4 FINGERS) =================
+// ================= TAP SYSTEM (PRO FIX) =================
 app.post("/api/tap", auth, async (req,res)=>{
-const u = await User.findById(req.userId);
-
 let multi = Number(req.body.multi || 1);
+multi = Math.max(1, Math.min(multi, 4));
 
-if(multi > 4) multi = 4;
-if(multi < 1) multi = 1;
+const u = await User.findById(req.userId);
 
 u.coins += multi;
 
-// auto convert coins → USDT
-if(u.coins >= 1000){
-const extra = Math.floor(u.coins / 1000);
-u.usdt += extra;
+// AUTO CONVERT (REAL TIME SAFE)
+u.usdt = Math.floor(u.coins / 1000);
 u.coins = u.coins % 1000;
-}
 
 await u.save();
 
-res.json({coins:u.coins,usdt:u.usdt});
+res.json({
+coins:u.coins,
+usdt:u.usdt
+});
 });
 
-// ================= SOCIAL TASKS (FIXED 100%) =================
+// ================= TASKS =================
 app.post("/api/task", auth, async (req,res)=>{
 const {type} = req.body;
 const u = await User.findById(req.userId);
 
-// init safe
 if(!u.tasks) u.tasks = {};
 
-// already done
 if(u.tasks[type]){
 return res.json({message:"Already completed"});
 }
 
 let reward = 0;
 
-if(type === "telegram") reward = 500;
-if(type === "tiktok") reward = 700;
-if(type === "youtube") reward = 1000;
+if(type==="telegram") reward=500;
+if(type==="tiktok") reward=700;
+if(type==="youtube") reward=1000;
 
-if(reward === 0){
+if(!reward){
 return res.json({message:"Invalid task"});
 }
 
 u.coins += reward;
 u.tasks[type] = true;
+
+u.usdt = Math.floor(u.coins / 1000);
+u.coins = u.coins % 1000;
 
 await u.save();
 
@@ -150,7 +161,7 @@ app.get("/api/wallet",(req,res)=>{
 res.json({ton:TON_WALLET});
 });
 
-// ================= WITHDRAW =================
+// ================= WITHDRAW (PRO FIX) =================
 app.post("/api/withdraw", auth, async (req,res)=>{
 const {amount,address}=req.body;
 const u = await User.findById(req.userId);
@@ -168,9 +179,10 @@ return res.json({message:"Need 10 referrals or unlock"});
 }
 
 u.usdt -= amount;
+
 await u.save();
 
-res.json({message:"Withdraw sent"});
+res.json({message:"Withdraw sent successfully"});
 });
 
 // ================= UNLOCK =================

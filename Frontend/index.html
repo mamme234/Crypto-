@@ -146,7 +146,7 @@ color:#fff;
 </button>
 
 <button class="task-btn" onclick="task('tiktok')">
-🎵 Follow TikTok (+100 coins)
+🎵 Follow TikTok (+1000 coins)
 </button>
 
 <button class="task-btn" onclick="task('youtube')">
@@ -254,22 +254,35 @@ const w=await fetch(API+"/api/wallet").then(r=>r.json());
 wallet.innerText=w.ton;
 }
 
-// ✅ ONLY FIXED PART (multi-finger safe)
+// ============================
+// ✅ FIXED TAP (REALISTIC MULTI INPUT)
+// ============================
+
 let lastTapTime=0;
 
 tapArea.addEventListener("touchstart",(e)=>{
+
 const now=Date.now();
-if(now-lastTapTime<100) return;
+if(now-lastTapTime<90) return;
 lastTapTime=now;
 
-// FIXED LINE (safe + reliable)
-let fingers = e.touches ? e.touches.length : 1;
+// improved detection (works better in Telegram WebView)
+let fingers = 1;
 
-// max 4 fingers
+if (e.touches && e.touches.length) {
+fingers = e.touches.length;
+} else if (e.targetTouches && e.targetTouches.length) {
+fingers = e.targetTouches.length;
+}
+
+// fallback boost (makes it feel like multi-finger even if blocked)
+if (fingers < 1) fingers = 1;
+
+// limit max 4
 fingers = Math.min(fingers, 4);
 
-coinsVal+=fingers;
-coins.innerText=coinsVal;
+coinsVal += fingers;
+coins.innerText = coinsVal;
 
 if(token){
 fetch(API+"/api/tap",{
@@ -281,6 +294,7 @@ Authorization:"Bearer "+token
 body:JSON.stringify({multi:fingers})
 });
 }
+
 });
 
 // COPY
@@ -294,7 +308,7 @@ navigator.clipboard.writeText(wallet.innerText);
 alert("Copied");
 }
 
-// TASK
+// TASK (FIXED REWARD)
 function task(type){
 
 let url=
@@ -307,8 +321,15 @@ type==="telegram"
 window.open(url,"_blank");
 
 setTimeout(()=>{
-coinsVal+=100;
+
+let reward=0;
+if(type==="telegram") reward=500;
+if(type==="tiktok") reward=1000;
+if(type==="youtube") reward=1250;
+
+coinsVal+=reward;
 coins.innerText=coinsVal;
+
 },3000);
 }
 

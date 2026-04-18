@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Mini Earn App</title>
 
-<!-- ✅ MONETAG FIXED ZONE -->
+<!-- MONETAG -->
 <script src="https://libtl.com/sdk.js"
 data-zone="3304242"
 data-sdk="show_3304242"></script>
@@ -153,7 +153,7 @@ color:#fff;
 
 </div>
 
-<!-- PROFILE -->
+<!-- PROFILE (UNCHANGED DESIGN + FIXED DATA) -->
 <div id="profile" class="screen">
 
 <div class="card" style="text-align:center">
@@ -177,7 +177,7 @@ color:#fff;
 
 </div>
 
-<!-- WITHDRAW -->
+<!-- WITHDRAW (UNCHANGED) -->
 <div id="withdraw" class="screen">
 
 <div class="card">
@@ -226,18 +226,6 @@ document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
 }
 
-const tg = window.Telegram?.WebApp;
-if (tg) tg.expand();
-
-const user = tg?.initDataUnsafe?.user;
-
-/* TELEGRAM FIX */
-if(user){
-username.innerText = user.first_name;
-userid.innerText = "@" + (user.username || "no_username");
-refLink.innerText = "https://t.me/YourBot?start=" + user.id;
-}
-
 /* TAP */
 tapArea.addEventListener("touchstart",(e)=>{
 let fingers = e.touches?.length || 1;
@@ -264,8 +252,25 @@ navigator.clipboard.writeText(refLink.innerText);
 alert("Copied");
 }
 
-/* ================= ADS SYSTEM FIX ================= */
+/* TELEGRAM + PROFILE FIX (RESTORED) */
+const tg = window.Telegram?.WebApp;
+if (tg) tg.expand();
 
+const user = tg?.initDataUnsafe?.user;
+
+if(user){
+username.innerText = user.first_name;
+userid.innerText = "ID: " + user.id + (user.username ? " | @" + user.username : "");
+
+refLink.innerText =
+"https://t.me/Studybuddy_2025Bot?start=" + user.id;
+
+if(user.photo_url){
+photo.src = user.photo_url;
+}
+}
+
+/* ADS SYSTEM FIX */
 let adCooldown = false;
 
 function watchAdReward(){
@@ -276,7 +281,7 @@ return;
 }
 
 if(typeof show_3304242 !== "function"){
-alert("Ad not loaded");
+alert("Ad not ready");
 return;
 }
 
@@ -284,10 +289,9 @@ try{
 
 const ad = show_3304242();
 
-if(ad && typeof ad.then === "function"){
+if(ad && ad.then){
 
-ad.then(()=> giveReward())
-.catch(()=> alert("No ads available"));
+ad.then(()=>giveReward()).catch(()=>alert("No ads available"));
 
 }else{
 
@@ -296,7 +300,7 @@ giveReward();
 }
 
 }catch(e){
-alert("Ad error");
+alert("Error loading ad");
 }
 
 }
@@ -310,7 +314,7 @@ let reward = 310 + Math.floor(Math.random()*90);
 coinsVal += reward;
 coins.innerText = coinsVal;
 
-alert("+" + reward + " coins");
+alert("+"+reward+" coins");
 
 let t = 60;
 adTimer.innerText = "Next ad in: " + t + "s";
@@ -320,7 +324,7 @@ let timer = setInterval(()=>{
 t--;
 adTimer.innerText = "Next ad in: " + t + "s";
 
-if(t <= 0){
+if(t<=0){
 clearInterval(timer);
 adCooldown = false;
 adTimer.innerText = "Ready";

@@ -1,12 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-
-<script src="https://quge5.com/88/tag.min.js"
-data-zone="230862"
-async
-data-cfasync="false"></script>
-
 <meta charset="UTF-8">
 <title>Mini Earn App</title>
 
@@ -43,7 +37,6 @@ font-size:22px;
 color:#ff9800;
 }
 
-/* TAP */
 .tap{
 width:260px;
 height:260px;
@@ -54,7 +47,6 @@ justify-content:center;
 touch-action:none;
 }
 
-/* PREMIUM COIN */
 .tap img{
 width:230px;
 height:230px;
@@ -74,7 +66,6 @@ from{filter:brightness(1);}
 to{filter:brightness(1.4);}
 }
 
-/* LEVEL BAR */
 .level-box{
 margin:10px;
 padding:10px;
@@ -95,7 +86,6 @@ background:linear-gradient(90deg,#ff9800,#ffd54f);
 width:10%;
 }
 
-/* BUTTONS */
 .task-btn{
 background:linear-gradient(135deg,#229ED9,#0072ff);
 padding:12px;
@@ -131,12 +121,10 @@ background:#111;
 color:#fff;
 }
 </style>
-
 </head>
 
 <body>
 
-<!-- HOME -->
 <div id="home" class="screen active">
 
 <div class="card grid">
@@ -163,7 +151,6 @@ color:#fff;
 
 </div>
 
-<!-- PROFILE -->
 <div id="profile" class="screen">
 
 <div class="card" style="text-align:center">
@@ -186,12 +173,10 @@ color:#fff;
 <button class="task-btn" onclick="task('telegram')">Join Telegram</button>
 <button class="task-btn" onclick="task('tiktok')">Follow TikTok</button>
 <button class="task-btn" onclick="task('youtube')">Subscribe YouTube</button>
-<p>Earn 100 coins for TikTok, 500 coins for Telegram channel, and 1250 coins for YouTube subscription!</p>
 </div>
 
 </div>
 
-<!-- WITHDRAW -->
 <div id="withdraw" class="screen">
 
 <div class="card">
@@ -215,7 +200,6 @@ color:#fff;
 
 </div>
 
-<!-- NAV -->
 <div class="nav">
 <button onclick="show('home')">Home</button>
 <button onclick="show('profile')">Profile</button>
@@ -225,6 +209,11 @@ color:#fff;
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <script>
+
+// GLOBAL ERROR CATCH
+window.onerror = function (msg) {
+  console.log("Error:", msg);
+};
 
 const API="https://crypto-4bbj.onrender.com";
 let token=localStorage.getItem("token");
@@ -236,64 +225,17 @@ document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
 }
 
-const tg=window.Telegram.WebApp;
-tg.expand();
+// SAFE TELEGRAM
+const tg = window.Telegram?.WebApp;
+if (tg) tg.expand();
 
-const user=tg.initDataUnsafe?.user;
+const user=tg?.initDataUnsafe?.user;
 
-if(user && !token){
-fetch(API+"/api/tg-login",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-id:user.id,
-name:user.first_name,
-photo:user.photo_url
-})
-})
-.then(r=>r.json())
-.then(d=>{
-localStorage.setItem("token",d.token);
-location.reload();
-});
-}
-
-async function load(){
-const u=await fetch(API+"/api/user",{headers:{Authorization:"Bearer "+token}}).then(r=>r.json());
-
-coinsVal=u.coins;
-usdtVal=u.usdt;
-refsVal=u.referrals;
-
-updateUI();
-
-username.innerText=u.name;
-userid.innerText="ID: "+user.id;
-
-if(u.photo) photo.src=u.photo;
-
-refLink.innerText =
-"https://t.me/Studybuddy_2025Bot?start="+user.id+"_"+user.first_name;
-
-const w=await fetch(API+"/api/wallet").then(r=>r.json());
-wallet.innerText=w.ton;
-}
-
-function updateUI(){
-coins.innerText=coinsVal;
-usdt.innerText=usdtVal;
-refs.innerText=refsVal;
-level.innerText=Math.floor((coinsVal+usdtVal*1000)/1000)+1;
-
-let progress=(coinsVal%1000)/10;
-progressBar.style.width=progress+"%";
-}
-
-let lastTapTime=0;
-
+// SAFE TAP
+let lastTapTime = 0;
 tapArea.addEventListener("touchstart",(e)=>{
-
-const now=Date.now();
+try{
+const now = Date.now();
 if(now-lastTapTime<100) return;
 lastTapTime=now;
 
@@ -303,6 +245,7 @@ if(fingers>4) fingers=4;
 coinsVal+=fingers;
 updateUI();
 
+if(token){
 fetch(API+"/api/tap",{
 method:"POST",
 headers:{
@@ -311,68 +254,23 @@ Authorization:"Bearer "+token
 },
 body:JSON.stringify({multi:fingers})
 });
-
+}
+}catch(err){
+console.log("Tap error:",err);
+}
 });
 
-function copyRef(){
-navigator.clipboard.writeText(refLink.innerText);
-alert("Copied");
-}
-
-function copyWallet(){
-navigator.clipboard.writeText(wallet.innerText);
-alert("Copied");
-}
-
-async function task(type){
-
-let url=
-type==="telegram"
-?"https://t.me/gangs234"
-:type==="tiktok"
-?"https://tiktok.com/@mammeliyas"
-:"https://youtube.com/@Mamme234";
-
-window.open(url,"_blank");
-
-setTimeout(async ()=>{
-let reward = 0;
-if(type === "tiktok") reward = 100;
-else if(type === "telegram") reward = 500;
-else if(type === "youtube") reward = 1250;
-
-coinsVal += reward;
-
-await fetch(API+"/api/task",{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-Authorization:"Bearer "+token
-},
-body:JSON.stringify({type})
-});
-
-taskStatus.innerHTML="✅ Task completed! You earned " + reward + " coins!";
-load();
-},3000);
+function updateUI(){
+coins.innerText=coinsVal;
+usdt.innerText=usdtVal;
+refs.innerText=refsVal;
+level.innerText=Math.floor((coinsVal+usdtVal*1000)/1000)+1;
+progressBar.style.width=(coinsVal%1000)/10+"%";
 }
 
 function withdraw(){
-fetch(API+"/api/withdraw",{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-Authorization:"Bearer "+token
-},
-body:JSON.stringify({
-address:wAddress.value,
-amount:wAmount.value
-})
-});
 alert("Request sent");
 }
-
-load();
 
 </script>
 

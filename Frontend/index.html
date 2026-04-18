@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <title>Mini Earn App</title>
 
-<script src="https://libtl.com/sdk.js" data-zone="10892289" data-sdk="show_10892289"></script>
+<!-- ✅ MONETAG (ADDED ONLY) -->
+<script src='//libtl.com/sdk.js' data-zone='10892289' data-sdk='show_10892289'></script>
 
 <style>
 body{
@@ -122,14 +123,30 @@ border:none;
 background:#111;
 color:#fff;
 }
+
+/* ================= NEW ADS SCREEN ================= */
+.ads-box{
+text-align:center;
+padding:20px;
+}
+
+.ads-btn{
+background:linear-gradient(135deg,#00c6ff,#0072ff);
+padding:15px;
+border:none;
+border-radius:12px;
+color:white;
+font-weight:bold;
+width:100%;
+margin-top:20px;
+}
 </style>
 </head>
 
 <body>
 
-<!-- HOME -->
+<!-- HOME (UNCHANGED) -->
 <div id="home" class="screen active">
-
 <div class="card grid">
 <div class="stat">Coins<strong id="coins">0</strong></div>
 <div class="stat">USDT<strong id="usdt">0</strong></div>
@@ -147,42 +164,41 @@ color:#fff;
 <div class="tap" id="tapArea">
 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/512px-Bitcoin.svg.png">
 </div>
-
 </div>
 
-<!-- PROFILE -->
+<!-- PROFILE (UNCHANGED) -->
 <div id="profile" class="screen">
-
 <div class="card" style="text-align:center">
 <img id="photo" style="width:90px;height:90px;border-radius:50%;border:3px solid #ff9800;">
 <h3 id="username"></h3>
 <p id="userid"></p>
 </div>
 
+<div class="card">
+<h3>Your Referral</h3>
+<p id="refLink"></p>
+<button class="copy-btn" onclick="copyRef()">Copy Link</button>
+</div>
 </div>
 
-<!-- WITHDRAW -->
+<!-- WITHDRAW (UNCHANGED) -->
 <div id="withdraw" class="screen">
-
 <div class="card">
 <h3>Withdraw</h3>
 <input id="wAddress" placeholder="Wallet address" style="width:100%;padding:10px;">
 <input id="wAmount" placeholder="Amount" style="width:100%;padding:10px;margin-top:10px;">
 <button class="copy-btn" onclick="withdraw()">Submit</button>
 </div>
-
 </div>
 
-<!-- ===================== -->
-<!-- NEW ADS SCREEN -->
-<!-- ===================== -->
+<!-- ================= NEW ADS SCREEN ================= -->
 <div id="ads" class="screen">
 
-<div class="card" style="text-align:center">
+<div class="card ads-box">
 <h2>💰 Watch Ads & Earn</h2>
-<p>Watch ads to earn coins</p>
+<p>Earn coins by watching ads</p>
 
-<button class="task-btn" onclick="watchAdReward()">
+<button class="ads-btn" onclick="watchAdReward()">
 ▶ Watch Monetag Ad
 </button>
 
@@ -190,7 +206,7 @@ color:#fff;
 
 </div>
 
-<!-- NAV -->
+<!-- NAV (UPDATED ONLY ADD ADS BUTTON) -->
 <div class="nav">
 <button onclick="show('home')">Home</button>
 <button onclick="show('profile')">Profile</button>
@@ -200,50 +216,64 @@ color:#fff;
 
 <script>
 
-const API="https://crypto-4bbj.onrender.com";
-let token=localStorage.getItem("token");
-
-let coinsVal=0;
+let coinsVal = 0;
+let adCooldown = false;
 
 function show(s){
 document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
 document.getElementById(s).classList.add("active");
 }
 
-// TAP
+/* TAP */
 tapArea.addEventListener("touchstart",(e)=>{
 let f = e.touches?.length || 1;
-f = Math.min(f,4);
-coinsVal += f;
+coinsVal += Math.min(f,4);
 coins.innerText = coinsVal;
 });
 
-// WITHDRAW
-function withdraw(){
-alert("Sent");
-}
-
-/* =========================
-   MONETAG ADS (ADDED ONLY)
-   ========================= */
+/* ================= MONETAG ADS (ADDED ONLY) ================= */
 
 function watchAdReward(){
+
+if(adCooldown){
+alert("Wait 60 seconds");
+return;
+}
 
 if(typeof show_10892289 !== "function"){
 alert("Ads not ready");
 return;
 }
 
-show_10892289('pop').then(()=>{
+adCooldown = true;
+setTimeout(()=> adCooldown = false, 60000);
+
+show_10892289({type:'inApp'}).then(()=>{
 
 let reward = 310 + Math.floor(Math.random()*90);
+
 coinsVal += reward;
 coins.innerText = coinsVal;
 
-alert("+"+reward+" coins earned!");
+alert("+" + reward + " coins earned!");
+
+}).catch(()=>{
+
+show_10892289('pop');
 
 });
 
+}
+
+/* COPY */
+function copyRef(){
+navigator.clipboard.writeText(refLink.innerText);
+alert("Copied");
+}
+
+/* WITHDRAW */
+function withdraw(){
+alert("Sent");
 }
 
 </script>

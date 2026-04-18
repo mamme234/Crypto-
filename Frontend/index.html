@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Earn Pro</title>
+<title>Earn App Pro Safe</title>
 
 <script src="https://libtl.com/sdk.js"
 data-zone="3304242"
@@ -16,12 +16,12 @@ background:linear-gradient(180deg,#0b122a,#020617);
 color:white;
 }
 
-/* TOP USER BAR */
+/* TOP BAR */
 .topbar{
 display:flex;
-align-items:center;
 justify-content:space-between;
-padding:12px 15px;
+align-items:center;
+padding:12px;
 background:rgba(255,255,255,0.05);
 backdrop-filter:blur(10px);
 }
@@ -39,20 +39,9 @@ border-radius:50%;
 border:2px solid gold;
 }
 
-.user div{
-line-height:1.2;
-}
+.small{font-size:12px;opacity:0.7;}
 
-.username{
-font-weight:bold;
-}
-
-.small{
-font-size:12px;
-opacity:0.7;
-}
-
-/* STATS */
+/* CARDS */
 .stats{
 display:grid;
 grid-template-columns:1fr 1fr;
@@ -68,7 +57,6 @@ text-align:center;
 }
 
 .card strong{
-display:block;
 font-size:20px;
 color:#facc15;
 }
@@ -86,11 +74,10 @@ width:220px;
 height:220px;
 border-radius:50%;
 background:radial-gradient(circle,#facc15,#f59e0b);
-box-shadow:0 0 30px gold;
+box-shadow:0 0 25px gold;
 display:flex;
-justify-content:center;
 align-items:center;
-font-size:18px;
+justify-content:center;
 font-weight:bold;
 user-select:none;
 }
@@ -120,13 +107,13 @@ color:white;
 
 <body>
 
-<!-- TOP USER PROFILE -->
+<!-- TOP USER -->
 <div class="topbar">
 
 <div class="user">
 <img id="photo" src="https://i.imgur.com/8Km9tLL.png">
 <div>
-<div class="username" id="name">Loading...</div>
+<div id="name">Loading...</div>
 <div class="small" id="uname">@user</div>
 </div>
 </div>
@@ -139,8 +126,8 @@ Level: <span id="level">1</span>
 
 <!-- STATS -->
 <div class="stats">
-<div class="card">Coins<strong id="coins">0</strong></div>
-<div class="card">USDT<strong id="usdt">0</strong></div>
+<div class="card">Coins<br><strong id="coins">0</strong></div>
+<div class="card">USDT<br><strong id="usdt">0</strong></div>
 </div>
 
 <!-- TAP -->
@@ -161,57 +148,98 @@ Level: <span id="level">1</span>
 <script>
 
 const API="https://crypto-4bbj.onrender.com";
-let token;
 
-/* TELEGRAM USER */
-const tg=window.Telegram.WebApp;
-const user=tg.initDataUnsafe.user;
+let token=null;
+let user=null;
 
-tg.expand();
+/* SAFE CHECK */
+if(window.Telegram && Telegram.WebApp){
+Telegram.WebApp.expand();
+user = Telegram.WebApp.initDataUnsafe.user;
+}else{
+alert("Open inside Telegram");
+}
 
-/* TOP PROFILE */
-document.getElementById("name").innerText=user.first_name;
-document.getElementById("uname").innerText="@"+(user.username||"no_username");
+/* SHOW USER SAFELY */
+function setUser(){
+if(!user) return;
 
-/* LOGIN */
+document.getElementById("name").innerText =
+user.first_name || "User";
+
+document.getElementById("uname").innerText =
+"@"+(user.username || "no_username");
+
+if(user.photo_url){
+document.getElementById("photo").src=user.photo_url;
+}
+}
+
+/* LOGIN SAFE */
 async function login(){
 
-const res=await fetch(API+"/api/login",{
+try{
+
+const res = await fetch(API+"/api/login",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
-id:user.id,
-name:user.first_name,
-ref:user.username
+id:user?.id,
+name:user?.first_name,
+ref:user?.username
 })
 });
 
-const d=await res.json();
-token=d.token;
+const d = await res.json();
 
-loadUser();
+if(!d.token){
+setTimeout(login,3000);
+return;
 }
 
-/* LOAD DATA */
+token=d.token;
+loadUser();
+
+}catch(e){
+setTimeout(login,3000);
+}
+
+}
+
+/* LOAD USER SAFE */
 async function loadUser(){
 
-const res=await fetch(API+"/api/user",{
+if(!token) return;
+
+try{
+
+const res = await fetch(API+"/api/user",{
 headers:{Authorization:"Bearer "+token}
 });
 
-const d=await res.json();
+const d = await res.json();
 
-coins.innerText=d.coins;
-usdt.innerText=d.usdt;
-level.innerText=d.level;
+coins.innerText=d.coins || 0;
+usdt.innerText=d.usdt || 0;
+level.innerText=d.level || 1;
+
+}catch(e){
+console.log("load error");
+setTimeout(loadUser,3000);
 }
 
-/* TAP SYSTEM (CONNECTED) */
+}
+
+/* TAP SAFE */
 tapBtn.addEventListener("touchstart",async (e)=>{
 
-let fingers=Math.min(e.touches.length,4);
+if(!token) return;
 
-const res=await fetch(API+"/api/tap",{
+try{
+
+let fingers = Math.min(e.touches.length,4);
+
+const res = await fetch(API+"/api/tap",{
 method:"POST",
 headers:{
 "Content-Type":"application/json",
@@ -220,20 +248,22 @@ Authorization:"Bearer "+token
 body:JSON.stringify({multi:fingers})
 });
 
-const d=await res.json();
+const d = await res.json();
+
+if(!d) return;
 
 coins.innerText=d.coins;
 usdt.innerText=d.usdt;
 level.innerText=d.level;
 
-});
-
-/* PROFILE IMAGE */
-if(user.photo_url){
-document.getElementById("photo").src=user.photo_url;
+}catch(e){
+console.log("tap error");
 }
 
-/* START */
+});
+
+/* AUTO START */
+setUser();
 login();
 
 </script>

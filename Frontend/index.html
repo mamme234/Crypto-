@@ -12,10 +12,11 @@ background:radial-gradient(circle at top,#1b2a4a,#050914 70%);
 color:white;
 }
 
-/* TOP */
+/* TOP BAR */
 .topbar{
 display:flex;
 justify-content:space-between;
+align-items:center;
 padding:14px;
 background:rgba(255,255,255,0.06);
 backdrop-filter:blur(10px);
@@ -28,17 +29,18 @@ align-items:center;
 }
 
 .user img{
-width:45px;
-height:45px;
+width:48px;
+height:48px;
 border-radius:50%;
-border:2px solid gold;
+border:2px solid #facc15;
+box-shadow:0 0 15px rgba(250,204,21,0.5);
 }
 
 /* STATS */
 .stats{
 display:flex;
 justify-content:space-around;
-margin-top:10px;
+margin-top:12px;
 }
 
 .box{
@@ -47,6 +49,7 @@ padding:12px;
 border-radius:14px;
 width:40%;
 text-align:center;
+backdrop-filter:blur(8px);
 }
 
 .box strong{
@@ -59,15 +62,17 @@ color:#facc15;
 .tap{
 display:flex;
 justify-content:center;
-margin-top:60px;
+margin-top:70px;
 }
 
 .tap button{
-width:210px;
-height:210px;
+width:220px;
+height:220px;
 border-radius:50%;
 border:none;
 font-size:22px;
+font-weight:bold;
+color:#111;
 background:radial-gradient(circle,#ffe066,#facc15);
 box-shadow:0 0 40px rgba(250,204,21,0.6);
 }
@@ -76,16 +81,14 @@ box-shadow:0 0 40px rgba(250,204,21,0.6);
 .screen{
 display:none;
 padding:15px;
+animation:fade 0.2s ease;
 }
 
 .active{display:block;}
 
-/* CARDS */
-.card{
-background:rgba(255,255,255,0.06);
-padding:12px;
-border-radius:12px;
-margin-top:10px;
+@keyframes fade{
+from{opacity:0;transform:translateY(10px);}
+to{opacity:1;transform:translateY(0);}
 }
 
 /* NAV */
@@ -103,6 +106,49 @@ padding:12px;
 background:none;
 color:white;
 border:none;
+}
+
+/* PROFILE DESIGN (NEW) */
+.profileCard{
+background:rgba(255,255,255,0.07);
+padding:15px;
+border-radius:18px;
+margin-top:10px;
+backdrop-filter:blur(10px);
+border:1px solid rgba(255,255,255,0.1);
+}
+
+.profileHeader{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.profileHeader img{
+width:60px;
+height:60px;
+border-radius:50%;
+border:2px solid gold;
+}
+
+.badge{
+background:gold;
+color:black;
+padding:3px 8px;
+border-radius:10px;
+font-size:12px;
+margin-left:10px;
+}
+
+/* INPUTS */
+input{
+width:100%;
+padding:12px;
+border-radius:10px;
+border:none;
+background:rgba(255,255,255,0.08);
+color:white;
+margin-top:8px;
 }
 </style>
 </head>
@@ -134,63 +180,75 @@ border:none;
 
 </div>
 
-<!-- PROFILE (WITHDRAW + ADS + TASKS) -->
+<!-- PROFILE (ATTRACTIVE FULL HUB) -->
 <div id="profile" class="screen">
 
-<h2>👤 Profile</h2>
+<div class="profileCard">
 
-<p id="pName"></p>
+<div class="profileHeader">
+<img id="pPhoto">
+<div>
+<h3 id="pName">User</h3>
+<span class="badge">VIP Player</span>
+</div>
+</div>
+
 <p id="pUser"></p>
 
+</div>
+
 <!-- REF -->
-<div class="card">
-<h3>🔗 Referral</h3>
-<input id="refLink" readonly style="width:100%;padding:10px">
+<div class="profileCard">
+<h3>🔗 Referral Link</h3>
+<input id="refLink" readonly>
 <button onclick="copyRef()" style="width:100%;margin-top:5px">
 Copy Link
 </button>
 </div>
 
-<!-- SOCIAL TASKS -->
-<div class="card">
+<!-- TASKS -->
+<div class="profileCard">
 <h3>🔥 Social Tasks</h3>
-<button onclick="openTask('telegram')">Join Telegram (+500)</button>
-<button onclick="openTask('youtube')">Subscribe YouTube (+1000)</button>
-<button onclick="openTask('tiktok')">Follow TikTok (+700)</button>
+<button onclick="task('telegram')" style="width:100%">Telegram (+500)</button>
+<button onclick="task('youtube')" style="width:100%;margin-top:5px">YouTube (+1000)</button>
+<button onclick="task('tiktok')" style="width:100%;margin-top:5px">TikTok (+700)</button>
 </div>
 
 <!-- ADS -->
-<div class="card">
+<div class="profileCard">
 <h3>💰 Ads Reward</h3>
-<button onclick="watchAd()">Watch Ad</button>
+<button onclick="ads()" style="width:100%">Watch Ad (+300)</button>
 </div>
 
-<!-- WITHDRAW (INSIDE PROFILE) -->
-<div class="card">
+<!-- WITHDRAW -->
+<div class="profileCard">
 <h3>💸 Withdraw</h3>
-<p>Min: 20 USDT</p>
 
-<input id="wallet" placeholder="Wallet address" style="width:100%;padding:10px">
-<input id="amount" placeholder="Amount USDT" style="width:100%;padding:10px">
+<input id="wallet" placeholder="Wallet address">
+<input id="amount" placeholder="Amount USDT">
 
 <button onclick="withdraw()" style="width:100%;margin-top:5px">
 Withdraw
 </button>
-</div>
 
 </div>
 
-<!-- DEPOSIT (ONLY HERE) -->
-<div id="withdraw" class="screen">
+</div>
 
+<!-- DEPOSIT -->
+<div id="deposit" class="screen">
+
+<div class="profileCard">
 <h2>💰 Deposit</h2>
 
-<input id="depWallet" readonly style="width:100%;padding:10px"
+<input id="depWallet" readonly
 value="UQAYjMccjJ8Xn1z9hodUImMjJCB2qmWGjlMup9-sVZtEQFWH">
 
 <button onclick="copyWallet()" style="width:100%;margin-top:10px">
-Copy Deposit Address
+Copy Address
 </button>
+
+</div>
 
 </div>
 
@@ -198,7 +256,7 @@ Copy Deposit Address
 <div class="nav">
 <button onclick="show('home')">Home</button>
 <button onclick="show('profile')">Profile</button>
-<button onclick="show('withdraw')">Deposit</button>
+<button onclick="show('deposit')">Deposit</button>
 </div>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -209,6 +267,20 @@ let state = {
 coins:0,
 usdt:0
 };
+
+/* SAVE SYSTEM */
+function save(){
+localStorage.setItem("coins",state.coins);
+localStorage.setItem("usdt",state.usdt);
+}
+
+function load(){
+state.coins = parseFloat(localStorage.getItem("coins"))||0;
+state.usdt = parseFloat(localStorage.getItem("usdt"))||0;
+}
+
+/* LOAD */
+load();
 
 /* ELEMENTS */
 const coinsEl = document.getElementById("coins");
@@ -221,10 +293,11 @@ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 }
 
-/* UPDATE */
+/* RENDER */
 function render(){
 coinsEl.innerText = Math.floor(state.coins);
 usdtEl.innerText = state.usdt.toFixed(3);
+save();
 }
 
 /* TELEGRAM */
@@ -238,7 +311,7 @@ if(user){
 document.getElementById("name").innerText=user.first_name;
 document.getElementById("uname").innerText="@"+(user.username||"user");
 
-document.getElementById("pName").innerText="Name: "+user.first_name;
+document.getElementById("pName").innerText=user.first_name;
 document.getElementById("pUser").innerText="ID: "+user.id;
 
 document.getElementById("refLink").value=
@@ -246,6 +319,7 @@ document.getElementById("refLink").value=
 
 if(user.photo_url){
 document.getElementById("photo").src=user.photo_url;
+document.getElementById("pPhoto").src=user.photo_url;
 }
 }
 
@@ -263,52 +337,42 @@ state.coins += fingers;
 state.usdt = state.coins / 1000;
 
 document.getElementById("level").innerText =
-Math.floor(state.coins / 5000) + 1;
+Math.floor(state.coins/5000)+1;
 
 render();
 }
 
 /* TASKS */
-function openTask(type){
+function task(type){
 
-if(type==="telegram") window.open("https://t.me/Studybuddy_2025Bot","_blank");
-if(type==="youtube") window.open("https://youtube.com","_blank");
-if(type==="tiktok") window.open("https://tiktok.com","_blank");
+let reward = type==="telegram"?500:type==="youtube"?1000:700;
 
 setTimeout(()=>{
-state.coins += (type==="telegram"?500:type==="youtube"?1000:700);
-state.usdt = state.coins / 1000;
+state.coins += reward;
+state.usdt = state.coins/1000;
 render();
-alert("Reward added!");
-},4000);
+alert("Task completed!");
+},3000);
 
 }
 
 /* ADS */
-function watchAd(){
-alert("Ad watched +300 coins");
+function ads(){
 state.coins += 300;
-state.usdt = state.coins / 1000;
+state.usdt = state.coins/1000;
 render();
 }
 
 /* WITHDRAW */
 function withdraw(){
 
-let w = document.getElementById("wallet").value;
-let a = parseFloat(document.getElementById("amount").value);
+let w=document.getElementById("wallet").value;
+let a=parseFloat(document.getElementById("amount").value);
 
-if(a < 20){
-alert("Minimum 20 USDT");
-return;
-}
+if(a<20){alert("Min 20 USDT");return;}
+if(a>state.usdt){alert("Not enough");return;}
 
-if(a > state.usdt){
-alert("Not enough balance");
-return;
-}
-
-alert("Withdraw request sent!");
+alert("Withdraw sent!");
 }
 
 /* COPY */
@@ -327,4 +391,4 @@ render();
 </script>
 
 </body>
-  </html>
+</html>

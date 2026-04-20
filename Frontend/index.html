@@ -108,7 +108,7 @@ color:white;
 border:none;
 }
 
-/* PROFILE DESIGN (NEW) */
+/* PROFILE */
 .profileCard{
 background:rgba(255,255,255,0.07);
 padding:15px;
@@ -140,7 +140,6 @@ font-size:12px;
 margin-left:10px;
 }
 
-/* INPUTS */
 input{
 width:100%;
 padding:12px;
@@ -175,16 +174,15 @@ margin-top:8px;
 </div>
 
 <div class="tap">
-<button id="tapBtn">TAP</button>
+<button id="tapBtn"></button>
 </div>
 
 </div>
 
-<!-- PROFILE (ATTRACTIVE FULL HUB) -->
+<!-- PROFILE -->
 <div id="profile" class="screen">
 
 <div class="profileCard">
-
 <div class="profileHeader">
 <img id="pPhoto">
 <div>
@@ -192,64 +190,43 @@ margin-top:8px;
 <span class="badge">VIP Player</span>
 </div>
 </div>
-
 <p id="pUser"></p>
-
 </div>
 
-<!-- REF -->
 <div class="profileCard">
 <h3>🔗 Referral Link</h3>
 <input id="refLink" readonly>
-<button onclick="copyRef()" style="width:100%;margin-top:5px">
-Copy Link
-</button>
+<button onclick="copyRef()" style="width:100%">Copy Link</button>
 </div>
 
-<!-- TASKS -->
 <div class="profileCard">
 <h3>🔥 Social Tasks</h3>
-<button onclick="task('telegram')" style="width:100%">Telegram (+500)</button>
-<button onclick="task('youtube')" style="width:100%;margin-top:5px">YouTube (+1000)</button>
-<button onclick="task('tiktok')" style="width:100%;margin-top:5px">TikTok (+700)</button>
+<button id="tgTask" onclick="task('telegram')" style="width:100%">Telegram (+500)</button>
+<button id="ytTask" onclick="task('youtube')" style="width:100%">YouTube (+1250)</button>
+<button id="ttTask" onclick="task('tiktok')" style="width:100%">TikTok (+1000)</button>
 </div>
 
-<!-- ADS -->
 <div class="profileCard">
 <h3>💰 Ads Reward</h3>
 <button onclick="ads()" style="width:100%">Watch Ad (+300)</button>
 </div>
 
-<!-- WITHDRAW -->
 <div class="profileCard">
 <h3>💸 Withdraw</h3>
-
 <input id="wallet" placeholder="Wallet address">
 <input id="amount" placeholder="Amount USDT">
-
-<button onclick="withdraw()" style="width:100%;margin-top:5px">
-Withdraw
-</button>
-
+<button onclick="withdraw()" style="width:100%">Withdraw</button>
 </div>
 
 </div>
 
 <!-- DEPOSIT -->
 <div id="deposit" class="screen">
-
 <div class="profileCard">
 <h2>💰 Deposit</h2>
-
-<input id="depWallet" readonly
-value="UQAYjMccjJ8Xn1z9hodUImMjJCB2qmWGjlMup9-sVZtEQFWH">
-
-<button onclick="copyWallet()" style="width:100%;margin-top:10px">
-Copy Address
-</button>
-
+<input id="depWallet" readonly value="UQAYjMccjJ8Xn1z9hodUImMjJCB2qmWGjlMup9-sVZtEQFWH">
+<button onclick="copyWallet()" style="width:100%">Copy Address</button>
 </div>
-
 </div>
 
 <!-- NAV -->
@@ -263,29 +240,40 @@ Copy Address
 
 <script>
 
-let state = {
-coins:0,
-usdt:0
-};
+const API = "https://your-render-url.onrender.com";
 
-/* SAVE SYSTEM */
-function save(){
-localStorage.setItem("coins",state.coins);
-localStorage.setItem("usdt",state.usdt);
+let state = {coins:0,usdt:0};
+
+const tg = window.Telegram?.WebApp;
+const user = tg?.initDataUnsafe?.user;
+
+if(tg) tg.expand();
+
+/* LOAD USER */
+async function loadUser(){
+
+if(!user) return;
+
+let ref = new URLSearchParams(window.location.search).get("ref");
+
+let url = API + "/user/" + user.id;
+if(ref) url += "/" + ref;
+
+let res = await fetch(url);
+let data = await res.json();
+
+state.coins = data.coins;
+state.usdt = data.usdt;
+
+render();
+updateTasks(data.tasks || []);
 }
 
-function load(){
-state.coins = parseFloat(localStorage.getItem("coins"))||0;
-state.usdt = parseFloat(localStorage.getItem("usdt"))||0;
+/* RENDER */
+function render(){
+document.getElementById("coins").innerText = Math.floor(state.coins);
+document.getElementById("usdt").innerText = state.usdt.toFixed(3);
 }
-
-/* LOAD */
-load();
-
-/* ELEMENTS */
-const coinsEl = document.getElementById("coins");
-const usdtEl = document.getElementById("usdt");
-const tapBtn = document.getElementById("tapBtn");
 
 /* NAV */
 function show(id){
@@ -293,86 +281,100 @@ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 }
 
-/* RENDER */
-function render(){
-coinsEl.innerText = Math.floor(state.coins);
-usdtEl.innerText = state.usdt.toFixed(3);
-save();
-}
-
-/* TELEGRAM */
-const tg = window.Telegram?.WebApp;
-const user = tg?.initDataUnsafe?.user;
-
-if(tg) tg.expand();
-
-if(user){
-
-document.getElementById("name").innerText=user.first_name;
-document.getElementById("uname").innerText="@"+(user.username||"user");
-
-document.getElementById("pName").innerText=user.first_name;
-document.getElementById("pUser").innerText="ID: "+user.id;
-
-document.getElementById("refLink").value=
-"https://t.me/Studybuddy_2025Bot?start="+user.id;
-
-if(user.photo_url){
-document.getElementById("photo").src=user.photo_url;
-document.getElementById("pPhoto").src=user.photo_url;
-}
-}
-
 /* TAP */
-tapBtn.addEventListener("touchstart",tap,{passive:false});
-tapBtn.addEventListener("click",tap);
-
-function tap(e){
-
+async function tap(e){
 e.preventDefault();
-
 let fingers = e.touches ? Math.min(e.touches.length,4) : 1;
 
-state.coins += fingers;
-state.usdt = state.coins / 1000;
+let res = await fetch(API+"/tap",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({userId:user.id,fingers})
+});
 
-document.getElementById("level").innerText =
-Math.floor(state.coins/5000)+1;
+let data = await res.json();
+state.coins = data.coins;
+state.usdt = data.usdt;
 
 render();
 }
 
+document.getElementById("tapBtn").addEventListener("touchstart",tap,{passive:false});
+document.getElementById("tapBtn").addEventListener("click",tap);
+
 /* TASKS */
-function task(type){
+function updateTasks(tasks){
+if(tasks.includes("telegram")){
+tgTask.innerText="Completed ✅"; tgTask.disabled=true;
+}
+if(tasks.includes("youtube")){
+ytTask.innerText="Completed ✅"; ytTask.disabled=true;
+}
+if(tasks.includes("tiktok")){
+ttTask.innerText="Completed ✅"; ttTask.disabled=true;
+}
+}
 
-let reward = type==="telegram"?500:type==="youtube"?1000:700;
+async function task(type){
 
-setTimeout(()=>{
-state.coins += reward;
-state.usdt = state.coins/1000;
+let links = {
+telegram:"https://t.me/gangs234",
+youtube:"https://youtube.com/@Mamme234",
+tiktok:"https://tiktok.com/@mammeliyas"
+};
+
+window.open(links[type],"_blank");
+
+let res = await fetch(API+"/task",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({userId:user.id,type})
+});
+
+let data = await res.json();
+
+state.coins = data.coins;
+state.usdt = data.usdt;
+
 render();
-alert("Task completed!");
-},3000);
+alert(data.message);
 
+loadUser();
 }
 
 /* ADS */
-function ads(){
-state.coins += 300;
-state.usdt = state.coins/1000;
+async function ads(){
+
+window.open("https://your-ad-link.com","_blank");
+
+let res = await fetch(API+"/ads",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({userId:user.id})
+});
+
+let data = await res.json();
+
+state.coins = data.coins;
+state.usdt = data.usdt;
+
 render();
 }
 
 /* WITHDRAW */
-function withdraw(){
+async function withdraw(){
 
-let w=document.getElementById("wallet").value;
-let a=parseFloat(document.getElementById("amount").value);
+let wallet=document.getElementById("wallet").value;
+let amount=parseFloat(document.getElementById("amount").value);
 
-if(a<20){alert("Min 20 USDT");return;}
-if(a>state.usdt){alert("Not enough");return;}
+let res = await fetch(API+"/withdraw",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({userId:user.id,wallet,amount})
+});
 
-alert("Withdraw sent!");
+let data = await res.json();
+alert(data.message);
 }
 
 /* COPY */
@@ -386,9 +388,26 @@ navigator.clipboard.writeText(document.getElementById("depWallet").value);
 alert("Copied");
 }
 
-render();
+/* TELEGRAM USER */
+if(user){
+document.getElementById("name").innerText=user.first_name;
+document.getElementById("uname").innerText="@"+(user.username||"user");
+document.getElementById("pName").innerText=user.first_name;
+document.getElementById("pUser").innerText="ID: "+user.id;
+
+document.getElementById("refLink").value =
+"https://t.me/Studybuddy_2025Bot?start="+user.id;
+
+if(user.photo_url){
+photo.src=user.photo_url;
+pPhoto.src=user.photo_url;
+}
+}
+
+/* START */
+loadUser();
 
 </script>
 
 </body>
-</html>
+  </html>

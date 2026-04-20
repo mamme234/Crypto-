@@ -1,198 +1,133 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const jwt = require("jsonwebtoken");
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const MONGO_URL = process.env.MONGO_URL;
-const JWT_SECRET = process.env.JWT_SECRET;
+const PORT = process.env.PORT || 3000;
 
-mongoose.connect(MONGO_URL);
+// ===== MongoDB =====
+mongoose.connect(process.env.MONGO_URI)
+.then(()=>console.log("MongoDB Connected ✅"))
+.catch(err=>console.log(err));
 
-/* ================= USER ================= */
-const User = mongoose.model("User", new mongoose.Schema({
-telegramId:String,
-name:String,
-username:String,
-coins:{type:Number,default:0},
-usdt:{type:Number,default:0},
-refs:{type:Number,default:0},
-tasks:{type:Object,default:{}},
-ban:{type:Boolean,default:false},
-lastTap:{type:Number,default:0}
-}));
-
-/* ================= WITHDRAW ================= */
-const Withdraw = mongoose.model("Withdraw",{
-userId:String,
-amount:Number,
-address:String,
-status:{type:String,default:"pending"}
+// ===== Model =====
+const User = mongoose.model("User",{
+  userId:Number,
+  coins:{type:Number,default:0},
+  usdt:{type:Number,default:0},
+  referredBy:Number,
+  tasks:{type:Array,default:[]}
 });
 
-/* ================= LOGIN ================= */
-app.post("/api/login", async (req,res)=>{
-let {id,name,ref} = req.body;
+// ===== GET USER + REF =====
+app.get("/user/:id/:ref?", async (req,res)=>{
 
-let u = await User.findOne({telegramId:id});
+  let {id,ref} = req.params;
 
-if(!u){
-u = await User.create({
-telegramId:id,
-name,
-username:ref
-});
-}
+  let user = await User.findOne({userId:id});
 
-const token = jwt.sign({id:u._id},JWT_SECRET);
-res.json({token});
-});
+  if(!user){
+    user = await User.create({
+      userId:id,
+      referredBy:ref || null
+    });
 
-/* ================= USER ================= */
-app.get("/api/user", async (req,res)=>{
-const token = req.headers.authorization?.split(" ")[1];
-const data = jwt.verify(token,JWT_SECRET);
+    // give referral reward
+    if(ref){
+      let refUser = await User.findOne({userId:ref});
+      if(refUser){
+        refUser.coins += 100;
+        refUser.usdt = refUser.coins/1000;
+        await refUser.save();
+      }
+    }
+  }
 
-const u = await User.findById(data.id);
-
-res.json({
-coins:u.coins,
-usdt:u.usdt,
-refs:u.refs,
-level:Math.floor(u.coins/5000)
-});
+  res.json(user);
 });
 
-/* ================= TAP SYSTEM ================= */
-app.post("/api/tap", async (req,res)=>{
-const token = req.headers.authorization?.split(" ")[1];
-const data = jwt.verify(token,JWT_SECRET);
+// ===== TAP =====
+app.post("/tap", async (req,res)=>{
+  let {userId,fingers} = req.body;
 
-const u = await User.findById(data.id);
+  let user = await User.findOne({userId});
+  fingers = Math.min(fingers,4);
 
-if(u.ban) return res.json({message:"Banned"});
+  user.coins += fingers;
+  user.usdt = user.coins/1000;
 
-let now = Date.now();
-if(now - u.lastTap < 300) return res.json({message:"Too fast"});
-
-u.lastTap = now;
-
-let multi = Math.min(req.body.multi || 1,4);
-
-u.coins += multi;
-u.usdt = Math.floor(u.coins / 1000);
-
-await u.save();
-
-res.json({
-coins:u.coins,
-usdt:u.usdt,
-level:Math.floor(u.coins/5000)
-});
+  await user.save();
+  res.json(user);
 });
 
-/* ================= TASKS ================= */
-app.post("/api/task", async (req,res)=>{
-const token = req.headers.authorization?.split(" ")[1];
-const data = jwt.verify(token,JWT_SECRET);
+// ===== TASK =====
+app.post("/task", async (req,res)=>{
+  let {userId,type} = req.body;
 
-const u = await User.findById(data.id);
+  let user = await User.findOne({userId});
 
-if(!u.tasks) u.tasks = {};
+  if(user.tasks.includes(type)){
+    return res.json({message:"Already completed",coins:user.coins,usdt:user.usdt});
+  }
 
-const {type} = req.body;
+  let reward =
+    type==="telegram"?500:
+    type==="youtube"?1250:
+    type==="tiktok"?1000:0;
 
-if(u.tasks[type]){
-return res.json({message:"Already done"});
-}
+  user.coins += reward;
+  user.usdt = user.coins/1000;
+  user.tasks.push(type);
 
-let reward = 0;
+  await user.save();
 
-if(type==="telegram") reward=500;
-if(type==="tiktok") reward=700;
-if(type==="youtube") reward=1000;
-
-u.coins += reward;
-u.tasks[type]=true;
-u.usdt = Math.floor(u.coins / 1000);
-
-await u.save();
-
-res.json({message:`+${reward} coins`});
+  res.json({message:"Task completed",coins:user.coins,usdt:user.usdt});
 });
 
-/* ================= WITHDRAW ================= */
-app.post("/api/withdraw", async (req,res)=>{
-const token = req.headers.authorization?.split(" ")[1];
-const data = jwt.verify(token,JWT_SECRET);
+// ===== ADS =====
+app.post("/ads", async (req,res)=>{
+  let {userId} = req.body;
 
-const u = await User.findById(data.id);
+  let user = await User.findOne({userId});
 
-if(u.usdt < req.body.amount){
-return res.json({message:"Not enough USDT"});
-}
+  user.coins += 300;
+  user.usdt = user.coins/1000;
 
-await Withdraw.create({
-userId:u._id,
-amount:req.body.amount,
-address:req.body.address
+  await user.save();
+  res.json(user);
 });
 
-res.json({message:"Pending approval"});
+// ===== WITHDRAW =====
+app.post("/withdraw", async (req,res)=>{
+  let {userId,wallet,amount} = req.body;
+
+  let user = await User.findOne({userId});
+
+  if(amount < 20){
+    return res.json({message:"Minimum 20 USDT"});
+  }
+
+  if(amount > user.usdt){
+    return res.json({message:"Not enough balance"});
+  }
+
+  user.usdt -= amount;
+  user.coins = user.usdt * 1000;
+
+  await user.save();
+
+  console.log("Withdraw:",wallet,amount);
+
+  res.json({message:"Withdraw request sent"});
 });
 
-/* ================= ADMIN ================= */
-const ADMIN = {user:"admin",pass:"123456"};
-
-/* login */
-app.post("/api/admin/login",(req,res)=>{
-if(req.body.user===ADMIN.user && req.body.pass===ADMIN.pass){
-return res.json({ok:true});
-}
-res.json({ok:false});
+// ===== SERVER =====
+app.listen(PORT,()=>{
+  console.log("Server running on port",PORT);
 });
-
-/* users */
-app.get("/api/admin/users", async (req,res)=>{
-const u = await User.find();
-res.json(u);
-});
-
-/* withdraws */
-app.get("/api/admin/withdraws", async (req,res)=>{
-const w = await Withdraw.find({status:"pending"});
-res.json(w);
-});
-
-/* approve */
-app.post("/api/admin/approve", async (req,res)=>{
-const w = await Withdraw.findById(req.body.id);
-const u = await User.findById(w.userId);
-
-if(u.usdt >= w.amount){
-u.usdt -= w.amount;
-await u.save();
-
-w.status="approved";
-await w.save();
-}
-
-res.json({ok:true});
-});
-
-/* reject */
-app.post("/api/admin/reject", async (req,res)=>{
-await Withdraw.findByIdAndUpdate(req.body.id,{status:"rejected"});
-res.json({ok:true});
-});
-
-/* ban */
-app.post("/api/admin/ban", async (req,res)=>{
-await User.findByIdAndUpdate(req.body.id,{ban:true});
-res.json({ok:true});
-});
-
-app.listen(3000,()=>console.log("Server running"));

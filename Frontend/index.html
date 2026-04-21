@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Crypto Tap Pro</title>
-<script src="//libtl.com/sdk.js" data-zone="10892289" data-sdk="show_10892289"></script>
+
 <style>
 body{
 margin:0;
@@ -209,7 +209,6 @@ margin-top:8px;
 <div class="profileCard">
 <h3>💰 Ads Reward</h3>
 <button onclick="ads()" style="width:100%">Watch Ad (+300)</button>
-<button onclick="popupAd()">Bonus Ad (+150)</button>
 </div>
 
 <div class="profileCard">
@@ -344,43 +343,15 @@ loadUser();
 }
 
 /* ADS */
-function ads(){
+async function ads(){
 
-show_10892289().then(() => {
+window.open("https://your-ad-link.com","_blank");
 
-    state.coins += 300;
-    state.usdt += 0.003;
-
-    render();
-    alert("🎉 Reward received!");
-
-    // optional backend sync
-    fetch(API+"/ads",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({userId:user.id})
-    }).catch(()=>{});
-
-}).catch(() => {
-    alert("❌ Ad not completed");
+let res = await fetch(API+"/ads",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({userId:user.id})
 });
-
-}
-
-function popupAd(){
-
-show_10892289('pop').then(() => {
-
-    state.coins += 150;
-
-    render();
-    alert("🎁 Popup reward received!");
-
-}).catch(() => {
-    alert("Ad failed or closed");
-});
-
-}
 
 let data = await res.json();
 
@@ -435,18 +406,8 @@ pPhoto.src=user.photo_url;
 
 /* START */
 loadUser();
-    
-show_10892289({
-  type: 'inApp',
-  inAppSettings: {
-    frequency: 2,
-    capping: 0.1,
-    interval: 30,
-    timeout: 5,
-    everyPage: false
-  }
-});
+
 </script>
 
 </body>
-</html>
+    </html>

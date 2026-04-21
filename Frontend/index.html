@@ -348,22 +348,29 @@ function ads(){
 
 show_10892289().then(() => {
 
-    // 🎁 MAIN REWARD (coins after ad)
     state.coins += 300;
     state.usdt += 0.003;
 
     render();
     alert("🎉 Reward received!");
 
+    // optional backend sync
+    fetch(API+"/ads",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({userId:user.id})
+    }).catch(()=>{});
+
 }).catch(() => {
     alert("❌ Ad not completed");
 });
 
-  }function popupAd(){
+}
+
+function popupAd(){
 
 show_10892289('pop').then(() => {
 
-    // 🎁 smaller reward
     state.coins += 150;
 
     render();
@@ -373,13 +380,7 @@ show_10892289('pop').then(() => {
     alert("Ad failed or closed");
 });
 
-                              }
-
-let res = await fetch(API+"/ads",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({userId:user.id})
-});
+}
 
 let data = await res.json();
 
@@ -434,6 +435,7 @@ pPhoto.src=user.photo_url;
 
 /* START */
 loadUser();
+    
 show_10892289({
   type: 'inApp',
   inAppSettings: {

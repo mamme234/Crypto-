@@ -442,7 +442,13 @@ pPhoto.src=user.photo_url;
 }
 
 /* START */
+document.addEventListener("DOMContentLoaded", () => {
+
 loadUser();
+
+document.getElementById("tapBtn").addEventListener("click", tap);
+document.getElementById("tapBtn").addEventListener("touchstart", tap, {passive:false});
+
 show_10892289({
   type: 'inApp',
   inAppSettings: {
@@ -452,6 +458,8 @@ show_10892289({
     timeout: 5,
     everyPage: false
   }
+});
+
 });
 </script>
 

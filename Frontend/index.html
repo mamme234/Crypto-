@@ -15,7 +15,6 @@
 </script>
 <meta charset="UTF-8">
 <title>Crypto Tap Pro</title>
-<script src="//libtl.com/sdk.js" data-zone="10892289" data-sdk="show_10892289"></script>
 <style>
 body{
 margin:0;
@@ -299,35 +298,65 @@ document.getElementById(id).classList.add("active");
 }
 
 /* TAP */
-async function tap(e){
-e.preventDefault();
+let lastAdTime = 0;
 
-let fingers = e.touches ? Math.min(e.touches.length,4) : 1;
-
-// instant update
-state.coins += fingers;
-state.usdt += fingers * 0.001;
-
-let tapCount = 0;
-
-// show ad every 20 taps
-if(tapCount % 20 === 0){
-    show_10892289().catch(()=>{});
+function canShowAd(){
+  return Date.now() - lastAdTime > 5000;
 }
 
+function ads(type="rewarded"){
+
+if(typeof show_10892289 !== "function"){
+  alert("Ads not ready");
+  return;
+}
+
+if(!canShowAd()){
+  alert("Wait 5 sec");
+  return;
+}
+
+lastAdTime = Date.now();
+
+if(type === "rewarded"){
+
+show_10892289().then(()=>{
+
+state.coins += 300;
+state.usdt += 0.003;
 render();
 
-// animation
-const btn = document.getElementById("tapBtn");
-btn.style.transform = "scale(0.9)";
-setTimeout(()=>{ btn.style.transform = "scale(1)"; },100);
+alert("🎉 +300 coins");
 
-// backend (safe)
-fetch(API+"/tap",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({userId:user?.id || 0,fingers})
-}).catch(()=>{});
+});
+
+}
+
+else if(type === "popup"){
+
+show_10892289("pop").then(()=>{
+
+state.coins += 150;
+render();
+
+alert("🎁 +150 coins");
+
+});
+
+}
+
+else if(type === "double"){
+
+show_10892289().then(()=>{
+
+state.coins *= 2;
+render();
+
+alert("🔥 Doubled");
+
+});
+
+}
 
 }
 /* TASKS */

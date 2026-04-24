@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Crypto Tap Pro</title>
-
+<script src="//libtl.com/sdk.js" data-zone="10892289" data-sdk="show_10892289"></script>
 <style>
 body{
 margin:0;
@@ -12,24 +12,92 @@ background:radial-gradient(circle at top,#1b2a4a,#050914 70%);
 color:white;
 }
 
+/* TOP BAR */
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:14px;
+background:rgba(255,255,255,0.06);
+backdrop-filter:blur(10px);
+}
+
+.user{
+display:flex;
+gap:10px;
+align-items:center;
+}
+
+.user img{
+width:48px;
+height:48px;
+border-radius:50%;
+border:2px solid #facc15;
+box-shadow:0 0 15px rgba(250,204,21,0.5);
+}
+
+/* STATS */
+.stats{
+display:flex;
+justify-content:space-around;
+margin-top:12px;
+}
+
+.box{
+background:rgba(255,255,255,0.06);
+padding:12px;
+border-radius:14px;
+width:40%;
+text-align:center;
+backdrop-filter:blur(8px);
+}
+
+.box strong{
+display:block;
+font-size:20px;
+color:#facc15;
+}
+
+/* TAP */
+.tap{
+display:flex;
+justify-content:center;
+margin-top:70px;
+}
+
+.tap button{
+width:220px;
+height:220px;
+border-radius:50%;
+border:none;
+font-size:22px;
+font-weight:bold;
+color:#111;
+background:radial-gradient(circle,#ffe066,#facc15);
+box-shadow:0 0 40px rgba(250,204,21,0.6);
+}
+
+/* SCREEN */
 .screen{
 display:none;
 padding:15px;
-min-height:100vh;
-box-sizing:border-box;
-padding-bottom:80px;
+animation:fade 0.2s ease;
 }
 
-.active{
-display:block;
+.active{display:block;}
+
+@keyframes fade{
+from{opacity:0;transform:translateY(10px);}
+to{opacity:1;transform:translateY(0);}
 }
 
+/* NAV */
 .nav{
 position:fixed;
 bottom:0;
 width:100%;
 display:flex;
-background:rgba(0,0,0,0.75);
+background:rgba(0,0,0,0.6);
 }
 
 .nav button{
@@ -39,6 +107,48 @@ background:none;
 color:white;
 border:none;
 }
+
+/* PROFILE */
+.profileCard{
+background:rgba(255,255,255,0.07);
+padding:15px;
+border-radius:18px;
+margin-top:10px;
+backdrop-filter:blur(10px);
+border:1px solid rgba(255,255,255,0.1);
+}
+
+.profileHeader{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.profileHeader img{
+width:60px;
+height:60px;
+border-radius:50%;
+border:2px solid gold;
+}
+
+.badge{
+background:gold;
+color:black;
+padding:3px 8px;
+border-radius:10px;
+font-size:12px;
+margin-left:10px;
+}
+
+input{
+width:100%;
+padding:12px;
+border-radius:10px;
+border:none;
+background:rgba(255,255,255,0.08);
+color:white;
+margin-top:8px;
+}
 </style>
 </head>
 
@@ -46,21 +156,79 @@ border:none;
 
 <!-- HOME -->
 <div id="home" class="screen active">
-<h2>Home</h2>
-<p id="name">User</p>
-<p id="uname">@user</p>
+
+<div class="topbar">
+<div class="user">
+<img id="photo">
+<div>
+<div id="name">User</div>
+<div id="uname">@user</div>
+</div>
+</div>
+<div>Lv <span id="level">1</span></div>
+</div>
+
+<div class="stats">
+<div class="box">Coins<strong id="coins">0</strong></div>
+<div class="box">USDT<strong id="usdt">0.000</strong></div>
+</div>
+
+<div class="tap">
+<button id="tapBtn"></button>
+</div>
+
 </div>
 
 <!-- PROFILE -->
 <div id="profile" class="screen">
-<h2>Profile</h2>
-<p id="pUser">Loading...</p>
+
+<div class="profileCard">
+<div class="profileHeader">
+<img id="pPhoto">
+<div>
+<h3 id="pName">User</h3>
+<span class="badge">VIP Player</span>
+</div>
+</div>
+<p id="pUser"></p>
+</div>
+
+<div class="profileCard">
+<h3>🔗 Referral Link</h3>
+<input id="refLink" readonly>
+<button onclick="copyRef()" style="width:100%">Copy Link</button>
+</div>
+
+<div class="profileCard">
+<h3>🔥 Social Tasks</h3>
+<button id="tgTask" onclick="task('telegram')" style="width:100%">Telegram (+500)</button>
+<button id="ytTask" onclick="task('youtube')" style="width:100%">YouTube (+1250)</button>
+<button id="ttTask" onclick="task('tiktok')" style="width:100%">TikTok (+1000)</button>
+</div>
+
+<div class="profileCard">
+<h3>💰 Ads Reward</h3>
+<button onclick="ads()" style="width:100%">Watch Ad (+300)</button>
+<button onclick="popupAd()">Bonus Ad (+150)</button>
+<button onclick="doubleReward()">🔥 Double Coins</button>
+</div>
+
+<div class="profileCard">
+<h3>💸 Withdraw</h3>
+<input id="wallet" placeholder="Wallet address">
+<input id="amount" placeholder="Amount USDT">
+<button onclick="withdraw()" style="width:100%">Withdraw</button>
+</div>
+
 </div>
 
 <!-- DEPOSIT -->
 <div id="deposit" class="screen">
-<h2>Deposit</h2>
-<p>Wallet Address Here</p>
+<div class="profileCard">
+<h2>💰 Deposit</h2>
+<input id="depWallet" readonly value="UQAYjMccjJ8Xn1z9hodUImMjJCB2qmWGjlMup9-sVZtEQFWH">
+<button onclick="copyWallet()" style="width:100%">Copy Address</button>
+</div>
 </div>
 
 <!-- NAV -->
@@ -73,42 +241,219 @@ border:none;
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <script>
-/* Telegram */
+
+const API = "https://crypto-4bbj.onrender.com";
+
+let state = {coins:0,usdt:0};
+
 const tg = window.Telegram?.WebApp;
-const user = tg?.initDataUnsafe?.user || null;
+const user = tg?.initDataUnsafe?.user;
 
-/* UI SET */
-function setUserUI(){
-  document.getElementById("name").innerText =
-    user?.first_name || "Guest";
+if(tg) tg.expand();
 
-  document.getElementById("uname").innerText =
-    "@" + (user?.username || "guest");
+/* LOAD USER */
+async function loadUser(){
 
-  document.getElementById("pUser").innerText =
-    user ? "ID: " + user.id : "No Telegram user";
+if(!user) return;
+
+let ref = new URLSearchParams(window.location.search).get("ref");
+
+let url = API + "/user/" + user.id;
+if(ref) url += "/" + ref;
+
+let res = await fetch(url);
+let data = await res.json();
+
+state.coins = data.coins;
+state.usdt = data.usdt;
+
+render();
+updateTasks(data.tasks || []);
 }
 
-/* NAV FIX */
-function show(id){
-  document.querySelectorAll(".screen").forEach(s=>{
-    s.classList.remove("active");
-    s.style.display = "none";
-  });
+/* RENDER */
+function render(){
+document.getElementById("coins").innerText = Math.floor(state.coins);
+document.getElementById("usdt").innerText = state.usdt.toFixed(3);
+}
 
-  const page = document.getElementById(id);
-  if(page){
-    page.style.display = "block";
-    page.classList.add("active");
-  }
+/* NAV */
+function show(id){
+document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+
+/* TAP */
+async function tap(e){
+e.preventDefault();
+
+let fingers = e.touches ? Math.min(e.touches.length,4) : 1;
+
+// ⚡ instant update
+state.coins += fingers;
+state.usdt += fingers * 0.001;
+
+tapCount++;   // 👈 count taps
+
+// 🎯 show ad every 20 taps
+if(tapCount % 20 === 0){
+    show_10892289().catch(()=>{});
+}
+
+render();
+
+// send to backend in background
+fetch(API+"/tap",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({userId:user?.id || 0,fingers})
+}).catch(()=>{});
+
+}
+
+// animation effect
+const btn = document.getElementById("tapBtn");
+btn.style.transform = "scale(0.9)";
+setTimeout(()=>{ btn.style.transform = "scale(1)"; },100);
+/* TASKS */
+function updateTasks(tasks){
+if(tasks.includes("telegram")){
+tgTask.innerText="Completed ✅"; tgTask.disabled=true;
+}
+if(tasks.includes("youtube")){
+ytTask.innerText="Completed ✅"; ytTask.disabled=true;
+}
+if(tasks.includes("tiktok")){
+ttTask.innerText="Completed ✅"; ttTask.disabled=true;
+}
+}
+
+async function task(type){
+
+let links = {
+telegram:"https://t.me/gangs234",
+youtube:"https://youtube.com/@Mamme234",
+tiktok:"https://tiktok.com/@mammeliyas"
+};
+
+window.open(links[type],"_blank");
+
+let res = await fetch(API+"/task",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({userId:user.id,type})
+});
+
+let data = await res.json();
+
+state.coins = data.coins;
+state.usdt = data.usdt;
+
+render();
+alert(data.message);
+
+loadUser();
+}
+
+/* ADS */
+function ads(){
+
+show_10892289().then(() => {
+
+    // 🎁 MAIN REWARD (coins after ad)
+    state.coins += 300;
+    state.usdt += 0.003;
+
+    render();
+    alert("🎉 Reward received!");
+
+}).catch(() => {
+    alert("❌ Ad not completed");
+});
+
+                                                                     }function popupAd(){
+
+show_10892289('pop').then(() => {
+
+    // 🎁 smaller reward
+    state.coins += 150;
+
+    render();
+    alert("🎁 Popup reward received!");
+
+}).catch(() => {
+    alert("Ad failed or closed");
+});
+
+    }
+function doubleReward(){
+
+show_10892289().then(()=>{
+
+state.coins *= 2;
+render();
+
+alert("🔥 Coins doubled!");
+
+});
+
+}
+/* WITHDRAW */
+async function withdraw(){
+
+let wallet=document.getElementById("wallet").value;
+let amount=parseFloat(document.getElementById("amount").value);
+
+let res = await fetch(API+"/withdraw",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({userId:user.id,wallet,amount})
+});
+
+let data = await res.json();
+alert(data.message);
+}
+
+/* COPY */
+function copyRef(){
+navigator.clipboard.writeText(document.getElementById("refLink").value);
+alert("Copied");
+}
+
+function copyWallet(){
+navigator.clipboard.writeText(document.getElementById("depWallet").value);
+alert("Copied");
+}
+
+/* TELEGRAM USER */
+if(user){
+document.getElementById("name").innerText=user.first_name;
+document.getElementById("uname").innerText="@"+(user.username||"user");
+document.getElementById("pName").innerText=user.first_name;
+document.getElementById("pUser").innerText="ID: "+user.id;
+
+document.getElementById("refLink").value =
+"https://t.me/Studybuddy_2025Bot?start="+user.id;
+
+if(user.photo_url){
+photo.src=user.photo_url;
+pPhoto.src=user.photo_url;
+}
 }
 
 /* START */
-window.addEventListener("load", ()=>{
-  setUserUI();
-  if(tg) tg.expand();
+loadUser();
+show_10892289({
+  type: 'inApp',
+  inAppSettings: {
+    frequency: 2,
+    capping: 0.1,
+    interval: 30,
+    timeout: 5,
+    everyPage: false
+  }
 });
 </script>
 
 </body>
-</html>
+  </html>

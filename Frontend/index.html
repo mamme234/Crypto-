@@ -377,15 +377,14 @@ loadUser();
 }
 
 /* ADS */
-function runAd(){
+function ads(){
 
-  if(!window.adReady || typeof show_10892289 !== "function"){
-    alert("Ads not ready yet");
+  if(typeof show_10892289 !== "function"){
+    alert("Ads not loaded yet. Try again in a few seconds.");
     return;
   }
 
   try {
-
     const ad = show_10892289();
 
     if(ad && typeof ad.then === "function"){
@@ -395,7 +394,7 @@ function runAd(){
         render();
         alert("🎉 Reward received!");
       }).catch(()=>{
-        alert("❌ Ad closed");
+        alert("❌ Ad closed or failed");
       });
     } else {
       state.coins += 300;

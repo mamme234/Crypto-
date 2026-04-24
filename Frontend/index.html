@@ -293,7 +293,7 @@ let fingers = e.touches ? Math.min(e.touches.length,4) : 1;
 state.coins += fingers;
 state.usdt += fingers * 0.001;
 
-tapCount++;   // 👈 count taps
+tapCount++;   // ✅ now works
 
 // 🎯 show ad every 20 taps
 if(tapCount % 20 === 0){
@@ -302,7 +302,12 @@ if(tapCount % 20 === 0){
 
 render();
 
-// send to backend in background
+// 🎮 animation
+const btn = document.getElementById("tapBtn");
+btn.style.transform = "scale(0.9)";
+setTimeout(()=>{ btn.style.transform = "scale(1)"; },100);
+
+// send to backend
 fetch(API+"/tap",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
@@ -310,11 +315,6 @@ body:JSON.stringify({userId:user?.id || 0,fingers})
 }).catch(()=>{});
 
 }
-
-// animation effect
-const btn = document.getElementById("tapBtn");
-btn.style.transform = "scale(0.9)";
-setTimeout(()=>{ btn.style.transform = "scale(1)"; },100);
 /* TASKS */
 function updateTasks(tasks){
 if(tasks.includes("telegram")){

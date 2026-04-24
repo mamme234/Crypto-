@@ -486,60 +486,78 @@ pPhoto.src=user.photo_url;
 }
 
 /* START */
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="//libtl.com/sdk.js" data-zone="10892289" data-sdk="show_10892289"></script>
+
 <script>
+/* =======================
+   SAFE INIT (NO STACK)
+======================= */
+
 const API = "https://crypto-4bbj.onrender.com";
 
 let state = { coins: 0, usdt: 0 };
 let tapCount = 0;
 let lastAdTime = 0;
 
-/* SAFE TELEGRAM INIT */
+/* Telegram safe user */
 const tg = window.Telegram?.WebApp;
+const user = tg?.initDataUnsafe?.user || null;
 
-const user = tg && tg.initDataUnsafe && tg.initDataUnsafe.user
-  ? tg.initDataUnsafe.user
-  : null;
+if (tg) tg.expand();
 
-/* FIX USER DISPLAY */
+/* =======================
+   USER UI
+======================= */
 function setUserUI() {
+  const name = document.getElementById("name");
+  const uname = document.getElementById("uname");
+
   if (!user) {
-    document.getElementById("name").innerText = "Guest";
-    document.getElementById("uname").innerText = "@guest";
+    name.innerText = "Guest";
+    uname.innerText = "@guest";
     return;
   }
 
-  document.getElementById("name").innerText = user.first_name || "User";
-  document.getElementById("uname").innerText = "@" + (user.username || "user");
+  name.innerText = user.first_name || "User";
+  uname.innerText = "@" + (user.username || "user");
 }
 
-/* LOAD USER */
+/* =======================
+   LOAD USER
+======================= */
 async function loadUser() {
   if (!user) return;
 
   try {
-    let res = await fetch(API + "/user/" + user.id);
-    let data = await res.json();
+    const res = await fetch(API + "/user/" + user.id);
+    const data = await res.json();
 
     state.coins = data.coins || 0;
     state.usdt = data.usdt || 0;
 
     render();
+    updateTasks(data.tasks || []);
   } catch (e) {
     console.log("load error", e);
   }
 }
 
-/* RENDER */
+/* =======================
+   RENDER
+======================= */
 function render() {
   document.getElementById("coins").innerText = Math.floor(state.coins);
   document.getElementById("usdt").innerText = state.usdt.toFixed(3);
 }
 
-/* TAP */
+/* =======================
+   TAP (FIXED)
+======================= */
 function tap(e) {
   e.preventDefault();
 
-  let fingers = e.touches ? Math.min(e.touches.length, 4) : 1;
+  const fingers = e.touches ? Math.min(e.touches.length, 4) : 1;
 
   tapCount++;
 
@@ -549,28 +567,35 @@ function tap(e) {
   render();
 
   // ad every 20 taps
-  if (tapCount % 20 === 0 && typeof show_10892289 === "function") {
-    show_10892289().catch(() => {});
+  if (tapCount % 20 === 0) {
+    ads("rewarded");
   }
 
   fetch(API + "/tap", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      userId: user ? user.id : 0,
+      userId: user?.id || 0,
       fingers
     })
   }).catch(() => {});
 }
 
-/* ADS (CLEAN) */
+/* =======================
+   ADS (ONE CLEAN SYSTEM)
+======================= */
+function canShowAd() {
+  return Date.now() - lastAdTime > 5000;
+}
+
 function ads(type = "rewarded") {
+
   if (typeof show_10892289 !== "function") {
-    alert("Ads not ready");
+    alert("Ads not loaded");
     return;
   }
 
-  if (Date.now() - lastAdTime < 5000) {
+  if (!canShowAd()) {
     alert("Wait 5 sec");
     return;
   }
@@ -580,6 +605,7 @@ function ads(type = "rewarded") {
   if (type === "rewarded") {
     show_10892289().then(() => {
       state.coins += 300;
+      state.usdt += 0.003;
       render();
     });
   }
@@ -599,21 +625,46 @@ function ads(type = "rewarded") {
   }
 }
 
-/* START */
-window.addEventListener("load", () => {
-  setUserUI();
+/* =======================
+   TASKS SAFE
+======================= */
+function updateTasks(tasks = []) {
+  const tgTask = document.getElementById("tgTask");
+  const ytTask = document.getElementById("ytTask");
+  const ttTask = document.getElementById("ttTask");
 
-  if (tg) tg.expand();
+  if (tasks.includes("telegram") && tgTask) {
+    tgTask.innerText = "Completed ✅";
+    tgTask.disabled = true;
+  }
+
+  if (tasks.includes("youtube") && ytTask) {
+    ytTask.innerText = "Completed ✅";
+    ytTask.disabled = true;
+  }
+
+  if (tasks.includes("tiktok") && ttTask) {
+    ttTask.innerText = "Completed ✅";
+    ttTask.disabled = true;
+  }
+}
+
+/* =======================
+   START ONLY ONCE
+======================= */
+window.addEventListener("load", () => {
+
+  setUserUI();
+  loadUser();
 
   const btn = document.getElementById("tapBtn");
+
   if (btn) {
     btn.addEventListener("click", tap);
     btn.addEventListener("touchstart", tap, { passive: false });
   }
 
-  loadUser();
 });
 </script>
-
 </body>
 </html>

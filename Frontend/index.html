@@ -342,14 +342,7 @@ async function tap(e){
       userId: user?.id || 0,
       fingers
     })
-  }).catch(()=>{});window.addEventListener("load", () => {
-  const btn = document.getElementById("tapBtn");
-
-  if(btn){
-    btn.addEventListener("click", tap);
-    btn.addEventListener("touchstart", tap, {passive:false});
-  }
-});
+  }).catch(()=>{});
       }
 /* TASKS */
 function updateTasks(tasks){
@@ -486,6 +479,14 @@ show_10892289({
     interval: 30,
     timeout: 5,
     everyPage: false
+  }
+});
+window.addEventListener("load", () => {
+  const btn = document.getElementById("tapBtn");
+
+  if (btn) {
+    btn.addEventListener("click", tap);
+    btn.addEventListener("touchstart", tap, { passive: false });
   }
 });
 </script>

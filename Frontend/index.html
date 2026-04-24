@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html>
-<head>
+<head><script>
+(function () {
+  const s = document.createElement("script");
+  s.src = "//libtl.com/sdk.js";
+  s.setAttribute("data-zone", "10892289");
+  s.setAttribute("data-sdk", "show_10892289");
+
+  s.onload = () => console.log("✅ Ads SDK loaded");
+  s.onerror = () => console.log("❌ Ads SDK failed");
+
+  document.head.appendChild(s);
+})();
+</script>
+</script>
 <meta charset="UTF-8">
 <title>Crypto Tap Pro</title>
 <script src="//libtl.com/sdk.js" data-zone="10892289" data-sdk="show_10892289"></script>
@@ -471,6 +484,105 @@ console.log("Ads SDK not ready");
 
 });
 </script>
+/* =========================
+   🚀 ADS UPGRADE SYSTEM
+========================= */
 
+let lastAdTime = 0;
+const AD_COOLDOWN = 5000; // 5 sec cooldown
+
+function canShowAd(){
+  return Date.now() - lastAdTime > AD_COOLDOWN;
+}
+
+/* MAIN ADS FUNCTION */
+function ads(type = "rewarded"){
+
+if(typeof show_10892289 !== "function"){
+  alert("❌ Ads not loaded");
+  return;
+}
+
+if(!canShowAd()){
+  alert("⏳ Please wait before next ad");
+  return;
+}
+
+lastAdTime = Date.now();
+
+/* =========================
+   🎯 REWARDED AD
+========================= */
+if(type === "rewarded"){
+
+show_10892289().then(() => {
+
+  state.coins += 300;
+  state.usdt += 0.003;
+
+  render();
+  alert("🎉 +300 coins reward");
+
+}).catch(() => {
+  alert("❌ Ad not completed");
+});
+
+}
+
+/* =========================
+   🎯 POPUP AD
+========================= */
+else if(type === "popup"){
+
+show_10892289("pop").then(() => {
+
+  state.coins += 150;
+
+  render();
+  alert("🎁 +150 popup reward");
+
+}).catch(() => {
+  alert("❌ Popup closed");
+});
+
+}
+
+/* =========================
+   🎯 DOUBLE REWARD AD
+========================= */
+else if(type === "double"){
+
+show_10892289().then(() => {
+
+  state.coins *= 2;
+
+  render();
+  alert("🔥 Coins doubled!");
+
+}).catch(() => {
+  alert("❌ Ad not completed");
+});
+
+}
+
+/* =========================
+   🎯 IN-APP ADS
+========================= */
+else if(type === "inApp"){
+
+show_10892289({
+  type: "inApp",
+  inAppSettings: {
+    frequency: 2,
+    capping: 0.1,
+    interval: 30,
+    timeout: 5,
+    everyPage: false
+  }
+}).catch(()=>{});
+
+}
+
+}
 </body>
     </html>

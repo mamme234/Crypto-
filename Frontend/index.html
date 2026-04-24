@@ -3,16 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Crypto Tap Pro</title>
-<script src="//libtl.com/sdk.js" data-zone="10892289" data-sdk="show_10892289">show_10892289({
-  type: 'inApp',
-  inAppSettings: {
-    frequency: 2,
-    capping: 0.1,
-    interval: 30,
-    timeout: 5,
-    everyPage: false
-  }
-});</script>
+<script src="//libtl.com/sdk.js" data-zone="10892289" data-sdk="show_10892289"></script>
 <style>
 body{
 margin:0;
@@ -429,7 +420,16 @@ pPhoto.src=user.photo_url;
 
 /* START */
 loadUser();
-
+show_10892289({
+  type: 'inApp',
+  inAppSettings: {
+    frequency: 2,
+    capping: 0.1,
+    interval: 30,
+    timeout: 5,
+    everyPage: false
+  }
+});
 </script>
 
 </body>

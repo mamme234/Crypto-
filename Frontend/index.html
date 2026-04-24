@@ -4,15 +4,26 @@
 <meta charset="UTF-8">
 <title>Crypto Tap Pro</title>
 <script>
-window.addEventListener("load", () => {
-  const s = document.createElement("script");
-  s.src = "//libtl.com/sdk.js";
-  s.setAttribute("data-zone","10892289");
-  s.setAttribute("data-sdk","show_10892289");
+window.adReady = false;
 
-  s.onload = () => console.log("Ads ready");
+(function () {
+  const s = document.createElement("script");
+  s.src = "https://libtl.com/sdk.js";
+  s.setAttribute("data-zone", "10892289");
+  s.setAttribute("data-sdk", "show_10892289");
+
+  s.onload = () => {
+    console.log("Ads ready");
+    window.adReady = true;
+  };
+
+  s.onerror = () => {
+    console.log("Ads failed");
+    window.adReady = false;
+  };
+
   document.head.appendChild(s);
-});
+})();
 </script>
 <style>
 body{
@@ -296,54 +307,35 @@ document.getElementById(id).classList.add("active");
 /* TAP */
 let tapCount = 0;
 
-function animateTap(btn){
-  btn.style.transform = "scale(0.9)";
-  setTimeout(()=>{
-    btn.style.transform = "scale(1)";
-  }, 80);
-}
-
-async function tap(e){
+function tap(e){
   if(e) e.preventDefault();
 
   const btn = document.getElementById("tapBtn");
-  if(btn) animateTap(btn);
+  if(btn){
+    btn.style.transform = "scale(0.92)";
+    setTimeout(()=>btn.style.transform="scale(1)",80);
+  }
 
-  const fingers = e?.touches
-    ? Math.min(e.touches.length, 4)
-    : 1;
+  const fingers = e?.touches ? Math.min(e.touches.length, 4) : 1;
 
-  tapCount++;
-
-  // instant reward
   state.coins += fingers;
   state.usdt += fingers * 0.001;
 
+  tapCount++;
+
   render();
 
-  // ads every 20 taps
+  // ADS every 20 taps
   if(tapCount % 20 === 0){
-    if(typeof show_10892289 === "function"){
-      try {
-        show_10892289();
-      } catch(err){
-        console.log("Ad error:", err);
-      }
-    } else {
-      console.log("Ad SDK not ready");
-    }
+    runAd();
   }
 
-  // backend update
   fetch(API+"/tap",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      userId: user?.id || 0,
-      fingers
-    })
+    body:JSON.stringify({userId:user?.id || 0, fingers})
   }).catch(()=>{});
-      }
+}
 /* TASKS */
 function updateTasks(tasks){
 if(tasks.includes("telegram")){
@@ -471,23 +463,30 @@ pPhoto.src=user.photo_url;
 
 /* START */
 loadUser();
-show_10892289({
-  type: 'inApp',
-  inAppSettings: {
-    frequency: 2,
-    capping: 0.1,
-    interval: 30,
-    timeout: 5,
-    everyPage: false
+function runAd(){
+  if(!window.adReady || typeof show_10892289 !== "function"){
+    console.log("Ad not ready yet");
+    return;
   }
-});
-window.addEventListener("load", () => {
+
+  try {
+    show_10892289().then(()=>{
+      state.coins += 300;
+      state.usdt += 0.003;
+      render();
+    }).catch(()=>{});
+  } catch(e){
+    console.log("Ad error", e);
+  }
+}window.addEventListener("load", () => {
   const btn = document.getElementById("tapBtn");
 
-  if (btn) {
+  if(btn){
     btn.addEventListener("click", tap);
-    btn.addEventListener("touchstart", tap, { passive: false });
+    btn.addEventListener("touchstart", tap, { passive:false });
   }
+
+  console.log("Tap system ready");
 });
 </script>
 

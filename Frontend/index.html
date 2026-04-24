@@ -247,9 +247,12 @@ const API = "https://crypto-4bbj.onrender.com";
 let state = {coins:0,usdt:0};
 
 const tg = window.Telegram?.WebApp;
-const user = tg?.initDataUnsafe?.user;
 
-if(tg) tg.expand();
+const user = tg?.initDataUnsafe?.user || {
+id: 1,
+first_name: "Guest",
+username: "guest"
+};
 
 /* LOAD USER */
 async function loadUser(){
@@ -293,7 +296,7 @@ let fingers = e.touches ? Math.min(e.touches.length,4) : 1;
 state.coins += fingers;
 state.usdt += fingers * 0.001;
 
-tapCount++;
+let tapCount = 0;
 
 // show ad every 20 taps
 if(tapCount % 20 === 0){
@@ -442,13 +445,16 @@ pPhoto.src=user.photo_url;
 }
 
 /* START */
-document.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("load", () => {
 
 loadUser();
 
+// tap events
 document.getElementById("tapBtn").addEventListener("click", tap);
 document.getElementById("tapBtn").addEventListener("touchstart", tap, {passive:false});
 
+// ads init (safe)
+try {
 show_10892289({
   type: 'inApp',
   inAppSettings: {
@@ -459,6 +465,9 @@ show_10892289({
     everyPage: false
   }
 });
+} catch(e){
+console.log("Ads SDK not ready");
+}
 
 });
 </script>

@@ -8,25 +8,26 @@ window.adReady = false;
 
 (function () {
   const s = document.createElement("script");
-  s.src = "https://libtl.com/sdk.js"; // MUST be https
+  s.src = "https://libtl.com/sdk.js";
   s.async = true;
 
   s.setAttribute("data-zone", "10892289");
   s.setAttribute("data-sdk", "show_10892289");
 
   s.onload = () => {
-    console.log("SDK loaded");
     window.adReady = true;
+    console.log("Ads ready");
   };
 
   s.onerror = () => {
-    console.log("SDK failed");
     window.adReady = false;
+    console.log("Ads failed");
   };
 
   document.head.appendChild(s);
 })();
 </script>
+</head>
 <style>
 body{
 margin:0;
@@ -447,20 +448,34 @@ pPhoto.src=user.photo_url;
 
 /* START */
 loadUser();
-window.addEventListener("load", () => {
-  if(window.adReady){
-    show_10892289({
-      type: 'inApp',
-      inAppSettings: {
-        frequency: 2,
-        capping: 0.1,
-        interval: 30,
-        timeout: 5,
-        everyPage: false
-      }
-    });
+<script>
+function ads(){
+  if(typeof show_10892289 !== "function"){
+    alert("Ads not ready yet");
+    return;
   }
-});
+
+  try {
+    const ad = show_10892289();
+
+    if(ad && ad.then){
+      ad.then(() => {
+        state.coins += 300;
+        state.usdt += 0.003;
+        render();
+      }).catch(() => {
+        alert("Ad closed or failed");
+      });
+    } else {
+      state.coins += 300;
+      render();
+    }
+
+  } catch(e){
+    console.log(e);
+    alert("Ad error");
+  }
+}
 </script>
 
 </body>

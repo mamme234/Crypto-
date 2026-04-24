@@ -89,13 +89,17 @@ box-shadow:0 0 40px rgba(250,204,21,0.6);
 }
 
 /* SCREEN */
-.screen{
-display:none;
-padding:15px;
-animation:fade 0.2s ease;
+  .screen{
+  display:none;
+  padding:15px;
+  min-height:100vh;
+  box-sizing:border-box;
+  padding-bottom:80px;
 }
 
-.active{display:block;}
+.active{
+  display:block;
+  }
 
 @keyframes fade{
 from{opacity:0;transform:translateY(10px);}
@@ -104,11 +108,12 @@ to{opacity:1;transform:translateY(0);}
 
 /* NAV */
 .nav{
-position:fixed;
-bottom:0;
-width:100%;
-display:flex;
-background:rgba(0,0,0,0.6);
+  position:fixed;
+  bottom:0;
+  width:100%;
+  display:flex;
+  background:rgba(0,0,0,0.75);
+  z-index:999;
 }
 
 .nav button{
@@ -293,8 +298,17 @@ document.getElementById("usdt").innerText = state.usdt.toFixed(3);
 
 /* NAV */
 function show(id){
-document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-document.getElementById(id).classList.add("active");
+
+  document.querySelectorAll(".screen").forEach(s => {
+    s.classList.remove("active");
+    s.style.display = "none";
+  });
+
+  const el = document.getElementById(id);
+  if(el){
+    el.style.display = "block";
+    el.classList.add("active");
+  }
 }
 
 /* TAP */

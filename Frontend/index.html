@@ -342,7 +342,14 @@ async function tap(e){
       userId: user?.id || 0,
       fingers
     })
-  }).catch(()=>{});
+  }).catch(()=>{});window.addEventListener("load", () => {
+  const btn = document.getElementById("tapBtn");
+
+  if(btn){
+    btn.addEventListener("click", tap);
+    btn.addEventListener("touchstart", tap, {passive:false});
+  }
+});
       }
 /* TASKS */
 function updateTasks(tasks){
@@ -424,14 +431,6 @@ render();
 
 alert("🔥 Coins doubled!");
 
-});
-window.addEventListener("load", () => {
-  const btn = document.getElementById("tapBtn");
-
-  if(btn){
-    btn.addEventListener("click", tap);
-    btn.addEventListener("touchstart", tap, {passive:false});
-  }
 });
 }
 /* WITHDRAW */

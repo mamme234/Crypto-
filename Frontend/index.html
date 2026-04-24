@@ -448,6 +448,20 @@ pPhoto.src=user.photo_url;
 
 /* START */
 loadUser();
+  window.addEventListener("load", () => {
+  if(window.adReady){
+    show_10892289({
+      type: 'inApp',
+      inAppSettings: {
+        frequency: 2,
+        capping: 0.1,
+        interval: 30,
+        timeout: 5,
+        everyPage: false
+      }
+    });
+  }
+});
 <script>
 function ads(){
   if(typeof show_10892289 !== "function"){

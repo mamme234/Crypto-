@@ -210,6 +210,7 @@ margin-top:8px;
 <h3>💰 Ads Reward</h3>
 <button onclick="ads()" style="width:100%">Watch Ad (+300)</button>
 <button onclick="popupAd()">Bonus Ad (+150)</button>
+<button onclick="doubleReward()">🔥 Double Coins</button>
 </div>
 
 <div class="profileCard">
@@ -285,24 +286,35 @@ document.getElementById(id).classList.add("active");
 /* TAP */
 async function tap(e){
 e.preventDefault();
+
 let fingers = e.touches ? Math.min(e.touches.length,4) : 1;
 
-let res = await fetch(API+"/tap",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({userId:user.id,fingers})
-});
+// ⚡ instant update
+state.coins += fingers;
+state.usdt += fingers * 0.001;
 
-let data = await res.json();
-state.coins = data.coins;
-state.usdt = data.usdt;
+tapCount++;   // 👈 count taps
 
-render();
+// 🎯 show ad every 20 taps
+if(tapCount % 20 === 0){
+    show_10892289().catch(()=>{});
 }
 
-document.getElementById("tapBtn").addEventListener("touchstart",tap,{passive:false});
-document.getElementById("tapBtn").addEventListener("click",tap);
+render();
 
+// send to backend in background
+fetch(API+"/tap",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({userId:user?.id || 0,fingers})
+}).catch(()=>{});
+
+}
+
+// animation effect
+const btn = document.getElementById("tapBtn");
+btn.style.transform = "scale(0.9)";
+setTimeout(()=>{ btn.style.transform = "scale(1)"; },100);
 /* TASKS */
 function updateTasks(tasks){
 if(tasks.includes("telegram")){
@@ -374,7 +386,18 @@ show_10892289('pop').then(() => {
 });
 
     }
+function doubleReward(){
 
+show_10892289().then(()=>{
+
+state.coins *= 2;
+render();
+
+alert("🔥 Coins doubled!");
+
+});
+
+}
 /* WITHDRAW */
 async function withdraw(){
 

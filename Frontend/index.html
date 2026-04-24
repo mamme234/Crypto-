@@ -486,114 +486,185 @@ pPhoto.src=user.photo_url;
 }
 
 /* START */
-window.addEventListener("load", () => {
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="//libtl.com/sdk.js" data-zone="10892289" data-sdk="show_10892289"></script>
 
-loadUser();
+<script>
 
-// tap events
-document.getElementById("tapBtn").addEventListener("click", tap);
-document.getElementById("tapBtn").addEventListener("touchstart", tap, {passive:false});
+const API = "https://crypto-4bbj.onrender.com";
 
-/* =========================
-   🚀 ADS UPGRADE SYSTEM
-========================= */
-
+let state = { coins: 0, usdt: 0 };
+let tapCount = 0;
 let lastAdTime = 0;
-const AD_COOLDOWN = 5000; // 5 sec cooldown
 
-function canShowAd(){
-  return Date.now() - lastAdTime > AD_COOLDOWN;
-}
+const tg = window.Telegram?.WebApp;
+const user = tg?.initDataUnsafe?.user || {
+  id: 1,
+  first_name: "Guest",
+  username: "guest"
+};
 
-/* MAIN ADS FUNCTION */
-function ads(type = "rewarded"){
-
-if(typeof show_10892289 !== "function"){
-  alert("❌ Ads not loaded");
-  return;
-}
-
-if(!canShowAd()){
-  alert("⏳ Please wait before next ad");
-  return;
-}
-
-lastAdTime = Date.now();
+if (tg) tg.expand();
 
 /* =========================
-   🎯 REWARDED AD
+   LOAD USER
 ========================= */
-if(type === "rewarded"){
+async function loadUser() {
+  try {
+    let ref = new URLSearchParams(window.location.search).get("ref");
 
-show_10892289().then(() => {
+    let url = API + "/user/" + user.id;
+    if (ref) url += "/" + ref;
 
-  state.coins += 300;
-  state.usdt += 0.003;
+    let res = await fetch(url);
+    let data = await res.json();
 
-  render();
-  alert("🎉 +300 coins reward");
+    state.coins = data.coins || 0;
+    state.usdt = data.usdt || 0;
 
-}).catch(() => {
-  alert("❌ Ad not completed");
-});
-
-}
-
-/* =========================
-   🎯 POPUP AD
-========================= */
-else if(type === "popup"){
-
-show_10892289("pop").then(() => {
-
-  state.coins += 150;
-
-  render();
-  alert("🎁 +150 popup reward");
-
-}).catch(() => {
-  alert("❌ Popup closed");
-});
-
-}
-
-/* =========================
-   🎯 DOUBLE REWARD AD
-========================= */
-else if(type === "double"){
-
-show_10892289().then(() => {
-
-  state.coins *= 2;
-
-  render();
-  alert("🔥 Coins doubled!");
-
-}).catch(() => {
-  alert("❌ Ad not completed");
-});
-
-}
-
-/* =========================
-   🎯 IN-APP ADS
-========================= */
-else if(type === "inApp"){
-
-show_10892289({
-  type: "inApp",
-  inAppSettings: {
-    frequency: 2,
-    capping: 0.1,
-    interval: 30,
-    timeout: 5,
-    everyPage: false
+    render();
+    updateTasks(data.tasks || []);
+  } catch (e) {
+    console.log("loadUser error", e);
   }
-}).catch(()=>{});
-
 }
 
+/* =========================
+   RENDER
+========================= */
+function render() {
+  document.getElementById("coins").innerText = Math.floor(state.coins);
+  document.getElementById("usdt").innerText = state.usdt.toFixed(3);
+}
+
+/* =========================
+   TAP SYSTEM (FIXED)
+========================= */
+async function tap(e) {
+  e.preventDefault();
+
+  let fingers = e.touches ? Math.min(e.touches.length, 4) : 1;
+
+  tapCount++;
+
+  state.coins += fingers;
+  state.usdt += fingers * 0.001;
+
+  render();
+
+  // 👉 show ad every 20 taps
+  if (tapCount % 20 === 0) {
+    ads("rewarded");
   }
+
+  // backend update (safe)
+  fetch(API + "/tap", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId: user.id, fingers })
+  }).catch(() => {});
+}
+
+/* =========================
+   ADS SYSTEM (ALL IN ONE)
+========================= */
+function canShowAd() {
+  return Date.now() - lastAdTime > 5000; // 5 sec cooldown
+}
+
+function ads(type = "rewarded") {
+
+  if (typeof show_10892289 !== "function") {
+    alert("Ads SDK not loaded");
+    return;
+  }
+
+  if (!canShowAd()) {
+    alert("Wait before next ad");
+    return;
+  }
+
+  lastAdTime = Date.now();
+
+  // 🔥 REWARDED AD
+  if (type === "rewarded") {
+    show_10892289().then(() => {
+      state.coins += 300;
+      state.usdt += 0.003;
+      render();
+      alert("+300 coins reward");
+    }).catch(() => {});
+  }
+
+  // 🎁 POPUP AD
+  else if (type === "popup") {
+    show_10892289("pop").then(() => {
+      state.coins += 150;
+      render();
+      alert("+150 coins reward");
+    }).catch(() => {});
+  }
+
+  // 🔥 DOUBLE AD
+  else if (type === "double") {
+    show_10892289().then(() => {
+      state.coins *= 2;
+      render();
+      alert("Coins doubled!");
+    }).catch(() => {});
+  }
+
+  // 📱 IN-APP ADS
+  else if (type === "inApp") {
+    show_10892289({
+      type: "inApp",
+      inAppSettings: {
+        frequency: 2,
+        capping: 0.1,
+        interval: 30,
+        timeout: 5,
+        everyPage: false
+      }
+    });
+  }
+}
+
+/* =========================
+   TASKS (FIX SAFE)
+========================= */
+function updateTasks(tasks = []) {
+  if (!user) return;
+
+  if (tasks.includes("telegram")) {
+    let el = document.getElementById("tgTask");
+    if (el) { el.innerText = "Completed ✅"; el.disabled = true; }
+  }
+
+  if (tasks.includes("youtube")) {
+    let el = document.getElementById("ytTask");
+    if (el) { el.innerText = "Completed ✅"; el.disabled = true; }
+  }
+
+  if (tasks.includes("tiktok")) {
+    let el = document.getElementById("ttTask");
+    if (el) { el.innerText = "Completed ✅"; el.disabled = true; }
+  }
+}
+
+/* =========================
+   BUTTON EVENTS
+========================= */
+document.addEventListener("DOMContentLoaded", () => {
+
+  loadUser();
+
+  const btn = document.getElementById("tapBtn");
+  if (btn) {
+    btn.addEventListener("click", tap);
+    btn.addEventListener("touchstart", tap, { passive: false });
+  }
+});
+
 </script>
 
 </body>

@@ -1,20 +1,9 @@
 <!DOCTYPE html>
 <html>
-<head><script>
-(function () {
-  const s = document.createElement("script");
-  s.src = "//libtl.com/sdk.js";
-  s.setAttribute("data-zone", "10892289");
-  s.setAttribute("data-sdk", "show_10892289");
-
-  s.onload = () => console.log("✅ Ads SDK loaded");
-  s.onerror = () => console.log("❌ Ads SDK failed");
-
-  document.head.appendChild(s);
-})();
-</script>
+<head>
 <meta charset="UTF-8">
 <title>Crypto Tap Pro</title>
+
 <style>
 body{
 margin:0;
@@ -23,97 +12,24 @@ background:radial-gradient(circle at top,#1b2a4a,#050914 70%);
 color:white;
 }
 
-/* TOP BAR */
-.topbar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:14px;
-background:rgba(255,255,255,0.06);
-backdrop-filter:blur(10px);
-}
-
-.user{
-display:flex;
-gap:10px;
-align-items:center;
-}
-
-.user img{
-width:48px;
-height:48px;
-border-radius:50%;
-border:2px solid #facc15;
-box-shadow:0 0 15px rgba(250,204,21,0.5);
-}
-
-/* STATS */
-.stats{
-display:flex;
-justify-content:space-around;
-margin-top:12px;
-}
-
-.box{
-background:rgba(255,255,255,0.06);
-padding:12px;
-border-radius:14px;
-width:40%;
-text-align:center;
-backdrop-filter:blur(8px);
-}
-
-.box strong{
-display:block;
-font-size:20px;
-color:#facc15;
-}
-
-/* TAP */
-.tap{
-display:flex;
-justify-content:center;
-margin-top:70px;
-}
-
-.tap button{
-width:220px;
-height:220px;
-border-radius:50%;
-border:none;
-font-size:22px;
-font-weight:bold;
-color:#111;
-background:radial-gradient(circle,#ffe066,#facc15);
-box-shadow:0 0 40px rgba(250,204,21,0.6);
-}
-
-/* SCREEN */
-  .screen{
-  display:none;
-  padding:15px;
-  min-height:100vh;
-  box-sizing:border-box;
-  padding-bottom:80px;
+.screen{
+display:none;
+padding:15px;
+min-height:100vh;
+box-sizing:border-box;
+padding-bottom:80px;
 }
 
 .active{
-  display:block;
-  }
-
-@keyframes fade{
-from{opacity:0;transform:translateY(10px);}
-to{opacity:1;transform:translateY(0);}
+display:block;
 }
 
-/* NAV */
 .nav{
-  position:fixed;
-  bottom:0;
-  width:100%;
-  display:flex;
-  background:rgba(0,0,0,0.75);
-  z-index:999;
+position:fixed;
+bottom:0;
+width:100%;
+display:flex;
+background:rgba(0,0,0,0.75);
 }
 
 .nav button{
@@ -123,48 +39,6 @@ background:none;
 color:white;
 border:none;
 }
-
-/* PROFILE */
-.profileCard{
-background:rgba(255,255,255,0.07);
-padding:15px;
-border-radius:18px;
-margin-top:10px;
-backdrop-filter:blur(10px);
-border:1px solid rgba(255,255,255,0.1);
-}
-
-.profileHeader{
-display:flex;
-align-items:center;
-gap:10px;
-}
-
-.profileHeader img{
-width:60px;
-height:60px;
-border-radius:50%;
-border:2px solid gold;
-}
-
-.badge{
-background:gold;
-color:black;
-padding:3px 8px;
-border-radius:10px;
-font-size:12px;
-margin-left:10px;
-}
-
-input{
-width:100%;
-padding:12px;
-border-radius:10px;
-border:none;
-background:rgba(255,255,255,0.08);
-color:white;
-margin-top:8px;
-}
 </style>
 </head>
 
@@ -172,102 +46,50 @@ margin-top:8px;
 
 <!-- HOME -->
 <div id="home" class="screen active">
-  <div class="topbar">
-    <div class="user">
-      <img id="photo">
-      <div>
-        <div id="name">User</div>
-        <div id="uname">@user</div>
-      </div>
-    </div>
-    <div>Lv <span id="level">1</span></div>
-  </div>
-
-  <div class="stats">
-    <div class="box">Coins<strong id="coins">0</strong></div>
-    <div class="box">USDT<strong id="usdt">0.000</strong></div>
-  </div>
-
-  <div class="tap">
-    <button id="tapBtn">TAP</button>
-  </div>
+<h2>Home</h2>
+<p id="name">User</p>
+<p id="uname">@user</p>
 </div>
 
 <!-- PROFILE -->
 <div id="profile" class="screen">
-  <div class="profileCard">
-    <h3>Profile</h3>
-    <p id="pUser"></p>
-  </div>
-
-  <div class="profileCard">
-    <h3>Ads</h3>
-    <button onclick="ads('rewarded')">Reward Ad</button>
-    <button onclick="ads('popup')">Popup Ad</button>
-    <button onclick="ads('double')">Double Coins</button>
-  </div>
+<h2>Profile</h2>
+<p id="pUser">Loading...</p>
 </div>
 
 <!-- DEPOSIT -->
 <div id="deposit" class="screen">
-  <div class="profileCard">
-    <h3>Deposit</h3>
-    <input readonly value="YOUR_WALLET_ADDRESS">
-  </div>
+<h2>Deposit</h2>
+<p>Wallet Address Here</p>
 </div>
 
 <!-- NAV -->
 <div class="nav">
-  <button onclick="show('home')">Home</button>
-  <button onclick="show('profile')">Profile</button>
-  <button onclick="show('deposit')">Deposit</button>
+<button onclick="show('home')">Home</button>
+<button onclick="show('profile')">Profile</button>
+<button onclick="show('deposit')">Deposit</button>
 </div>
-
-</body>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <script>
-
-const API = "https://crypto-4bbj.onrender.com";
-
-let state = {coins:0,usdt:0};
-
+/* Telegram */
 const tg = window.Telegram?.WebApp;
+const user = tg?.initDataUnsafe?.user || null;
 
-const user = tg?.initDataUnsafe?.user || {
-id: 1,
-first_name: "Guest",
-username: "guest"
-};
+/* UI SET */
+function setUserUI(){
+  document.getElementById("name").innerText =
+    user?.first_name || "Guest";
 
-/* LOAD USER */
-async function loadUser(){
+  document.getElementById("uname").innerText =
+    "@" + (user?.username || "guest");
 
-if(!user) return;
-
-let ref = new URLSearchParams(window.location.search).get("ref");
-
-let url = API + "/user/" + user.id;
-if(ref) url += "/" + ref;
-
-let res = await fetch(url);
-let data = await res.json();
-
-state.coins = data.coins;
-state.usdt = data.usdt;
-
-render();
-updateTasks(data.tasks || []);
+  document.getElementById("pUser").innerText =
+    user ? "ID: " + user.id : "No Telegram user";
 }
 
-/* RENDER */
-function render(){
-document.getElementById("coins").innerText = Math.floor(state.coins);
-document.getElementById("usdt").innerText = state.usdt.toFixed(3);
-}
-
-/* NAV */
+/* NAV FIX */
 function show(id){
   document.querySelectorAll(".screen").forEach(s=>{
     s.classList.remove("active");
@@ -281,261 +103,12 @@ function show(id){
   }
 }
 
-/* TAP */
-let lastAdTime = 0;
-
-function canShowAd(){
-  return Date.now() - lastAdTime > 5000;
-}
-
-function ads(type="rewarded"){
-
-if(typeof show_10892289 !== "function"){
-  alert("Ads not ready");
-  return;
-}
-
-if(!canShowAd()){
-  alert("Wait 5 sec");
-  return;
-}
-
-lastAdTime = Date.now();
-
-if(type === "rewarded"){
-
-show_10892289().then(()=>{
-
-state.coins += 300;
-state.usdt += 0.003;
-render();
-
-alert("🎉 +300 coins");
-
-});
-
-}
-
-else if(type === "popup"){
-
-show_10892289("pop").then(()=>{
-
-state.coins += 150;
-render();
-
-alert("🎁 +150 coins");
-
-});
-
-}
-
-else if(type === "double"){
-
-show_10892289().then(()=>{
-
-state.coins *= 2;
-render();
-
-alert("🔥 Doubled");
-
-});
-
-}
-
-}
-/* TASKS */
-function updateTasks(tasks){
-if(tasks.includes("telegram")){
-tgTask.innerText="Completed ✅"; tgTask.disabled=true;
-}
-if(tasks.includes("youtube")){
-ytTask.innerText="Completed ✅"; ytTask.disabled=true;
-}
-if(tasks.includes("tiktok")){
-ttTask.innerText="Completed ✅"; ttTask.disabled=true;
-}
-}
-
 /* START */
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="//libtl.com/sdk.js" data-zone="10892289" data-sdk="show_10892289"></script>
-
-<script>
-/* =======================
-   SAFE INIT (NO STACK)
-======================= */
-
-const API = "https://crypto-4bbj.onrender.com";
-
-let state = { coins: 0, usdt: 0 };
-let tapCount = 0;
-let lastAdTime = 0;
-
-/* Telegram safe user */
-const tg = window.Telegram?.WebApp;
-const user = tg?.initDataUnsafe?.user || null;
-
-if (tg) tg.expand();
-
-/* =======================
-   USER UI
-======================= */
-function setUserUI() {
-  const name = document.getElementById("name");
-  const uname = document.getElementById("uname");
-
-  if (!user) {
-    name.innerText = "Guest";
-    uname.innerText = "@guest";
-    return;
-  }
-
-  name.innerText = user.first_name || "User";
-  uname.innerText = "@" + (user.username || "user");
-}
-
-/* =======================
-   LOAD USER
-======================= */
-async function loadUser() {
-  if (!user) return;
-
-  try {
-    const res = await fetch(API + "/user/" + user.id);
-    const data = await res.json();
-
-    state.coins = data.coins || 0;
-    state.usdt = data.usdt || 0;
-
-    render();
-    updateTasks(data.tasks || []);
-  } catch (e) {
-    console.log("load error", e);
-  }
-}
-
-/* =======================
-   RENDER
-======================= */
-function render() {
-  document.getElementById("coins").innerText = Math.floor(state.coins);
-  document.getElementById("usdt").innerText = state.usdt.toFixed(3);
-}
-
-/* =======================
-   TAP (FIXED)
-======================= */
-function tap(e) {
-  e.preventDefault();
-
-  const fingers = e.touches ? Math.min(e.touches.length, 4) : 1;
-
-  tapCount++;
-
-  state.coins += fingers;
-  state.usdt += fingers * 0.001;
-
-  render();
-
-  // ad every 20 taps
-  if (tapCount % 20 === 0) {
-    ads("rewarded");
-  }
-
-  fetch(API + "/tap", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      userId: user?.id || 0,
-      fingers
-    })
-  }).catch(() => {});
-}
-
-/* =======================
-   ADS (ONE CLEAN SYSTEM)
-======================= */
-function canShowAd() {
-  return Date.now() - lastAdTime > 5000;
-}
-
-function ads(type = "rewarded") {
-
-  if (typeof show_10892289 !== "function") {
-    alert("Ads not loaded");
-    return;
-  }
-
-  if (!canShowAd()) {
-    alert("Wait 5 sec");
-    return;
-  }
-
-  lastAdTime = Date.now();
-
-  if (type === "rewarded") {
-    show_10892289().then(() => {
-      state.coins += 300;
-      state.usdt += 0.003;
-      render();
-    });
-  }
-
-  if (type === "popup") {
-    show_10892289("pop").then(() => {
-      state.coins += 150;
-      render();
-    });
-  }
-
-  if (type === "double") {
-    show_10892289().then(() => {
-      state.coins *= 2;
-      render();
-    });
-  }
-}
-
-/* =======================
-   TASKS SAFE
-======================= */
-function updateTasks(tasks = []) {
-  const tgTask = document.getElementById("tgTask");
-  const ytTask = document.getElementById("ytTask");
-  const ttTask = document.getElementById("ttTask");
-
-  if (tasks.includes("telegram") && tgTask) {
-    tgTask.innerText = "Completed ✅";
-    tgTask.disabled = true;
-  }
-
-  if (tasks.includes("youtube") && ytTask) {
-    ytTask.innerText = "Completed ✅";
-    ytTask.disabled = true;
-  }
-
-  if (tasks.includes("tiktok") && ttTask) {
-    ttTask.innerText = "Completed ✅";
-    ttTask.disabled = true;
-  }
-}
-
-/* =======================
-   START ONLY ONCE
-======================= */
-window.addEventListener("load", () => {
-
+window.addEventListener("load", ()=>{
   setUserUI();
-  loadUser();
-
-  const btn = document.getElementById("tapBtn");
-
-  if (btn) {
-    btn.addEventListener("click", tap);
-    btn.addEventListener("touchstart", tap, { passive: false });
-  }
-
+  if(tg) tg.expand();
 });
 </script>
+
 </body>
 </html>

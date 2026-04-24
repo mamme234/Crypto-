@@ -289,25 +289,25 @@ e.preventDefault();
 
 let fingers = e.touches ? Math.min(e.touches.length,4) : 1;
 
-// ⚡ instant update
+// instant update
 state.coins += fingers;
 state.usdt += fingers * 0.001;
 
-tapCount++;   // ✅ now works
+tapCount++;
 
-// 🎯 show ad every 20 taps
+// show ad every 20 taps
 if(tapCount % 20 === 0){
     show_10892289().catch(()=>{});
 }
 
 render();
 
-// 🎮 animation
+// animation
 const btn = document.getElementById("tapBtn");
 btn.style.transform = "scale(0.9)";
 setTimeout(()=>{ btn.style.transform = "scale(1)"; },100);
 
-// send to backend
+// backend (safe)
 fetch(API+"/tap",{
 method:"POST",
 headers:{"Content-Type":"application/json"},

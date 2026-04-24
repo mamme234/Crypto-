@@ -8,17 +8,19 @@ window.adReady = false;
 
 (function () {
   const s = document.createElement("script");
-  s.src = "https://libtl.com/sdk.js";
+  s.src = "https://libtl.com/sdk.js"; // MUST be https
+  s.async = true;
+
   s.setAttribute("data-zone", "10892289");
   s.setAttribute("data-sdk", "show_10892289");
 
   s.onload = () => {
-    console.log("Ads ready");
+    console.log("SDK loaded");
     window.adReady = true;
   };
 
   s.onerror = () => {
-    console.log("Ads failed");
+    console.log("SDK failed");
     window.adReady = false;
   };
 
@@ -379,35 +381,27 @@ loadUser();
 
 /* ADS */
 function ads(){
-
-  if(typeof show_10892289 !== "function"){
-    alert("Ads not loaded yet. Try again in a few seconds.");
+  if(!window.adReady || typeof show_10892289 !== "function"){
+    alert("Ad not ready yet");
     return;
   }
 
-  try {
-    const ad = show_10892289();
+  show_10892289().then(() => {
+    state.coins += 300;
+    state.usdt += 0.003;
+    render();
+    alert("🎉 Reward received!");
+  }).catch(() => {
+    alert("❌ Ad closed or failed");
+  });
+  }function popupAd(){
+  if(!window.adReady) return;
 
-    if(ad && typeof ad.then === "function"){
-      ad.then(()=>{
-        state.coins += 300;
-        state.usdt += 0.003;
-        render();
-        alert("🎉 Reward received!");
-      }).catch(()=>{
-        alert("❌ Ad closed or failed");
-      });
-    } else {
-      state.coins += 300;
-      state.usdt += 0.003;
-      render();
-    }
-
-  } catch(err){
-    console.log(err);
-    alert("❌ Ad error");
-  }
-  }
+  show_10892289('pop').then(() => {
+    state.coins += 150;
+    render();
+  }).catch(() => {});
+}
 /* WITHDRAW */
 async function withdraw(){
 
@@ -453,31 +447,19 @@ pPhoto.src=user.photo_url;
 
 /* START */
 loadUser();
-function runAd(){
-  if(!window.adReady || typeof show_10892289 !== "function"){
-    console.log("Ad not ready yet");
-    return;
+window.addEventListener("load", () => {
+  if(window.adReady){
+    show_10892289({
+      type: 'inApp',
+      inAppSettings: {
+        frequency: 2,
+        capping: 0.1,
+        interval: 30,
+        timeout: 5,
+        everyPage: false
+      }
+    });
   }
-
-  try {
-    show_10892289().then(()=>{
-      state.coins += 300;
-      state.usdt += 0.003;
-      render();
-    }).catch(()=>{});
-  } catch(e){
-    console.log("Ad error", e);
-  }
-}
-  window.addEventListener("load", () => {
-  const btn = document.getElementById("tapBtn");
-
-  if(btn){
-    btn.addEventListener("click", tap);
-    btn.addEventListener("touchstart", tap, { passive:false });
-  }
-
-  console.log("Tap system ready");
 });
 </script>
 

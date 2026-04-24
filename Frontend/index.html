@@ -377,47 +377,51 @@ loadUser();
 }
 
 /* ADS */
-function ads(){
+function runAd(){
 
-show_10892289().then(() => {
+  if(!window.adReady || typeof show_10892289 !== "function"){
+    alert("Ads not ready yet");
+    return;
+  }
 
-    // 🎁 MAIN REWARD (coins after ad)
-    state.coins += 300;
-    state.usdt += 0.003;
+  try {
 
-    render();
-    alert("🎉 Reward received!");
+    const ad = show_10892289();
 
-}).catch(() => {
-    alert("❌ Ad not completed");
-});
-
-                                                                     }function popupAd(){
-
-show_10892289('pop').then(() => {
-
-    // 🎁 smaller reward
-    state.coins += 150;
-
-    render();
-    alert("🎁 Popup reward received!");
-
-}).catch(() => {
-    alert("Ad failed or closed");
-});
-
+    if(ad && typeof ad.then === "function"){
+      ad.then(()=>{
+        state.coins += 300;
+        state.usdt += 0.003;
+        render();
+        alert("🎉 Reward received!");
+      }).catch(()=>{
+        alert("❌ Ad closed");
+      });
+    } else {
+      state.coins += 300;
+      state.usdt += 0.003;
+      render();
     }
-function doubleReward(){
 
-show_10892289().then(()=>{
-
-state.coins *= 2;
-render();
-
-alert("🔥 Coins doubled!");
-
-});
+  } catch(err){
+    console.log(err);
+    alert("❌ Ad error");
+  }
+  }function ads(){
+  runAd();
 }
+
+function popupAd(){
+  runAd();
+  state.coins -= 150;
+  render();
+}
+
+function doubleReward(){
+  runAd();
+  state.coins *= 2;
+  render();
+  }
 /* WITHDRAW */
 async function withdraw(){
 

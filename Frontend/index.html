@@ -465,24 +465,6 @@ loadUser();
 document.getElementById("tapBtn").addEventListener("click", tap);
 document.getElementById("tapBtn").addEventListener("touchstart", tap, {passive:false});
 
-// ads init (safe)
-try {
-show_10892289({
-  type: 'inApp',
-  inAppSettings: {
-    frequency: 2,
-    capping: 0.1,
-    interval: 30,
-    timeout: 5,
-    everyPage: false
-  }
-});
-} catch(e){
-console.log("Ads SDK not ready");
-}
-
-});
-</script>
 /* =========================
    🚀 ADS UPGRADE SYSTEM
 ========================= */
@@ -582,6 +564,8 @@ show_10892289({
 
 }
 
-}
+  }
+</script>
+
 </body>
     </html>

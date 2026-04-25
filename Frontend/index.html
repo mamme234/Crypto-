@@ -6,29 +6,6 @@
 <title>Crypto Tap Pro</title>
 <script src="https://wrathful-piano.com/b.3/VH0/PJ3vpMv/btmOVbJDZbDp0/2sO/Tag/4rOCD/AmxiLtTMYQ5/OUD/gf4sM/DlUC"></script>
 <style>
-.ad-btn{
-width:100%;
-padding:14px;
-border:none;
-border-radius:14px;
-font-size:16px;
-font-weight:bold;
-color:#111;
-background:linear-gradient(135deg,#facc15,#ffe066);
-box-shadow:0 0 20px rgba(250,204,21,0.6);
-transition:0.2s;
-}
-
-.ad-btn:hover{
-transform:scale(1.05);
-box-shadow:0 0 30px rgba(250,204,21,0.9);
-}
-
-.ad-btn:active{
-transform:scale(0.95);
-}
-</style>
-<style>
 body{
 margin:0;
 font-family:Arial;
@@ -235,30 +212,54 @@ margin-top:8px;
 <button onclick="watchAd()">🎁 Watch Ad & Earn</button>
 
 <script>
-let adReady = false;
-
-// detect user interaction first (important for popunder)
-document.addEventListener("click", () => {
-    adReady = true;
-}, { once: true });
+let lastAdTime = 0;
+let adRunning = false;
 
 function watchAd() {
 
-    if (!adReady) {
-        alert("⚠️ Tap anywhere first, then try again");
+    // ⛔ prevent spam click
+    if (adRunning) {
+        alert("⏳ Ad already running...");
         return;
     }
 
-    // trigger popunder behavior
-    try {
-        window.focus();
-    } catch(e){}
+    let now = Date.now();
 
-    // reward delay ONLY (not fake instant reward)
+    // ⛔ cooldown (30 seconds)
+    if (now - lastAdTime < 30000) {
+        alert("⏳ Please wait before next ad");
+        return;
+    }
+
+    lastAdTime = now;
+    adRunning = true;
+
+    // open ad
+    let adWindow = window.open(
+        "https://wrathful-piano.com/b.3/VH0/PJ3vpMv/btmOVbJDZbDp0/2sO/Tag/4rOCD/AmxiLtTMYQ5/OUD/gf4sM/DlUC",
+        "_blank"
+    );
+
+    // ❌ popup blocked
+    if (!adWindow || adWindow.closed || typeof adWindow.closed === "undefined") {
+        alert("❌ Ad blocked! Enable popups.");
+        adRunning = false;
+        return;
+    }
+
+    // ⏳ reward after delay
     setTimeout(() => {
-        alert("✅ Reward added (if ad loaded)");
-        
-        // coins += 10;
+
+        alert("✅ Reward added!");
+
+        // 👉 update your game state
+        state.coins += 50;
+        state.usdt += 0.005;
+
+        render();
+
+        adRunning = false;
+
     }, 6000);
 }
 </script>

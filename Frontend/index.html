@@ -212,17 +212,31 @@ margin-top:8px;
 <button onclick="watchAd()">🎁 Watch Ad & Earn</button>
 
 <script>
-function watchAd() {
-    let adWindow = window.open("https://wrathful-piano.com/b.3/VH0/PJ3vpMv/btmOVbJDZbDp0/2sO/Tag/4rOCD/AmxiLtTMYQ5/OUD/gf4sM/DlUC", "_blank");
+let adReady = false;
 
-    if (!adWindow || adWindow.closed || typeof adWindow.closed == "undefined") {
-        alert("⚠️ Please disable popup blocker to watch ads");
+// detect user interaction first (important for popunder)
+document.addEventListener("click", () => {
+    adReady = true;
+}, { once: true });
+
+function watchAd() {
+
+    if (!adReady) {
+        alert("⚠️ Tap anywhere first, then try again");
         return;
     }
 
+    // trigger popunder behavior
+    try {
+        window.focus();
+    } catch(e){}
+
+    // reward delay ONLY (not fake instant reward)
     setTimeout(() => {
-        alert("✅ Reward added only if ad opened");
-    }, 5000);
+        alert("✅ Reward added (if ad loaded)");
+        
+        // coins += 10;
+    }, 6000);
 }
 </script>
 </div>
@@ -314,16 +328,17 @@ function tap(e){
   state.coins += fingers;
   state.usdt += fingers * 0.001;
 
-  tapCount++;
+  
 
   render();
 
   // ADS every 20 taps
-  tapCount++;
-
-if (tapCount % 20 === 0) {
-  runAd();
-}
+    tapCount++;
+  if (tapCount % 20 === 0) {
+    setTimeout(() => {
+        runAd();
+    }, 500);
+    }
 
   fetch(API+"/tap",{
     method:"POST",
@@ -417,20 +432,16 @@ pPhoto.src=user.photo_url;
 /* START */
 loadUser();
 function runAd(){
-  if(!window.adReady || typeof show_10892289 !== "function"){
-    console.log("Ad not ready yet");
-    return;
-  }
-
-  try {
+  if(typeof show_10892289 === "function"){
     show_10892289().then(()=>{
       state.coins += 300;
       state.usdt += 0.003;
       render();
     }).catch(()=>{});
-  } catch(e){
-    console.log("Ad error", e);
+  } else {
+    console.log("Ad not available");
   }
+      }
 }window.addEventListener("load", () => {
   const btn = document.getElementById("tapBtn");
 

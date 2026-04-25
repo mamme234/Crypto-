@@ -415,26 +415,25 @@ pPhoto.src=user.photo_url;
 
 /* START */
 loadUser();
-function openAd() {
-  window.open(https://wrathful-piano.com/bw3/V.0_P/3DpcvKbrm/VRJlZxD/0R2mO/TogK4xN/TUY/xoL/TfYh5/OXD/g-1ANmjjUr);
+function runAd(){
 
-  setTimeout(() => {
-    alert("Reward added!");
-  }, 4000);
-    }
-
-  
-}window.addEventListener("load", () => {
-  const btn = document.getElementById("tapBtn");
-
-  if(btn){
-    btn.addEventListener("click", tap);
-    btn.addEventListener("touchstart", tap, { passive:false });
+  if(typeof show_10892289 !== "function"){
+    alert("Ads not ready yet");
+    return;
   }
 
-  console.log("Tap system ready");
-});
-</script>
+  try {
+    show_10892289().then(() => {
+      rewardUser(300, 0.003);
+    }).catch((e) => {
+      console.log("Ad closed/failed", e);
+    });
+
+  } catch(e){
+    console.log("Ad error", e);
+  }
+                        }
+                        }
 <script>
 function detectAdBlock(callback) {
     let ad = document.createElement("div");

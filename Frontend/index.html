@@ -209,56 +209,42 @@ margin-top:8px;
 
 <div class="profileCard">
 <h3>💰 Ads </h3>
-<button onclick="watchAd()">🎁 Watch Ad & Earn</button>
+<button onclick="watchAd(event)">🎁 Watch Ad & Earn</button>
 
 <script>
 let lastAdTime = 0;
-let adRunning = false;
 
-function watchAd() {
-
-    // ⛔ prevent spam click
-    if (adRunning) {
-        alert("⏳ Ad already running...");
-        return;
-    }
+function watchAd(e) {
 
     let now = Date.now();
 
-    // ⛔ cooldown (30 seconds)
+    // ⛔ cooldown
     if (now - lastAdTime < 30000) {
-        alert("⏳ Please wait before next ad");
+        alert("⏳ Wait before next ad");
         return;
     }
 
-    lastAdTime = now;
-    adRunning = true;
-
-    // open ad
+    // ✅ open immediately (VERY IMPORTANT)
     let adWindow = window.open(
         "https://wrathful-piano.com/b.3/VH0/PJ3vpMv/btmOVbJDZbDp0/2sO/Tag/4rOCD/AmxiLtTMYQ5/OUD/gf4sM/DlUC",
         "_blank"
     );
 
-    // ❌ popup blocked
-    if (!adWindow || adWindow.closed || typeof adWindow.closed === "undefined") {
-        alert("❌ Ad blocked! Enable popups.");
-        adRunning = false;
+    // ❌ blocked
+    if (!adWindow) {
+        alert("❌ Popup blocked. Tap again.");
         return;
     }
 
-    // ⏳ reward after delay
-    setTimeout(() => {
+    lastAdTime = now;
 
+    // ⏳ reward AFTER open
+    setTimeout(() => {
         alert("✅ Reward added!");
 
-        // 👉 update your game state
         state.coins += 50;
         state.usdt += 0.005;
-
         render();
-
-        adRunning = false;
 
     }, 6000);
 }

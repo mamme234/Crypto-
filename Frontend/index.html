@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <title>Crypto Tap Pro</title>
-<script src='//libtl.com/sdk.js' data-zone='10892289' data-sdk='show_10892289'></script>
+<script src="https://libtl.com/sdk.js"
+        data-zone="10892289"
+        data-sdk="show_10892289"></script>
 <style>
 body{
 margin:0;
@@ -211,6 +213,7 @@ margin-top:8px;
 <button onclick="runAd()">Watch Ad</button>
 <button onclick="popupAd()">Bonus Ad (+150)</button>
 <button onclick="doubleReward()">🔥 Double Coins</button>
+<button onclick="alert(typeof show_10892289)">TEST SDK</button>
 </div>
 
 <div class="profileCard">
@@ -440,30 +443,17 @@ pPhoto.src=user.photo_url;
 
 /* START */
 loadUser();
-function runAd(){
-  if(!window.adReady || typeof show_10892289 !== "function"){
-    console.log("Ad not ready yet");
-    return;
-  }
+window.adReady = false;
 
-  try {
-    show_10892289().then(()=>{
-      state.coins += 300;
-      state.usdt += 0.003;
-      render();
-    }).catch(()=>{});
-  } catch(e){
-    console.log("Ad error", e);
-  }
-}window.addEventListener("load", () => {
-  const btn = document.getElementById("tapBtn");
-
-  if(btn){
-    btn.addEventListener("click", tap);
-    btn.addEventListener("touchstart", tap, { passive:false });
-  }
-
-  console.log("Tap system ready");
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    if(typeof show_10892289 === "function"){
+      window.adReady = true;
+      console.log("Ads ready");
+    } else {
+      console.log("Ads failed to load");
+    }
+  }, 2000);
 });
 </script>
 

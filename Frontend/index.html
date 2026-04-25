@@ -298,10 +298,9 @@ function tap(e){
 
   render();
 
-  // ADS every 20 taps
   if(tapCount % 20 === 0){
-    runAd();
-  }
+  ads(); // correct function
+}
 
   fetch(API+"/tap",{
     method:"POST",
@@ -330,8 +329,7 @@ youtube:"https://youtube.com/@Mamme234",
 tiktok:"https://tiktok.com/@mammeliyas"
 };
 
-window.open(links[type],"_blank");
-
+window.location.href = links[type];
 let res = await fetch(API+"/task",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
@@ -352,27 +350,16 @@ loadUser();
 /* ADS */
 function ads(){
   if(typeof show_10892289 !== "function"){
-    alert("Ads not ready yet");
+    alert("Ads not loaded yet");
     return;
   }
 
-  try {
-    const ad = show_10892289();
-
-    if(ad && typeof ad.then === "function"){
-      ad.then(() => {
-        rewardUser(300, 0.003);
-      }).catch(() => {
-        alert("❌ Ad not completed");
-      });
-    } else {
-      rewardUser(300, 0.003);
-    }
-
-  } catch(e){
-    console.log(e);
-    alert("Ad failed");
-  }
+  show_10892289().then(() => {
+    rewardUser(300, 0.003);
+  }).catch(() => {
+    alert("Ad failed or closed");
+  });
+        }
                                           }
 /* REWARD */
 function rewardUser(coins, usdt){
@@ -425,15 +412,22 @@ pPhoto.src=user.photo_url;
 }
 
 /* START APP */
+let user = null;
+
 window.addEventListener("DOMContentLoaded", () => {
-   // load user data
+
+  const tg = window.Telegram?.WebApp;
+  user = tg?.initDataUnsafe?.user;
+
+  if(tg) tg.expand();
+
+  loadUser(); // now user exists
 
   const btn = document.getElementById("tapBtn");
   if(btn){
-    btn.addEventListener("click", tap); // tap works here
+    btn.addEventListener("click", tap);
   }
 
-  console.log("App ready");
 });
 </script>
 </body>

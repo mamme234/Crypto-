@@ -209,8 +209,8 @@ margin-top:8px;
 </div>
 
 <div class="profileCard">
-<h3>💰 Ads Reward</h3>
-<button onclick="ads()">Watch Ad</button>
+<h3>💰 Ads </h3>
+<button onclick="showAd()">Watch Ad</button>
 <button onclick="popupAd()">Bonus Ad</button>
 <button onclick="doubleReward()">Double</button>
 </div>
@@ -363,14 +363,11 @@ loadUser();
 // ADS SYSTEM (FIXED)
 // ==========================
 
-function runAd() {
-  if (typeof show_10892435 !== "function") {
-    alert("Ads not loaded");
-    return;
-  }
-
-  try {
-    show_10892435();
+function showAd() {
+    show_10892289().then(() => {
+        alert("Reward given");
+    });
+}
 
     // give reward after short delay
     setTimeout(() => {

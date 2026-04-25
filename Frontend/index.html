@@ -208,7 +208,7 @@ margin-top:8px;
 
 <div class="profileCard">
 <h3>💰 Ads Reward</h3>
-<button onclick="ads()">Watch Ad (+300)</button>
+<button onclick="runAd()">Watch Ad</button>
 <button onclick="popupAd()">Bonus Ad (+150)</button>
 <button onclick="doubleReward()">🔥 Double Coins</button>
 </div>
@@ -364,27 +364,21 @@ function runAd(){
   }
 
   try {
-
-    // Rewarded Interstitial (main ad)
     show_10892289().then(() => {
-      rewardUser();
+      rewardUser(300, 0.003);
     }).catch((e) => {
-      console.log("Ad closed or failed", e);
+      console.log("Ad closed/failed", e);
     });
 
   } catch(e){
     console.log("Ad error", e);
   }
-}
-
-/* Reward system */
-function rewardUser(){
-  state.coins += 300;
-  state.usdt += 0.003;
+  }function rewardUser(coins, usdt){
+  state.coins += coins;
+  state.usdt += usdt;
   render();
-  alert("🎉 You have seen an ad!");
-}
-function popupAd(){
+  alert("🎉 Reward received!");
+      }function popupAd(){
 
   if(typeof show_10892289 !== "function"){
     alert("Ads not ready");
@@ -393,12 +387,12 @@ function popupAd(){
 
   try {
     show_10892289('pop').then(() => {
-      rewardUser();
+      rewardUser(150, 0.001);
     }).catch(() => {});
   } catch(e){
     console.log(e);
   }
-                              }
+}
 
 
 /* WITHDRAW */

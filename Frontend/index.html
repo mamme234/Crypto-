@@ -3,9 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Crypto Tap Pro</title>
-<script src="https://libtl.com/sdk.js"
-        data-zone="10892289"
-        data-sdk="show_10892289"></script>
+<script src='//libtl.com/sdk.js' data-zone='10892289' data-sdk='show_10892289'></script>
 <style>
 body{
 margin:0;
@@ -210,10 +208,9 @@ margin-top:8px;
 
 <div class="profileCard">
 <h3>💰 Ads Reward</h3>
-<button onclick="runAd()">Watch Ad</button>
+<button onclick="ads()">Watch Ad (+300)</button>
 <button onclick="popupAd()">Bonus Ad (+150)</button>
 <button onclick="doubleReward()">🔥 Double Coins</button>
-<button onclick="alert(typeof show_10892289)">TEST SDK</button>
 </div>
 
 <div class="profileCard">
@@ -361,41 +358,96 @@ loadUser();
 /* ADS */
 function runAd(){
 
-  if(typeof show_10892289 !== "function"){
+  if(!window.adReady || typeof show_10892289 !== "function"){
     alert("Ads not ready yet");
     return;
   }
 
   try {
-    show_10892289().then(() => {
-      rewardUser(300, 0.003);
-    }).catch((e) => {
-      console.log("Ad closed/failed", e);
-    });
 
-  } catch(e){
-    console.log("Ad error", e);
-  }
-  }function rewardUser(coins, usdt){
-  state.coins += coins;
-  state.usdt += usdt;
-  render();
-  alert("🎉 Reward received!");
-      }function popupAd(){
+    const ad = show_10892289();
 
-  if(typeof show_10892289 !== "function"){
-    alert("Ads not ready");
-    return;
-  }
+    if(ad && typeof ad.then === "function"){
+      ad.then(()=>{
+        state.coins += 300;
+        state.usdt += 0.003;
+        render();
+        alert("🎉 Reward received!");
+      }).catch(()=>{
+        alert("❌ Ad closed");
+      });
+    } else {
+      state.coins += 300;
+      state.usdt += 0.003;
+      render();
+    }
 
-  try {
-    show_10892289('pop').then(() => {
-      rewardUser(150, 0.001);
-    }).catch(() => {});
-  } catch(e){
-    console.log(e);
+  } catch(err){
+    console.log(err);
+    alert("❌ Ad error");
   }
+  }function ads(){
+  runAd();
 }
+
+function popupAd(){
+  runAd();
+  state.coins -= 150;
+  render();
+}
+
+function doubleReward(){
+  runAd();
+  state.coins *= 2;
+  render();
+  }
+  
+
+// Rewarded interstitial
+
+show_10892289().then(() => {
+    // You need to add your user reward function here, which will be executed after the user watches the ad.
+    // For more details, please refer to the detailed instructions.
+    alert('You have seen an ad!');
+})
+
+        
+
+// Rewarded Popup
+
+show_10892289('pop').then(() => {
+    // user watch ad till the end or close it in interstitial format
+    // your code to reward user for rewarded format
+}).catch(e => {
+    // user get error during playing ad
+    // do nothing or whatever you want
+})
+
+        
+
+// In-App Interstitial
+
+show_10892289({
+  type: 'inApp',
+  inAppSettings: {
+    frequency: 2,
+    capping: 0.1,
+    interval: 30,
+    timeout: 5,
+    everyPage: false
+  }
+})
+
+/*
+This value is decoded as follows:
+- show automatically 2 ads
+  within 0.1 hours (6 minutes)
+  with a 30-second interval between them
+  and a 5-second delay before the first one is shown.
+  The last digit, 0, means that the session will be saved when you navigate between pages.
+  If you set the last digit as 1, then at any transition between pages,
+  the session will be reset, and the ads will start again.
+*/
 
 
 /* WITHDRAW */
@@ -443,7 +495,31 @@ pPhoto.src=user.photo_url;
 
 /* START */
 loadUser();
-        
+function runAd(){
+  if(!window.adReady || typeof show_10892289 !== "function"){
+    console.log("Ad not ready yet");
+    return;
+  }
+
+  try {
+    show_10892289().then(()=>{
+      state.coins += 300;
+      state.usdt += 0.003;
+      render();
+    }).catch(()=>{});
+  } catch(e){
+    console.log("Ad error", e);
+  }
+}window.addEventListener("load", () => {
+  const btn = document.getElementById("tapBtn");
+
+  if(btn){
+    btn.addEventListener("click", tap);
+    btn.addEventListener("touchstart", tap, { passive:false });
+  }
+
+  console.log("Tap system ready");
+});
 </script>
 
 </body>

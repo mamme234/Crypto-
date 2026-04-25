@@ -212,36 +212,32 @@ margin-top:8px;
 function watchAd() {
 <button onclick="watchAd()">🎁 Watch Ad & Earn</button>
 
+<button onclick="watchAd()">🎁 Watch Ad & Earn</button>
+
 <script>
-let adWatching = false;
+let lastAdTime = 0;
 
 function watchAd() {
 
-    let now = Date.now();
-
-    // ⛔ cooldown (30 sec)
-    if (now - lastAdTime < 30000) {
-        alert("⏳ Wait before watching another ad");
+    if (adWatching) {
+        alert("⏳ Ad already running");
         return;
     }
 
-    lastAdTime = now;
+    adWatching = true;
 
-    let adWindow = window.open(
-        "https://wrathful-piano.com/b.3/VH0/PJ3vpMv/btmOVbJDZbDp0/2sO/Tag/4rOCD/AmxiLtTMYQ5/OUD/gf4sM/DlUC",
-        "_blank"
-    );
+    let adWindow = window.open("https://wrathful-piano.com/b.3/VH0/PJ3vpMv/btmOVbJDZbDp0/2sO/Tag/4rOCD/AmxiLtTMYQ5/OUD/gf4sM/DlUC", "_blank");
 
-    if (!adWindow || adWindow.closed || typeof adWindow.closed === "undefined") {
-        alert("❌ Ad blocked. Enable popups.");
+    if (!adWindow) {
+        alert("❌ Popup blocked");
+        adWatching = false;
         return;
     }
 
-    // ⏳ reward after delay
     setTimeout(() => {
         alert("✅ Reward added!");
-        
-        // update coins
+        adWatching = false;
+
         state.coins += 50;
         state.usdt += 0.005;
         render();

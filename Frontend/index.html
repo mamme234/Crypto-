@@ -425,21 +425,16 @@ pPhoto.src=user.photo_url;
 }
 
 /* START APP */
-window.addEventListener("load", () => {
-  if(window.adReady){
-    show_10892289({
-      type: 'inApp',
-      inAppSettings: {
-        frequency: 2,
-        capping: 0.1,
-        interval: 30,
-        timeout: 5,
-        everyPage: false
-      }
-    });
+window.addEventListener("DOMContentLoaded", () => {
+  loadUser(); // load user data
+
+  const btn = document.getElementById("tapBtn");
+  if(btn){
+    btn.addEventListener("click", tap); // tap works here
   }
+
+  console.log("App ready");
 });
 </script>
-
 </body>
   </html>

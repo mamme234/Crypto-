@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <title>Crypto Tap Pro</title>
 <script src="https://libtl.com/sdk.js"
-        data-zone="10892289"
-        data-sdk="show_10892289"></script>
+        data-zone="10892435"
+        data-sdk="show_10892435"></script>
 <style>
 body{
 margin:0;
@@ -364,32 +364,26 @@ loadUser();
 // ==========================
 
 function runAd() {
-  if (typeof show_10892289 !== "function") {
-    console.log("Ads SDK not loaded");
+  if (typeof show_10892435 !== "function") {
+    alert("Ads not loaded");
     return;
   }
 
   try {
-    show_10892289()
-      .then(() => {
-        rewardUser();
-      })
-      .catch(() => {
-        console.log("Ad closed or failed");
-      });
+    show_10892435();
+
+    // give reward after short delay
+    setTimeout(() => {
+      state.coins += 300;
+      state.usdt += 0.003;
+      render();
+      alert("🎉 Reward added!");
+    }, 2000);
 
   } catch (e) {
-    console.log("Ad error:", e);
+    console.log(e);
   }
-}
-
-// Reward function (central place)
-function rewardUser() {
-  state.coins += 300;
-  state.usdt += 0.003;
-  render();
-  alert("🎉 You earned reward!");
-  }
+          }
 
 /* WITHDRAW */
 async function withdraw(){

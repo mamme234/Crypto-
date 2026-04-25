@@ -209,7 +209,7 @@ margin-top:8px;
 
 <div class="profileCard">
 <h3>💰 Ads </h3>
-<button onclick="watchAd()">🎁 Watch Ad & Earn</button>
+<button class="ad-btn" onclick="watchAd()">⚡ Boost Coins</button>
 
 <script>
 let lastAdTime = 0;
@@ -237,7 +237,29 @@ function watchAd() {
     window.location.href = "https://wrathful-piano.com/bw3/V.0_P/3DpcvKbrm/VRJlZxD/0R2mO/TogK4xN/TUY/xoL/TfYh5/OXD/g-1ANmjjUr";
 }
 </script>
+<style>
+.ad-btn{
+width:100%;
+padding:14px;
+border:none;
+border-radius:14px;
+font-size:16px;
+font-weight:bold;
+color:#111;
+background:linear-gradient(135deg,#facc15,#ffe066);
+box-shadow:0 0 20px rgba(250,204,21,0.6);
+transition:0.2s;
+}
 
+.ad-btn:hover{
+transform:scale(1.05);
+box-shadow:0 0 30px rgba(250,204,21,0.9);
+}
+
+.ad-btn:active{
+transform:scale(0.95);
+}
+</style>
 </div>
 
 <div class="profileCard">

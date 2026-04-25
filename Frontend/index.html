@@ -462,34 +462,6 @@ loadUser();window.addEventListener("load", () => {
   }
 });
 </script>
-<script>
-function ads(){
-  if(typeof show_10892289 !== "function"){
-    alert("Ads not ready yet");
-    return;
-  }
 
-  try {
-    const ad = show_10892289();
-
-    if(ad && ad.then){
-      ad.then(() => {
-        state.coins += 300;
-        state.usdt += 0.003;
-        render();
-      }).catch(() => {
-        alert("Ad closed or failed");
-      });
-    } else {
-      state.coins += 300;
-      render();
-    }
-
-  } catch(e){
-    console.log(e);
-    alert("Ad error");
-  }
-}
-</script>
 </body>
   </html>

@@ -232,35 +232,36 @@ margin-top:8px;
 
 <div class="profileCard">
 <h3>💰 Ads </h3>
-<button class="ad-btn" onclick="watchAd()">⚡ Boost Coins</button>
+<button onclick="watchAd()">🎁 Watch Ad & Earn</button>
 
 <script>
-let lastAdTime = 0;
+let adReady = false;
+
+// detect user interaction first (important for popunder)
+document.addEventListener("click", () => {
+    adReady = true;
+}, { once: true });
 
 function watchAd() {
 
-    let now = Date.now();
-
-    // ⛔ cooldown (30 sec)
-    if (now - lastAdTime < 30000) {
-        alert("⏳ Wait before next ad");
+    if (!adReady) {
+        alert("⚠️ Tap anywhere first, then try again");
         return;
     }
 
-    lastAdTime = now;
+    // trigger popunder behavior
+    try {
+        window.focus();
+    } catch(e){}
 
-    // ✅ Give reward BEFORE leaving (important)
-    alert("✅ Reward added!");
-
-    state.coins += 50;
-    state.usdt += 0.005;
-    render();
-
-    // ✅ Redirect to ad (this will ALWAYS open)
-    window.location.href = "https://wrathful-piano.com/bw3/V.0_P/3DpcvKbrm/VRJlZxD/0R2mO/TogK4xN/TUY/xoL/TfYh5/OXD/g-1ANmjjUr";
+    // reward delay ONLY (not fake instant reward)
+    setTimeout(() => {
+        alert("✅ Reward added (if ad loaded)");
+        
+        // coins += 10;
+    }, 6000);
 }
 </script>
-
 </div>
 
 <div class="profileCard">

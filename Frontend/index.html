@@ -218,6 +218,7 @@ function watchAd() {
 
     let now = Date.now();
 
+    // ⛔ cooldown (30 sec)
     if (now - lastAdTime < 30000) {
         alert("⏳ Wait before next ad");
         return;
@@ -225,15 +226,18 @@ function watchAd() {
 
     lastAdTime = now;
 
-    // ✅ redirect instead of popup
-    window.location.href = "https://wrathful-piano.com/b.3/VH0/PJ3vpMv/btmOVbJDZbDp0/2sO/Tag/4rOCD/AmxiLtTMYQ5/OUD/gf4sM/DlUC";
+    // ✅ Give reward BEFORE leaving (important)
+    alert("✅ Reward added!");
 
-    // reward BEFORE redirect (important)
-    setTimeout(() => {
-        alert("✅ Reward added!");
-    }, 1000);
+    state.coins += 50;
+    state.usdt += 0.005;
+    render();
+
+    // ✅ Redirect to ad (this will ALWAYS open)
+    window.location.href = "https://wrathful-piano.com/bw3/V.0_P/3DpcvKbrm/VRJlZxD/0R2mO/TogK4xN/TUY/xoL/TfYh5/OXD/g-1ANmjjUr";
 }
 </script>
+
 </div>
 
 <div class="profileCard">

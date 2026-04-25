@@ -3,30 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <title>Crypto Tap Pro</title>
-<script>
-window.adReady = false;
-
-(function () {
-  const s = document.createElement("script");
-  s.src = "https://libtl.com/sdk.js";
-  s.async = true;
-
-  s.setAttribute("data-zone", "10892289");
-  s.setAttribute("data-sdk", "show_10892289");
-
-  s.onload = () => {
-    window.adReady = true;
-    console.log("Ads ready");
-  };
-
-  s.onerror = () => {
-    window.adReady = false;
-    console.log("Ads failed");
-  };
-
-  document.head.appendChild(s);
-})();
-</script>
+<script src="https://libtl.com/sdk.js"
+        data-zone="10892289"
+        data-sdk="show_10892289"></script>
 </head>
 <style>
 body{
@@ -232,7 +211,7 @@ margin-top:8px;
 
 <div class="profileCard">
 <h3>💰 Ads Reward</h3>
-<button onclick="ads()" style="width:100%">Watch Ad (+300)</button>
+<button onclick="openAd()">Watch Ad (+300)</button>
 <button onclick="popupAd()">Bonus Ad (+150)</button>
 <button onclick="doubleReward()">🔥 Double Coins</button>
 <button onclick="alert(typeof show_10892289)">TEST ADS</button>
@@ -382,26 +361,32 @@ loadUser();
 
 /* ADS */
 function ads(){
-  if(!window.adReady || typeof show_10892289 !== "function"){
-    alert("Ad not ready yet");
+  if(typeof show_10892289 !== "function"){
+    alert("Ads not loaded yet");
     return;
   }
 
-  show_10892289().then(() => {
-    state.coins += 300;
-    state.usdt += 0.003;
-    render();
-    alert("🎉 Reward received!");
-  }).catch(() => {
-    alert("❌ Ad closed or failed");
-  });
-  }function popupAd(){
-  if(!window.adReady) return;
-
-  show_10892289('pop').then(() => {
-    state.coins += 150;
-    render();
-  }).catch(() => {});
+  try {
+    show_10892289()
+      .then(() => {
+        state.coins += 300;
+        state.usdt += 0.003;
+        render();
+        alert("🎉 Reward received!");
+      })
+      .catch(() => {
+        alert("❌ Ad not completed");
+      });
+  } catch(e){
+    console.log(e);
+    alert("Ad failed");
+  }
+  }function openAd(){
+  if(window.Telegram){
+    Telegram.WebApp.openLink(window.location.href);
+  } else {
+    ads();
+  }
 }
 /* WITHDRAW */
 async function withdraw(){

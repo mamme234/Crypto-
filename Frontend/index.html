@@ -208,13 +208,23 @@ margin-top:8px;
 
 <div class="profileCard">
 <h3>💰 Ads </h3>
-<button onclick="watchAdButton()">
-    🎁 Watch Ad & Earn Reward
-</button>
+<button onclick="openAd()">🎁 Watch Ad & Earn</button>
 
-<button onclick="showPopupAd()">
-    📢 Show Popup Ad
-</button>
+<script>
+function openAd() {
+    // open your direct ad link
+    window.open("YOUR_DIRECT_AD_LINK", "_blank");
+
+    // reward delay system (important for Telegram apps)
+    setTimeout(() => {
+        alert("✅ Reward added!");
+        
+        // example:
+        // coins += 10;
+        // saveToLocalStorage();
+    }, 5000);
+}
+</script>
 </div>
 
 <div class="profileCard">
@@ -433,46 +443,28 @@ function runAd(){
 });
 </script>
 <script>
-/* =========================
-   REWARDED INTERSTITIAL AD
-========================= */
-function showRewardAd() {
-    return show_10892435()
-    .then(() => {
-        console.log("Rewarded ad completed");
-        alert("Reward granted!");
-        
-        // 👉 put your reward logic here
-        // example: coins += 10;
-    })
-    .catch(err => {
-        console.log("Reward ad failed:", err);
-        alert("Ad not available, try again later");
-    });
+function detectAdBlock(callback) {
+    let ad = document.createElement("div");
+    ad.className = "adsbox";
+    ad.style.height = "1px";
+    ad.style.width = "1px";
+    ad.style.position = "absolute";
+    ad.style.left = "-9999px";
+    document.body.appendChild(ad);
+
+    setTimeout(() => {
+        let blocked = ad.offsetHeight === 0;
+        document.body.removeChild(ad);
+        callback(blocked);
+    }, 100);
 }
 
-
-/* =========================
-   POPUP / BACKUP AD
-========================= */
-function showPopupAd() {
-    return show_10892435('pop')
-    .then(() => {
-        console.log("Popup ad shown");
-    })
-    .catch(err => {
-        console.log("Popup ad failed:", err);
-    });
-}
-
-
-/* =========================
-   SAFE BUTTON TRIGGER
-========================= */
-function watchAdButton() {
-    // Always triggered by user click (VERY IMPORTANT)
-    showRewardAd();
-}
+detectAdBlock(function(blocked) {
+    if (blocked) {
+        alert("⚠️ AdBlock detected. Please disable it for rewards.");
+    }
+});
+</script>
 </script>
 </body>
         </html>

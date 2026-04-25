@@ -3,10 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <title>Crypto Tap Pro</title>
-<script src="https://libtl.com/sdk.js"
-        data-zone="10892289"
-        data-sdk="show_10892289"></script>
-</head>
+<script>
+window.adReady = false;
+
+(function () {
+  const s = document.createElement("script");
+  s.src = "https://libtl.com/sdk.js";
+  s.setAttribute("data-zone", "10892289");
+  s.setAttribute("data-sdk", "show_10892289");
+
+  s.onload = () => {
+    console.log("Ads ready");
+    window.adReady = true;
+  };
+
+  s.onerror = () => {
+    console.log("Ads failed");
+    window.adReady = false;
+  };
+
+  document.head.appendChild(s);
+})();
+</script>
 <style>
 body{
 margin:0;
@@ -211,10 +229,9 @@ margin-top:8px;
 
 <div class="profileCard">
 <h3>💰 Ads Reward</h3>
-<button onclick="ads()">Watch Ad (+300)</button>
+<button onclick="ads()" style="width:100%">Watch Ad (+300)</button>
 <button onclick="popupAd()">Bonus Ad (+150)</button>
 <button onclick="doubleReward()">🔥 Double Coins</button>
-<button onclick="alert(typeof show_10892289)">TEST ADS</button>
 </div>
 
 <div class="profileCard">
@@ -255,16 +272,26 @@ const user = tg?.initDataUnsafe?.user;
 
 if(tg) tg.expand();
 
-loadUser();
-window.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("tapBtn");
+/* LOAD USER */
+async function loadUser(){
 
-  if(btn){
-    btn.addEventListener("click", tap);
-  }
+if(!user) return;
 
-  console.log("Tap ready");
-});
+let ref = new URLSearchParams(window.location.search).get("ref");
+
+let url = API + "/user/" + user.id;
+if(ref) url += "/" + ref;
+
+let res = await fetch(url);
+let data = await res.json();
+
+state.coins = data.coins;
+state.usdt = data.usdt;
+
+render();
+updateTasks(data.tasks || []);
+}
+
 /* RENDER */
 function render(){
 document.getElementById("coins").innerText = Math.floor(state.coins);
@@ -350,37 +377,51 @@ loadUser();
 }
 
 /* ADS */
-function ads(){
-  if(typeof show_10892289 !== "function"){
+function runAd(){
+
+  if(!window.adReady || typeof show_10892289 !== "function"){
     alert("Ads not ready yet");
     return;
   }
 
   try {
+
     const ad = show_10892289();
 
     if(ad && typeof ad.then === "function"){
-      ad.then(() => {
-        rewardUser(300, 0.003);
-      }).catch(() => {
-        alert("❌ Ad not completed");
+      ad.then(()=>{
+        state.coins += 300;
+        state.usdt += 0.003;
+        render();
+        alert("🎉 Reward received!");
+      }).catch(()=>{
+        alert("❌ Ad closed");
       });
     } else {
-      rewardUser(300, 0.003);
+      state.coins += 300;
+      state.usdt += 0.003;
+      render();
     }
 
-  } catch(e){
-    console.log(e);
-    alert("Ad failed");
+  } catch(err){
+    console.log(err);
+    alert("❌ Ad error");
   }
-                                          }
-/* REWARD */
-function rewardUser(coins, usdt){
-  state.coins += coins;
-  state.usdt += usdt;
-  render();
-  alert("🎉 Reward received!");
+  }function ads(){
+  runAd();
 }
+
+function popupAd(){
+  runAd();
+  state.coins -= 150;
+  render();
+}
+
+function doubleReward(){
+  runAd();
+  state.coins *= 2;
+  render();
+  }
 /* WITHDRAW */
 async function withdraw(){
 
@@ -424,17 +465,34 @@ pPhoto.src=user.photo_url;
 }
 }
 
-/* START APP */
-window.addEventListener("DOMContentLoaded", () => {
-   // load user data
-
-  const btn = document.getElementById("tapBtn");
-  if(btn){
-    btn.addEventListener("click", tap); // tap works here
+/* START */
+loadUser();
+function runAd(){
+  if(!window.adReady || typeof show_10892289 !== "function"){
+    console.log("Ad not ready yet");
+    return;
   }
 
-  console.log("App ready");
+  try {
+    show_10892289().then(()=>{
+      state.coins += 300;
+      state.usdt += 0.003;
+      render();
+    }).catch(()=>{});
+  } catch(e){
+    console.log("Ad error", e);
+  }
+}window.addEventListener("load", () => {
+  const btn = document.getElementById("tapBtn");
+
+  if(btn){
+    btn.addEventListener("click", tap);
+    btn.addEventListener("touchstart", tap, { passive:false });
+  }
+
+  console.log("Tap system ready");
 });
 </script>
+
 </body>
-  </html>
+        </html>

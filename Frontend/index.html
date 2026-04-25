@@ -209,33 +209,43 @@ margin-top:8px;
 
 <div class="profileCard">
 <h3>💰 Ads </h3>
+function watchAd() {
 <button onclick="watchAd()">🎁 Watch Ad & Earn</button>
 
 <script>
-let adReady = false;
-
-// detect user interaction first (important for popunder)
-document.addEventListener("click", () => {
-    adReady = true;
-}, { once: true });
+let adWatching = false;
 
 function watchAd() {
 
-    if (!adReady) {
-        alert("⚠️ Tap anywhere first, then try again");
+    let now = Date.now();
+
+    // ⛔ cooldown (30 sec)
+    if (now - lastAdTime < 30000) {
+        alert("⏳ Wait before watching another ad");
         return;
     }
 
-    // trigger popunder behavior
-    try {
-        window.focus();
-    } catch(e){}
+    lastAdTime = now;
 
-    // reward delay ONLY (not fake instant reward)
+    let adWindow = window.open(
+        "https://wrathful-piano.com/b.3/VH0/PJ3vpMv/btmOVbJDZbDp0/2sO/Tag/4rOCD/AmxiLtTMYQ5/OUD/gf4sM/DlUC",
+        "_blank"
+    );
+
+    if (!adWindow || adWindow.closed || typeof adWindow.closed === "undefined") {
+        alert("❌ Ad blocked. Enable popups.");
+        return;
+    }
+
+    // ⏳ reward after delay
     setTimeout(() => {
-        alert("✅ Reward added (if ad loaded)");
+        alert("✅ Reward added!");
         
-        // coins += 10;
+        // update coins
+        state.coins += 50;
+        state.usdt += 0.005;
+        render();
+
     }, 6000);
 }
 </script>
@@ -334,11 +344,9 @@ function tap(e){
 
   // ADS every 20 taps
     tapCount++;
-  if (tapCount % 20 === 0) {
-    setTimeout(() => {
-        runAd();
-    }, 500);
-    }
+if (tapCount % 20 === 0) {
+    watchAd(); // use real ad instead
+}
 
   fetch(API+"/tap",{
     method:"POST",

@@ -444,18 +444,6 @@ pPhoto.src=user.photo_url;
 /* START */
 loadUser();
         
-window.adReady = false;
-
-window.addEventListener("load", () => {
-  setTimeout(() => {
-    if(typeof show_10892289 === "function"){
-      window.adReady = true;
-      console.log("Ads ready");
-    } else {
-      console.log("Ads failed to load");
-    }
-  }, 2000);
-});
 </script>
 
 </body>

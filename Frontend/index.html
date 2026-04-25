@@ -342,12 +342,6 @@ function tap(e){
 
   render();
 
-  // ADS every 20 taps
-    tapCount++;
-if (tapCount % 20 === 0) {
-    watchAd(); // use real ad instead
-}
-
   fetch(API+"/tap",{
     method:"POST",
     headers:{"Content-Type":"application/json"},

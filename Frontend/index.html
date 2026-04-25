@@ -432,16 +432,20 @@ pPhoto.src=user.photo_url;
 /* START */
 loadUser();
   function runAd(){
-  if(typeof show_10892289 === "function"){
+  if(!window.adReady || typeof show_10892289 !== "function"){
+    console.log("Ad not ready yet");
+    return;
+  }
+
+  try {
     show_10892289().then(()=>{
       state.coins += 300;
       state.usdt += 0.003;
       render();
     }).catch(()=>{});
-  } else {
-    console.log("Ad not available");
-  }
-      }
+  } catch(e){
+    console.log("Ad error", e);
+    }
 }window.addEventListener("load", () => {
   const btn = document.getElementById("tapBtn");
 

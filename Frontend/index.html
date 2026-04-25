@@ -256,25 +256,18 @@ const user = tg?.initDataUnsafe?.user;
 if(tg) tg.expand();
 
 /* LOAD USER */
-async function loadUser(){
+loadUser();
 
-if(!user) return;
+window.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("tapBtn");
 
-let ref = new URLSearchParams(window.location.search).get("ref");
+  if(btn){
+    btn.onclick = tap;
+    btn.ontouchstart = tap;
+  }
 
-let url = API + "/user/" + user.id;
-if(ref) url += "/" + ref;
-
-let res = await fetch(url);
-let data = await res.json();
-
-state.coins = data.coins;
-state.usdt = data.usdt;
-
-render();
-updateTasks(data.tasks || []);
-}
-
+  console.log("Tap ready");
+});
 /* RENDER */
 function render(){
 document.getElementById("coins").innerText = Math.floor(state.coins);
@@ -362,31 +355,34 @@ loadUser();
 /* ADS */
 function ads(){
   if(typeof show_10892289 !== "function"){
-    alert("Ads not loaded yet");
+    alert("Ads not ready yet");
     return;
   }
 
   try {
-    show_10892289()
-      .then(() => {
-        state.coins += 300;
-        state.usdt += 0.003;
-        render();
-        alert("🎉 Reward received!");
-      })
-      .catch(() => {
+    const ad = show_10892289();
+
+    if(ad && typeof ad.then === "function"){
+      ad.then(() => {
+        rewardUser(300, 0.003);
+      }).catch(() => {
         alert("❌ Ad not completed");
       });
+    } else {
+      rewardUser(300, 0.003);
+    }
+
   } catch(e){
     console.log(e);
     alert("Ad failed");
   }
-  }function openAd(){
-  if(window.Telegram){
-    Telegram.WebApp.openLink(window.location.href);
-  } else {
-    ads();
-  }
+                                          }
+/* REWARD */
+function rewardUser(coins, usdt){
+  state.coins += coins;
+  state.usdt += usdt;
+  render();
+  alert("🎉 Reward received!");
 }
 /* WITHDRAW */
 async function withdraw(){
@@ -432,7 +428,8 @@ pPhoto.src=user.photo_url;
 }
 
 /* START */
-loadUser();window.addEventListener("load", () => {
+loadUser();
+window.addEventListener("load", () => {
   if(window.adReady){
     show_10892289({
       type: 'inApp',

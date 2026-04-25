@@ -256,13 +256,11 @@ const user = tg?.initDataUnsafe?.user;
 if(tg) tg.expand();
 
 loadUser();
-
 window.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("tapBtn");
 
   if(btn){
-    btn.onclick = tap;
-    btn.ontouchstart = tap;
+    btn.addEventListener("click", tap);
   }
 
   console.log("Tap ready");
@@ -426,8 +424,8 @@ pPhoto.src=user.photo_url;
 }
 }
 
-/* START */
-loadUser();window.addEventListener("load", () => {
+/* START APP */
+window.addEventListener("load", () => {
   if(window.adReady){
     show_10892289({
       type: 'inApp',

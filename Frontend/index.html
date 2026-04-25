@@ -363,49 +363,6 @@ alert(data.message);
 loadUser();
 }
 
-<script>
-/* =========================
-   REWARDED INTERSTITIAL AD
-========================= */
-function showRewardAd() {
-    return show_10892435()
-    .then(() => {
-        console.log("Rewarded ad completed");
-        alert("Reward granted!");
-        
-        // 👉 put your reward logic here
-        // example: coins += 10;
-    })
-    .catch(err => {
-        console.log("Reward ad failed:", err);
-        alert("Ad not available, try again later");
-    });
-}
-
-
-/* =========================
-   POPUP / BACKUP AD
-========================= */
-function showPopupAd() {
-    return show_10892435('pop')
-    .then(() => {
-        console.log("Popup ad shown");
-    })
-    .catch(err => {
-        console.log("Popup ad failed:", err);
-    });
-}
-
-
-/* =========================
-   SAFE BUTTON TRIGGER
-========================= */
-function watchAdButton() {
-    // Always triggered by user click (VERY IMPORTANT)
-    showRewardAd();
-}
-</script>
-
 /* WITHDRAW */
 async function withdraw(){
 
@@ -477,6 +434,47 @@ function runAd(){
   console.log("Tap system ready");
 });
 </script>
+<script>
+/* =========================
+   REWARDED INTERSTITIAL AD
+========================= */
+function showRewardAd() {
+    return show_10892435()
+    .then(() => {
+        console.log("Rewarded ad completed");
+        alert("Reward granted!");
+        
+        // 👉 put your reward logic here
+        // example: coins += 10;
+    })
+    .catch(err => {
+        console.log("Reward ad failed:", err);
+        alert("Ad not available, try again later");
+    });
+}
 
+
+/* =========================
+   POPUP / BACKUP AD
+========================= */
+function showPopupAd() {
+    return show_10892435('pop')
+    .then(() => {
+        console.log("Popup ad shown");
+    })
+    .catch(err => {
+        console.log("Popup ad failed:", err);
+    });
+}
+
+
+/* =========================
+   SAFE BUTTON TRIGGER
+========================= */
+function watchAdButton() {
+    // Always triggered by user click (VERY IMPORTANT)
+    showRewardAd();
+}
+</script>
 </body>
         </html>

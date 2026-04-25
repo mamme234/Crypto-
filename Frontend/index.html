@@ -210,9 +210,13 @@ margin-top:8px;
 
 <div class="profileCard">
 <h3>💰 Ads </h3>
-<button onclick="showAd()">Watch Ad</button>
-<button onclick="popupAd()">Bonus Ad</button>
-<button onclick="doubleReward()">Double</button>
+<button onclick="watchAdButton()">
+    🎁 Watch Ad & Earn Reward
+</button>
+
+<button onclick="showPopupAd()">
+    📢 Show Popup Ad
+</button>
 </div>
 
 <div class="profileCard">
@@ -359,28 +363,48 @@ alert(data.message);
 loadUser();
 }
 
-// ==========================
-// ADS SYSTEM (FIXED)
-// ==========================
-
-function showAd() {
-    show_10892289().then(() => {
-        alert("Reward given");
+<script>
+/* =========================
+   REWARDED INTERSTITIAL AD
+========================= */
+function showRewardAd() {
+    return show_10892435()
+    .then(() => {
+        console.log("Rewarded ad completed");
+        alert("Reward granted!");
+        
+        // 👉 put your reward logic here
+        // example: coins += 10;
+    })
+    .catch(err => {
+        console.log("Reward ad failed:", err);
+        alert("Ad not available, try again later");
     });
 }
 
-    // give reward after short delay
-    setTimeout(() => {
-      state.coins += 300;
-      state.usdt += 0.003;
-      render();
-      alert("🎉 Reward added!");
-    }, 2000);
 
-  } catch (e) {
-    console.log(e);
-  }
-          }
+/* =========================
+   POPUP / BACKUP AD
+========================= */
+function showPopupAd() {
+    return show_10892435('pop')
+    .then(() => {
+        console.log("Popup ad shown");
+    })
+    .catch(err => {
+        console.log("Popup ad failed:", err);
+    });
+}
+
+
+/* =========================
+   SAFE BUTTON TRIGGER
+========================= */
+function watchAdButton() {
+    // Always triggered by user click (VERY IMPORTANT)
+    showRewardAd();
+}
+</script>
 
 /* WITHDRAW */
 async function withdraw(){

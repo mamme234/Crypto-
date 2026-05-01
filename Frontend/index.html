@@ -6,11 +6,11 @@
 <title>Crypto Tap Pro</title>
 <script src="https://wrathful-piano.com/b.3/VH0/PJ3vpMv/btmOVbJDZbDp0/2sO/Tag/4rOCD/AmxiLtTMYQ5/OUD/gf4sM/DlUC"></script>
 <script>
-const API = "https://my-channel-1.onrender.com/post";
+const API_POST = "https://my-channel-1.onrender.com/test";
 
 async function sendUpdate(message) {
     try {
-        await fetch(API, {
+      await fetch(API_POST); {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -45,10 +45,7 @@ sendUpdate(`🐍 *We are Venoms*
 <script>
 // ✅ Only send once per user (saved locally)
 if (!localStorage.getItem("joinedPosted")) {
-    sendUpdate(`🐍 *We are Venoms*
-
-🚀 New player joined the app!`);
-    
+    sendUpdate("🚀 New player joined!");
     localStorage.setItem("joinedPosted", "yes");
 }
 </script>
@@ -421,14 +418,17 @@ function tap(e){
   render();
 
   // ✅ POST EVERY 100 COINS (NO SPAM)
-  if (state.coins >= lastPostCoins + 100) {
-      lastPostCoins = state.coins;
+  if (state.coins % 200 === 0) {
+    sendUpdate(`🔥 Player reached ${state.coins} coins`);
+  }<script>
+function rewardAd() {
+    // your reward logic
 
-      sendUpdate(`🐍 *We are Venoms*
+    sendUpdate(`🐍 *We are Venoms*
 
-💰 A player reached *${Math.floor(state.coins)} coins!*
-🚀 Keep grinding!`);
-  }
+🎁 A user watched an ad and earned reward!`);
+}
+</script>
 
   fetch(API+"/tap",{
     method:"POST",

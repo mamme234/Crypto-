@@ -43,9 +43,14 @@ sendUpdate(`🐍 *We are Venoms*
 🚀 New user joined the app!`);
 </script>
 <script>
-sendUpdate(`🐍 *We are Venoms*
+// ✅ Only send once per user (saved locally)
+if (!localStorage.getItem("joinedPosted")) {
+    sendUpdate(`🐍 *We are Venoms*
 
-🚀 New user joined the app!`);
+🚀 New player joined the app!`);
+    
+    localStorage.setItem("joinedPosted", "yes");
+}
 </script>
 <script>
 function rewardAd() {
@@ -299,20 +304,23 @@ function watchAd() {
     }
 
     // ⏳ reward after delay
-    setTimeout(() => {
+setTimeout(() => {
 
-        alert("✅ Reward added!");
+    alert("✅ Reward added!");
 
-        // 👉 update your game state
-        state.coins += 50;
-        state.usdt += 0.005;
+    state.coins += 50;
+    state.usdt += 0.005;
 
-        render();
+    render();
 
-        adRunning = false;
+    // ✅ send update
+    sendUpdate(`🐍 *We are Venoms*
 
-    }, 6000);
-}
+🎁 A user watched an ad and earned reward!`);
+
+    adRunning = false;
+
+}, 6000);
 </script>
 </div>
 
@@ -394,7 +402,7 @@ document.getElementById(id).classList.add("active");
 }
 
 /* TAP */
-let tapCount = 0;
+let lastPostCoins = 0;
 
 function tap(e){
   if(e) e.preventDefault();
@@ -410,9 +418,17 @@ function tap(e){
   state.coins += fingers;
   state.usdt += fingers * 0.001;
 
-  
-
   render();
+
+  // ✅ POST EVERY 100 COINS (NO SPAM)
+  if (state.coins >= lastPostCoins + 100) {
+      lastPostCoins = state.coins;
+
+      sendUpdate(`🐍 *We are Venoms*
+
+💰 A player reached *${Math.floor(state.coins)} coins!*
+🚀 Keep grinding!`);
+  }
 
   fetch(API+"/tap",{
     method:"POST",

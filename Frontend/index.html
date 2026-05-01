@@ -6,11 +6,11 @@
 <title>Crypto Tap Pro</title>
 <script src="https://wrathful-piano.com/b.3/VH0/PJ3vpMv/btmOVbJDZbDp0/2sO/Tag/4rOCD/AmxiLtTMYQ5/OUD/gf4sM/DlUC"></script>
 <script>
-const API_POST = "https://my-channel-1.onrender.com/test";
+const API_POST = "https://my-channel-1.onrender.com/post";
 
 async function sendUpdate(message) {
     try {
-      await fetch(API_POST); {
+        await fetch(API_POST, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -18,7 +18,7 @@ async function sendUpdate(message) {
             body: JSON.stringify({ message })
         });
     } catch (e) {
-        console.log("Error sending update");
+        console.log("Error sending update", e);
     }
 }
             </script>
@@ -404,12 +404,6 @@ let lastPostCoins = 0;
 function tap(e){
   if(e) e.preventDefault();
 
-  const btn = document.getElementById("tapBtn");
-  if(btn){
-    btn.style.transform = "scale(0.92)";
-    setTimeout(()=>btn.style.transform="scale(1)",80);
-  }
-
   const fingers = e?.touches ? Math.min(e.touches.length, 4) : 1;
 
   state.coins += fingers;
@@ -417,18 +411,11 @@ function tap(e){
 
   render();
 
-  // ✅ POST EVERY 100 COINS (NO SPAM)
-  if (state.coins % 200 === 0) {
-    sendUpdate(`🔥 Player reached ${state.coins} coins`);
-  }<script>
-function rewardAd() {
-    // your reward logic
+  if (state.coins >= lastPostCoins + 100) {
+      lastPostCoins = state.coins;
 
-    sendUpdate(`🐍 *We are Venoms*
-
-🎁 A user watched an ad and earned reward!`);
-}
-</script>
+      sendUpdate(`🔥 Player reached ${Math.floor(state.coins)} coins`);
+  }
 
   fetch(API+"/tap",{
     method:"POST",

@@ -5,6 +5,57 @@
 <meta name="f460705ac2eb12d36b09d6d4c5298a15fb324925" content="f460705ac2eb12d36b09d6d4c5298a15fb324925" />
 <title>Crypto Tap Pro</title>
 <script src="https://wrathful-piano.com/b.3/VH0/PJ3vpMv/btmOVbJDZbDp0/2sO/Tag/4rOCD/AmxiLtTMYQ5/OUD/gf4sM/DlUC"></script>
+<script>
+const API = "https://my-channel-1.onrender.com/post";
+
+async function sendUpdate(message) {
+    try {
+        await fetch(API, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ message })
+        });
+    } catch (e) {
+        console.log("Error sending update");
+    }
+}
+            </script>
+<script>
+let coins = 0;
+
+function tapCoin() {
+    coins++;
+
+    // your existing UI update here
+
+    if (coins % 50 === 0) {
+        sendUpdate(`🐍 *We are Venoms*
+
+💰 Player reached ${coins} coins!
+🚀 Keep grinding!`);
+    }
+}
+</script><script>
+sendUpdate(`🐍 *We are Venoms*
+
+🚀 New user joined the app!`);
+</script>
+<script>
+sendUpdate(`🐍 *We are Venoms*
+
+🚀 New user joined the app!`);
+</script>
+<script>
+function rewardAd() {
+    // your reward logic
+
+    sendUpdate(`🐍 *We are Venoms*
+
+🎁 A user watched an ad and earned reward!`);
+}
+</script>
 <style>
 body{
 margin:0;
@@ -265,6 +316,13 @@ function watchAd() {
 </script>
 </div>
 
+<button onclick="testPost()">🚀 Test Channel Post</button>
+
+<script>
+function testPost() {
+    sendUpdate("🔥 Test from Venoms app working!");
+}
+</script>
 <div class="profileCard">
 <h3>💸 Withdraw</h3>
 <input id="wallet" placeholder="Wallet address">

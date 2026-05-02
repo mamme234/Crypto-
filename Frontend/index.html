@@ -7,7 +7,216 @@
 <script src="https://wrathful-piano.com/b.3/VH0/PJ3vpMv/btmOVbJDZbDp0/2sO/Tag/4rOCD/AmxiLtTMYQ5/OUD/gf4sM/DlUC"></script>
 <script>
 const API_POST = "https://my-channel-1.onrender.com/post";
+/* =======================
+   STATE
+======================= */
+let state = {
+  coins: 0,
+  usdt: 0,
+  referrals: 0
+};
 
+const DAILY_LIMIT = 5000;
+
+/* =======================
+   DATE HELPERS
+======================= */
+function getTodayKey() {
+  return new Date().toISOString().split("T")[0];
+}
+
+function getDailyCoins() {
+  let data = JSON.parse(localStorage.getItem("dailyTap") || "{}");
+
+  if (data.date !== getTodayKey()) {
+    data = { date: getTodayKey(), coins: 0 };
+    localStorage.setItem("dailyTap", JSON.stringify(data));
+  }
+
+  return data;
+}
+
+function saveDailyCoins(coins) {
+  localStorage.setItem("dailyTap", JSON.stringify({
+    date: getTodayKey(),
+    coins
+  }));
+}
+
+/* =======================
+   RENDER UI
+======================= */
+function render() {
+  document.getElementById("coins").innerText = Math.floor(state.coins);
+  document.getElementById("usdt").innerText = state.usdt.toFixed(3);
+
+  let ref = document.getElementById("refCount");
+  if (ref) ref.innerText = state.referrals;
+}
+
+/* =======================
+   TAP SYSTEM (ANTI-CHEAT + DAILY LIMIT)
+======================= */
+let lastTapTime = 0;
+
+function tap(e) {
+  if (e) e.preventDefault();
+
+  let now = Date.now();
+
+  // anti spam tap
+  if (now - lastTapTime < 80) return;
+  lastTapTime = now;
+
+  const daily = getDailyCoins();
+  const fingers = e?.touches ? Math.min(e.touches.length, 4) : 1;
+
+  if (daily.coins >= DAILY_LIMIT) {
+    alert("⛔ Daily limit reached (5000 coins)");
+    return;
+  }
+
+  if (daily.coins + fingers > DAILY_LIMIT) {
+    alert("⛔ Near daily limit");
+    return;
+  }
+
+  daily.coins += fingers;
+  saveDailyCoins(daily.coins);
+
+  state.coins += fingers;
+  state.usdt += fingers * 0.001;
+
+  render();
+
+  fetch(API + "/tap", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      userId: user?.id || 0,
+      fingers,
+      date: getTodayKey()
+    })
+  }).catch(() => {});
+}
+
+/* =======================
+   WITHDRAW (RULE: 20 USDT + 10 REF)
+======================= */
+async function withdraw() {
+
+  let wallet = document.getElementById("wallet").value;
+  let amount = parseFloat(document.getElementById("amount").value);
+
+  if (amount < 20) {
+    alert("⛔ Minimum withdraw is 20 USDT");
+    return;
+  }
+
+  if (state.referrals < 10) {
+    alert("⛔ You need 10 referrals to withdraw");
+    return;
+  }
+
+  let res = await fetch(API + "/withdraw", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      userId: user.id,
+      wallet,
+      amount,
+      status: "pending"
+    })
+  });
+
+  let data = await res.json();
+  alert("⏳ Withdrawal request sent (Pending approval)");
+}
+
+/* =======================
+   ADS REWARD
+======================= */
+function rewardAd() {
+  state.coins += 50;
+  state.usdt += 0.005;
+  render();
+
+  sendUpdate(`🐍 *We are Venoms*
+🎁 User watched ad and earned reward!`);
+}
+
+/* =======================
+   WATCH AD WINDOW
+======================= */
+let adRunning = false;
+let lastAdTime = 0;
+
+function watchAd() {
+
+  if (adRunning) return alert("⏳ Ad already running");
+
+  let now = Date.now();
+  if (now - lastAdTime < 30000) {
+    return alert("⏳ Wait before next ad");
+  }
+
+  lastAdTime = now;
+  adRunning = true;
+
+  let w = window.open("https://wrathful-piano.com/b.3/VH0/PJ3vpMv/btmOVbJDZbDp0/2sO/Tag/4rOCD/AmxiLtTMYQ5/OUD/gf4sM/DlUC", "_blank");
+
+  if (!w) {
+    alert("❌ Popup blocked");
+    adRunning = false;
+    return;
+  }
+
+  setTimeout(() => {
+    alert("✅ Reward added!");
+
+    state.coins += 50;
+    state.usdt += 0.005;
+
+    render();
+    rewardAd();
+
+    adRunning = false;
+  }, 6000);
+}
+
+/* =======================
+   LOAD USER DATA
+======================= */
+async function loadUser() {
+  if (!user) return;
+
+  let ref = new URLSearchParams(window.location.search).get("ref");
+
+  let url = API + "/user/" + user.id;
+  if (ref) url += "/" + ref;
+
+  let res = await fetch(url);
+  let data = await res.json();
+
+  state.coins = data.coins;
+  state.usdt = data.usdt;
+  state.referrals = data.referrals || 0;
+
+  render();
+}
+
+/* =======================
+   COPY FUNCTIONS
+======================= */
+function copyRef() {
+  navigator.clipboard.writeText(document.getElementById("refLink").value);
+  alert("Copied");
+}
+
+function copyWallet() {
+  navigator.clipboard.writeText(document.getElementById("depWallet").value);
+  alert("Copied");
+    }
 async function sendUpdate(message) {
     try {
         await fetch(API_POST, {

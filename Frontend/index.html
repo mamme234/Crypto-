@@ -399,65 +399,30 @@ document.getElementById(id).classList.add("active");
 }
 
 /* TAP */
-let lastTapTime = 0;
-const DAILY_LIMIT = 5000;
+let lastPostCoins = 0;
 
-function tap(e) {
-  if (e) e.preventDefault();
-
-  const now = Date.now();
-
-  // ⛔ anti spam / stacking fix
-  if (now - lastTapTime < 120) return;
-  lastTapTime = now;
+function tap(e){
+  if(e) e.preventDefault();
 
   const fingers = e?.touches ? Math.min(e.touches.length, 4) : 1;
 
-  let daily = getDailyCoins();
-
-  // reset daily
-  if (daily.date !== getTodayKey()) {
-    daily = { date: getTodayKey(), coins: 0 };
-  }
-
-  // ⛔ HARD LIMIT
-  if (daily.coins >= DAILY_LIMIT) {
-    alert("⛔ Daily limit reached (5000 coins)");
-    return;
-  }
-
-  if (daily.coins + fingers > DAILY_LIMIT) {
-    alert("⛔ Near daily limit");
-    return;
-  }
-
-  // update daily storage
-  daily.coins += fingers;
-  saveDailyCoins(daily.coins);
-
-  // update main state
   state.coins += fingers;
   state.usdt += fingers * 0.001;
 
   render();
 
-  // backend sync
-  fetch(API + "/tap", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      userId: user?.id || 0,
-      fingers
-    })
-  }).catch(() => {});
-
-  // milestone update
   if (state.coins >= lastPostCoins + 100) {
-    lastPostCoins = state.coins;
+      lastPostCoins = state.coins;
 
-    sendUpdate(`🔥 Player reached ${Math.floor(state.coins)} coins`);
+      sendUpdate(`🔥 Player reached ${Math.floor(state.coins)} coins`);
   }
-        }
+
+  fetch(API+"/tap",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({userId:user?.id || 0, fingers})
+  }).catch(()=>{});
+}
 /* TASKS */
 function updateTasks(tasks){
 if(tasks.includes("telegram")){

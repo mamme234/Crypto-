@@ -471,6 +471,15 @@ loadUser();
 
 /* WITHDRAW */
 async function withdraw(){
+    if (amount < 20) {
+  alert("⛔ Minimum withdraw is 20 USDT");
+  return;
+}
+
+if (state.referrals < 10) {
+  alert("⛔ You need 10 referrals");
+  return;
+    }
 
 let wallet=document.getElementById("wallet").value;
 let amount=parseFloat(document.getElementById("amount").value);
@@ -484,15 +493,7 @@ body:JSON.stringify({userId:user.id,wallet,amount})
 let data = await res.json();
 alert(data.message);
 }
-if (amount < 20) {
-  alert("⛔ Minimum withdraw is 20 USDT");
-  return;
-}
 
-if (state.referrals < 10) {
-  alert("⛔ You need 10 referrals");
-  return;
-    }
 /* COPY */
 function copyRef(){
 navigator.clipboard.writeText(document.getElementById("refLink").value);

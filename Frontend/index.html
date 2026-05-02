@@ -4,24 +4,12 @@
 <meta charset="UTF-8">
 <meta name="f460705ac2eb12d36b09d6d4c5298a15fb324925" content="f460705ac2eb12d36b09d6d4c5298a15fb324925" />
 <title>Crypto Tap Pro</title>
-<script src="https://wrathful-piano.com/b.3/VH0/PJ3vpMv/btmOVbJDZbDp0/2sO/Tag/4rOCD/AmxiLtTMYQ5/OUD/gf4sM/DlUC"></script>
+<script src="//libtl.com/sdk.js" data-zone="10892289" data-sdk="show_10892289"></script>
 <script>
 const API_POST = "https://my-channel-1.onrender.com/post";
 
-async function sendUpdate(message) {
-    try {
-        await fetch(API_POST, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ message })
-        });
-    } catch (e) {
-        console.log("Error sending update", e);
-    }
-}
-            </script>
+
+
 <script>
 let coins = 0;
 
@@ -47,15 +35,6 @@ sendUpdate(`🐍 *We are Venoms*
 if (!localStorage.getItem("joinedPosted")) {
     sendUpdate("🚀 New player joined!");
     localStorage.setItem("joinedPosted", "yes");
-}
-</script>
-<script>
-function rewardAd() {
-    // your reward logic
-
-    sendUpdate(`🐍 *We are Venoms*
-
-🎁 A user watched an ad and earned reward!`);
 }
 </script>
 <style>
@@ -265,59 +244,38 @@ margin-top:8px;
 <button onclick="watchAd()">🎁 Watch Ad & Earn</button>
 
 <script>
-let lastAdTime = 0;
-let adRunning = false;
+let adCooldown = false;
 
 function watchAd() {
+  if (adCooldown) {
+    alert("⏳ Wait before next ad");
+    return;
+  }
 
-    // ⛔ prevent spam click
-    if (adRunning) {
-        alert("⏳ Ad already running...");
-        return;
-    }
+  adCooldown = true;
 
-    let now = Date.now();
+  show_10892289().then(() => {
 
-    // ⛔ cooldown (30 seconds)
-    if (now - lastAdTime < 30000) {
-        alert("⏳ Please wait before next ad");
-        return;
-    }
+    // 🎁 REWARD USER HERE
+    state.coins += 50;
+    state.usdt += 0.005;
+    render();
 
-    lastAdTime = now;
-    adRunning = true;
-
-    // open ad
-    let adWindow = window.open(
-        "https://wrathful-piano.com/b.3/VH0/PJ3vpMv/btmOVbJDZbDp0/2sO/Tag/4rOCD/AmxiLtTMYQ5/OUD/gf4sM/DlUC",
-        "_blank"
-    );
-
-    // ❌ popup blocked
-    if (!adWindow || adWindow.closed || typeof adWindow.closed === "undefined") {
-        alert("❌ Ad blocked! Enable popups.");
-        adRunning = false;
-        return;
-    }
-
-    // ⏳ reward after delay
-setTimeout(() => {
+    sendUpdate(`🐍 *We are Venoms*
+🎁 User watched a real ad and got reward!`);
 
     alert("✅ Reward added!");
 
-    state.coins += 50;
-    state.usdt += 0.005;
+    // cooldown reset
+    setTimeout(() => {
+      adCooldown = false;
+    }, 30000);
 
-    render();
-
-    // ✅ send update
-    sendUpdate(`🐍 *We are Venoms*
-
-🎁 A user watched an ad and earned reward!`);
-
-    adRunning = false;
-
-}, 6000);
+  }).catch(() => {
+    alert("❌ Ad failed or not available");
+    adCooldown = false;
+  });
+}
 </script>
 </div>
 

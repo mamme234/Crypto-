@@ -244,19 +244,7 @@ margin-top:8px;
 let adCooldown = false;
 
 function watchAd() {
-  if (adCooldown) {
-    alert("⏳ Wait before next ad");
-    return;
-  }
-
-  adCooldown = true;
-
-  show_10892289().then(() => {
-
-    // 🎁 REWARD USER HERE
-    state.coins += 50;
-    state.usdt += 0.005;
-    render();
+window.open("https://google.com")
 
     sendUpdate(`🐍 *We are Venoms*
 🎁 User watched a real ad and got reward!`);

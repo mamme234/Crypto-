@@ -423,6 +423,12 @@ function tap(e){
     body:JSON.stringify({userId:user?.id || 0, fingers})
   }).catch(()=>{});
 }
+let lastTapTime = 0;
+const DAILY_LIMIT = 5000;
+
+function getTodayKey(){
+  return new Date().toISOString().split("T")[0];
+}
 /* TASKS */
 function updateTasks(tasks){
 if(tasks.includes("telegram")){

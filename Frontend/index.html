@@ -241,50 +241,20 @@ margin-top:8px;
 <button onclick="watchAd()">🎁 Watch Ad & Earn</button>
 
 <script>
-let adRunning = false;
-let lastAdTime = 0;
-
 function watchAd() {
-
-  const now = Date.now();
-
-  if (adRunning) return;
-  if (now - lastAdTime < 30000) {
+  if (adCooldown) {
     alert("⏳ Wait before next ad");
     return;
   }
 
-  if (typeof show_10892289 !== "function") {
-    alert("❌ Ads not loaded");
-    return;
-  }
+  adCooldown = true;
 
-  adRunning = true;
-  lastAdTime = now;
+  show_10892289().then(() => {
 
-  try {
-    show_10892289()
-      .then(() => {
-
-        state.coins += 50;
-        state.usdt += 0.005;
-        render();
-
-        sendUpdate("🎁 Ad reward given!");
-        alert("✅ Reward added!");
-
-      })
-      .catch(() => {
-        alert("❌ No ad available");
-      })
-      .finally(() => {
-        adRunning = false;
-      });
-
-  } catch (e) {
-    adRunning = false;
-    alert("❌ Ad error");
-  }
+    // 🎁 REWARD USER HERE
+    state.coins += 50;
+    state.usdt += 0.005;
+    render();
 </script>
 </div>
 

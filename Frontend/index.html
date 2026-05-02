@@ -252,24 +252,29 @@ margin-top:8px;
 let adCooldown = false;
 
 function watchAd() {
-  // 1. Check SDK first
+
+  // 1. SDK NOT READY CHECK FIRST
   if (typeof show_10892289 !== "function") {
-    alert("❌ Ads not loaded yet. Try again in 5 seconds.");
+    alert("❌ Ads are still loading. Please try again in a few seconds.");
     return;
   }
 
-  // 2. Cooldown AFTER SDK check
+  // 2. COOLDOWN CHECK SECOND
   if (adCooldown) {
-    alert("⏳ Wait before next ad");
+    alert("⏳ Wait for next ad");
     return;
   }
 
-  // 3. Start ad
+  // 3. START AD
   adCooldown = true;
+
+  let adOpened = false;
 
   show_10892289()
     .then(() => {
-      // reward
+      adOpened = true;
+
+      // reward user ONLY if ad actually opened
       state.coins += 50;
       state.usdt += 0.005;
       render();
@@ -277,15 +282,22 @@ function watchAd() {
       alert("🎁 Reward received!");
     })
     .catch(() => {
-      alert("❌ Ad failed or skipped");
+      alert("❌ Ad failed to load or was blocked");
     })
     .finally(() => {
-      // cooldown reset even if failed
+
+      // if ad never opened → don't punish user with cooldown
+      if (!adOpened) {
+        adCooldown = false;
+        return;
+      }
+
+      // normal cooldown after successful attempt
       setTimeout(() => {
         adCooldown = false;
-      }, 20000); // 20 sec
+      }, 20000);
     });
-        }
+}
 </script>
 </div>
 

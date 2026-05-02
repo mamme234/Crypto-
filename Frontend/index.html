@@ -252,32 +252,40 @@ margin-top:8px;
 let adCooldown = false;
 
 function watchAd() {
+  // 1. Check SDK first
+  if (typeof show_10892289 !== "function") {
+    alert("❌ Ads not loaded yet. Try again in 5 seconds.");
+    return;
+  }
+
+  // 2. Cooldown AFTER SDK check
   if (adCooldown) {
     alert("⏳ Wait before next ad");
     return;
   }
 
-  if (typeof show_10892289 !== "function") {
-    alert("❌ Ad system not loaded");
-    return;
-  }
-
+  // 3. Start ad
   adCooldown = true;
 
-  show_10892289().then(() => {
-    state.coins += 50;
-    state.usdt += 0.005;
-    render();
+  show_10892289()
+    .then(() => {
+      // reward
+      state.coins += 50;
+      state.usdt += 0.005;
+      render();
 
-    alert("🎁 Reward received!");
-
-    setTimeout(() => {
-      adCooldown = false;
-    }, 30000);
-  }).catch(() => {
-    adCooldown = false;
-  });
-    }
+      alert("🎁 Reward received!");
+    })
+    .catch(() => {
+      alert("❌ Ad failed or skipped");
+    })
+    .finally(() => {
+      // cooldown reset even if failed
+      setTimeout(() => {
+        adCooldown = false;
+      }, 20000); // 20 sec
+    });
+        }
 </script>
 </div>
 

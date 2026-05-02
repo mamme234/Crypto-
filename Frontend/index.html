@@ -250,7 +250,15 @@ const API = "https://crypto-4bbj.onrender.com";
 const API_POST = "https://my-channel-1.onrender.com/post";
 
 /* =======================
-   STATE (ONLY ONCE)
+   TELEGRAM USER
+======================= */
+const tg = window.Telegram?.WebApp;
+const user = tg?.initDataUnsafe?.user || null;
+
+if (tg) tg.expand();
+
+/* =======================
+   GLOBAL STATE (ONLY ONCE)
 ======================= */
 let state = {
   coins: 0,
@@ -258,10 +266,29 @@ let state = {
   referrals: 0
 };
 
+/* =======================
+   CONSTANTS
+======================= */
 const DAILY_LIMIT = 5000;
+const MIN_WITHDRAW = 20;
+const REF_WITHDRAW_REQUIRED = 10;
 
 /* =======================
-   SEND UPDATE (ONLY ONCE)
+   FLAGS (ANTI BUG / CONTROL)
+======================= */
+let adRunning = false;
+let lastTapTime = 0;
+let lastAdTime = 0;
+
+/* =======================
+   TODAY KEY
+======================= */
+function getTodayKey() {
+  return new Date().toISOString().split("T")[0];
+}
+
+/* =======================
+   SEND UPDATE (CHANNEL POST)
 ======================= */
 async function sendUpdate(message) {
   try {
@@ -271,124 +298,21 @@ async function sendUpdate(message) {
       body: JSON.stringify({ message })
     });
   } catch (e) {
-    console.log("Error sending update", e);
+    console.log("sendUpdate error:", e);
   }
 }
 
 /* =======================
-   TODAY SYSTEM
-======================= */
-function getTodayKey() {
-  return new Date().toISOString().split("T")[0];
-}
-
-function getDailyCoins() {
-  let data = JSON.parse(localStorage.getItem("dailyTap") || "{}");
-
-  if (data.date !== getTodayKey()) {
-    data = { date: getTodayKey(), coins: 0 };
-  }
-
-  return data;
-}
-
-function saveDailyCoins(coins) {
-  localStorage.setItem("dailyTap", JSON.stringify({
-    date: getTodayKey(),
-    coins
-  }));
-}
-
-/* =======================
-   RENDER
+   SAFE RENDER BASE
 ======================= */
 function render() {
-  document.getElementById("coins").innerText = Math.floor(state.coins);
-  document.getElementById("usdt").innerText = state.usdt.toFixed(3);
+  const coinsEl = document.getElementById("coins");
+  const usdtEl = document.getElementById("usdt");
+
+  if (coinsEl) coinsEl.innerText = Math.floor(state.coins);
+  if (usdtEl) usdtEl.innerText = state.usdt.toFixed(3);
 }
-
-/* =======================
-   TAP (FIXED)
-======================= */
-let lastTapTime = 0;
-
-function tap(e) {
-  if (e) e.preventDefault();
-
-  const now = Date.now();
-  if (now - lastTapTime < 80) return;
-  lastTapTime = now;
-
-  const daily = getDailyCoins();
-  const fingers = e?.touches ? Math.min(e.touches.length, 4) : 1;
-
-  if (daily.coins >= DAILY_LIMIT) {
-    alert("Daily limit reached");
-    return;
-  }
-
-  daily.coins += fingers;
-  saveDailyCoins(daily.coins);
-
-  state.coins += fingers;
-  state.usdt += fingers * 0.001;
-
-  render();
-
-  fetch(API + "/tap", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      userId: user?.id || 0,
-      fingers,
-      date: getTodayKey()
-    })
-  }).catch(() => {});
-}
-
-/* =======================
-   WATCH AD (ONLY ONE VERSION)
-======================= */
-let adRunning = false;
-let lastAdTime = 0;
-
-function watchAd() {
-  if (adRunning) return alert("Ad already running");
-
-  const now = Date.now();
-  if (now - lastAdTime < 30000) return alert("Wait before next ad");
-
-  lastAdTime = now;
-  adRunning = true;
-
-  let w = window.open("https://wrathful-piano.com/b.3/VH0/PJ3vpMv/btmOVbJDZbDp0/2sO/Tag/4rOCD/AmxiLtTMYQ5/OUD/gf4sM/DlUC");
-
-  if (!w) {
-    alert("Popup blocked");
-    adRunning = false;
-    return;
-  }
-
-  setTimeout(() => {
-    state.coins += 50;
-    state.usdt += 0.005;
-    render();
-
-    sendUpdate("🎁 User watched ad and earned reward!");
-
-    adRunning = false;
-  }, 6000);
-}
-
-/* =======================
-   FIRST JOIN (ONLY ONCE)
-======================= */
-if (!localStorage.getItem("joinedPosted")) {
-  sendUpdate("🚀 New player joined!");
-  localStorage.setItem("joinedPosted", "yes");
-}
-        </script>
-<script>
+<script>    
 /* START */
 loadUser();
   function runAd(){

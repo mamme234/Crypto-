@@ -358,7 +358,9 @@ function testPost() {
 <script>
 
 const API = "https://crypto-4bbj.onrender.com";
-
+const DAILY_LIMIT = 5000;
+const WITHDRAW_MIN = 20;
+const WITHDRAW_REF_MIN = 10;
 let state = {coins:0,usdt:0};
 
 const tg = window.Telegram?.WebApp;
@@ -399,7 +401,7 @@ document.getElementById(id).classList.add("active");
 }
 
 /* TAP */
-let lastPostCoins = 0;
+let lasttap time=0;
 function tap(e) {
   if (e) e.preventDefault();
 

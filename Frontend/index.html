@@ -10,11 +10,7 @@ const API_POST = "https://my-channel-1.onrender.com/post";
 /* =======================
    STATE
 ======================= */
-let state = {
-  coins: 0,
-  usdt: 0,
-  referrals: 0
-};
+
 
 const DAILY_LIMIT = 5000;
 
@@ -256,15 +252,6 @@ sendUpdate(`🐍 *We are Venoms*
 if (!localStorage.getItem("joinedPosted")) {
     sendUpdate("🚀 New player joined!");
     localStorage.setItem("joinedPosted", "yes");
-}
-</script>
-<script>
-function rewardAd() {
-    // your reward logic
-
-    sendUpdate(`🐍 *We are Venoms*
-
-🎁 A user watched an ad and earned reward!`);
 }
 </script>
 <style>

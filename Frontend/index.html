@@ -10,7 +10,11 @@ const API_POST = "https://my-channel-1.onrender.com/post";
 /* =======================
    STATE
 ======================= */
-
+let state = {
+  coins: 0,
+  usdt: 0,
+  referrals: 0
+};
 
 const DAILY_LIMIT = 5000;
 
@@ -460,7 +464,6 @@ margin-top:8px;
 <h3>💰 Ads </h3>
 <button onclick="watchAd()">🎁 Watch Ad & Earn</button>
 
-<
 </div>
 
 <button onclick="testPost()">🚀 Test Channel Post</button>
@@ -693,7 +696,6 @@ detectAdBlock(function(blocked) {
         alert("⚠️ AdBlock detected. Please disable it for rewards.");
     }
 });
-</script>
 </script>
 </body>
     </html>

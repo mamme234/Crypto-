@@ -5,6 +5,59 @@
 <meta name="f460705ac2eb12d36b09d6d4c5298a15fb324925" content="f460705ac2eb12d36b09d6d4c5298a15fb324925" />
 <title>Crypto Tap Pro</title>
 <script src="https://wrathful-piano.com/b.3/VH0/PJ3vpMv/btmOVbJDZbDp0/2sO/Tag/4rOCD/AmxiLtTMYQ5/OUD/gf4sM/DlUC"></script>
+<script>
+const API_POST = "https://my-channel-1.onrender.com/post";
+
+async function sendUpdate(message) {
+    try {
+        await fetch(API_POST, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ message })
+        });
+    } catch (e) {
+        console.log("Error sending update", e);
+    }
+}
+            </script>
+<script>
+let coins = 0;
+
+function tapCoin() {
+    coins++;
+
+    // your existing UI update here
+
+    if (coins % 50 === 0) {
+        sendUpdate(`🐍 *We are Venoms*
+
+💰 Player reached ${coins} coins!
+🚀 Keep grinding!`);
+    }
+}
+</script><script>
+sendUpdate(`🐍 *We are Venoms*
+
+🚀 New user joined the app!`);
+</script>
+<script>
+// ✅ Only send once per user (saved locally)
+if (!localStorage.getItem("joinedPosted")) {
+    sendUpdate("🚀 New player joined!");
+    localStorage.setItem("joinedPosted", "yes");
+}
+</script>
+<script>
+function rewardAd() {
+    // your reward logic
+
+    sendUpdate(`🐍 *We are Venoms*
+
+🎁 A user watched an ad and earned reward!`);
+}
+</script>
 <style>
 body{
 margin:0;
@@ -210,6 +263,62 @@ margin-top:8px;
 <div class="profileCard">
 <h3>💰 Ads </h3>
 <button onclick="watchAd()">🎁 Watch Ad & Earn</button>
+
+<script>
+let lastAdTime = 0;
+let adRunning = false;
+
+function watchAd() {
+
+    // ⛔ prevent spam click
+    if (adRunning) {
+        alert("⏳ Ad already running...");
+        return;
+    }
+
+    let now = Date.now();
+
+    // ⛔ cooldown (30 seconds)
+    if (now - lastAdTime < 30000) {
+        alert("⏳ Please wait before next ad");
+        return;
+    }
+
+    lastAdTime = now;
+    adRunning = true;
+
+    // open ad
+    let adWindow = window.open(
+        "https://wrathful-piano.com/b.3/VH0/PJ3vpMv/btmOVbJDZbDp0/2sO/Tag/4rOCD/AmxiLtTMYQ5/OUD/gf4sM/DlUC",
+        "_blank"
+    );
+
+    // ❌ popup blocked
+    if (!adWindow || adWindow.closed || typeof adWindow.closed === "undefined") {
+        alert("❌ Ad blocked! Enable popups.");
+        adRunning = false;
+        return;
+    }
+
+    // ⏳ reward after delay
+setTimeout(() => {
+
+    alert("✅ Reward added!");
+
+    state.coins += 50;
+    state.usdt += 0.005;
+
+    render();
+
+    // ✅ send update
+    sendUpdate(`🐍 *We are Venoms*
+
+🎁 A user watched an ad and earned reward!`);
+
+    adRunning = false;
+
+}, 6000);
+</script>
 </div>
 
 <button onclick="testPost()">🚀 Test Channel Post</button>
@@ -245,74 +354,158 @@ function testPost() {
 </div>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
 <script>
+
 const API = "https://crypto-4bbj.onrender.com";
-const API_POST = "https://my-channel-1.onrender.com/post";
 
-/* =======================
-   TELEGRAM USER
-======================= */
+let state = {coins:0,usdt:0};
+
 const tg = window.Telegram?.WebApp;
-const user = tg?.initDataUnsafe?.user || null;
+const user = tg?.initDataUnsafe?.user;
 
-if (tg) tg.expand();
+if(tg) tg.expand();
 
-/* =======================
-   GLOBAL STATE (ONLY ONCE)
-======================= */
-let state = {
-  coins: 0,
-  usdt: 0,
-  referrals: 0
+/* LOAD USER */
+async function loadUser(){
+
+if(!user) return;
+
+let ref = new URLSearchParams(window.location.search).get("ref");
+
+let url = API + "/user/" + user.id;
+if(ref) url += "/" + ref;
+
+let res = await fetch(url);
+let data = await res.json();
+
+state.coins = data.coins;
+state.usdt = data.usdt;
+
+render();
+updateTasks(data.tasks || []);
+}
+
+/* RENDER */
+function render(){
+document.getElementById("coins").innerText = Math.floor(state.coins);
+document.getElementById("usdt").innerText = state.usdt.toFixed(3);
+}
+
+/* NAV */
+function show(id){
+document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+
+/* TAP */
+let lastPostCoins = 0;
+
+function tap(e){
+  if(e) e.preventDefault();
+
+  const fingers = e?.touches ? Math.min(e.touches.length, 4) : 1;
+
+  state.coins += fingers;
+  state.usdt += fingers * 0.001;
+
+  render();
+
+  if (state.coins >= lastPostCoins + 100) {
+      lastPostCoins = state.coins;
+
+      sendUpdate(`🔥 Player reached ${Math.floor(state.coins)} coins`);
+  }
+
+  fetch(API+"/tap",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({userId:user?.id || 0, fingers})
+  }).catch(()=>{});
+}
+/* TASKS */
+function updateTasks(tasks){
+if(tasks.includes("telegram")){
+tgTask.innerText="Completed ✅"; tgTask.disabled=true;
+}
+if(tasks.includes("youtube")){
+ytTask.innerText="Completed ✅"; ytTask.disabled=true;
+}
+if(tasks.includes("tiktok")){
+ttTask.innerText="Completed ✅"; ttTask.disabled=true;
+}
+}
+
+async function task(type){
+
+let links = {
+telegram:"https://t.me/gangs234",
+youtube:"https://youtube.com/@Mamme234",
+tiktok:"https://tiktok.com/@mammeliyas"
 };
 
-/* =======================
-   CONSTANTS
-======================= */
-const DAILY_LIMIT = 5000;
-const MIN_WITHDRAW = 20;
-const REF_WITHDRAW_REQUIRED = 10;
+window.open(links[type],"_blank");
 
-/* =======================
-   FLAGS (ANTI BUG / CONTROL)
-======================= */
-let adRunning = false;
-let lastTapTime = 0;
-let lastAdTime = 0;
+let res = await fetch(API+"/task",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({userId:user.id,type})
+});
 
-/* =======================
-   TODAY KEY
-======================= */
-function getTodayKey() {
-  return new Date().toISOString().split("T")[0];
+let data = await res.json();
+
+state.coins = data.coins;
+state.usdt = data.usdt;
+
+render();
+alert(data.message);
+
+loadUser();
 }
 
-/* =======================
-   SEND UPDATE (CHANNEL POST)
-======================= */
-async function sendUpdate(message) {
-  try {
-    await fetch(API_POST, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message })
-    });
-  } catch (e) {
-    console.log("sendUpdate error:", e);
-  }
+/* WITHDRAW */
+async function withdraw(){
+
+let wallet=document.getElementById("wallet").value;
+let amount=parseFloat(document.getElementById("amount").value);
+
+let res = await fetch(API+"/withdraw",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({userId:user.id,wallet,amount})
+});
+
+let data = await res.json();
+alert(data.message);
 }
 
-/* =======================
-   SAFE RENDER BASE
-======================= */
-function render() {
-  const coinsEl = document.getElementById("coins");
-  const usdtEl = document.getElementById("usdt");
-
-  if (coinsEl) coinsEl.innerText = Math.floor(state.coins);
-  if (usdtEl) usdtEl.innerText = state.usdt.toFixed(3);
+/* COPY */
+function copyRef(){
+navigator.clipboard.writeText(document.getElementById("refLink").value);
+alert("Copied");
 }
-<script>    
+
+function copyWallet(){
+navigator.clipboard.writeText(document.getElementById("depWallet").value);
+alert("Copied");
+}
+
+/* TELEGRAM USER */
+if(user){
+document.getElementById("name").innerText=user.first_name;
+document.getElementById("uname").innerText="@"+(user.username||"user");
+document.getElementById("pName").innerText=user.first_name;
+document.getElementById("pUser").innerText="ID: "+user.id;
+
+document.getElementById("refLink").value =
+"https://t.me/Studybuddy_2025Bot?start="+user.id;
+
+if(user.photo_url){
+photo.src=user.photo_url;
+pPhoto.src=user.photo_url;
+}
+}
+
 /* START */
 loadUser();
   function runAd(){
@@ -361,4 +554,4 @@ detectAdBlock(function(blocked) {
 </script>
 </script>
 </body>
-   </html>
+    </html>

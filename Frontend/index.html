@@ -241,26 +241,51 @@ margin-top:8px;
 <button onclick="watchAd()">🎁 Watch Ad & Earn</button>
 
 <script>
-let adCooldown = false;
+let adRunning = false;
+let lastAdTime = 0;
 
 function watchAd() {
-window.open("https://google.com")
 
-    sendUpdate(`🐍 *We are Venoms*
-🎁 User watched a real ad and got reward!`);
+  const now = Date.now();
 
-    alert("✅ Reward added!");
+  if (adRunning) return;
+  if (now - lastAdTime < 30000) {
+    alert("⏳ Wait before next ad");
+    return;
+  }
 
-    // cooldown reset
-    setTimeout(() => {
-      adCooldown = false;
-    }, 30000);
+  if (typeof show_10892289 !== "function") {
+    alert("❌ Ads not loaded");
+    return;
+  }
 
-  }).catch(() => {
-    alert("❌ Ad failed or not available");
-    adCooldown = false;
-  });
-}
+  adRunning = true;
+  lastAdTime = now;
+
+  try {
+    show_10892289()
+      .then(() => {
+
+        state.coins += 50;
+        state.usdt += 0.005;
+        render();
+
+        sendUpdate("🎁 Ad reward given!");
+        alert("✅ Reward added!");
+
+      })
+      .catch(() => {
+        alert("❌ No ad available");
+      })
+      .finally(() => {
+        adRunning = false;
+      });
+
+  } catch (e) {
+    adRunning = false;
+    alert("❌ Ad error");
+  }
+            }
 </script>
 </div>
 

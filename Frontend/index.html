@@ -358,11 +358,7 @@ function testPost() {
 <script>
 
 const API = "https://crypto-4bbj.onrender.com";
-    
-const DAILY_LIMIT = 5000;
-const WITHDRAW_MIN = 20;
-const WITHDRAW_REF_MIN = 10;
-    
+
 let state = {coins:0,usdt:0};
 
 const tg = window.Telegram?.WebApp;
@@ -371,28 +367,29 @@ const user = tg?.initDataUnsafe?.user;
 if(tg) tg.expand();
 
 /* LOAD USER */
-async function loadUser() {
-  if (!user) return;
+async function loadUser(){
 
-  let ref = new URLSearchParams(window.location.search).get("ref");
+if(!user) return;
 
-  let url = API + "/user/" + user.id;
-  if (ref) url += "/" + ref;
+let ref = new URLSearchParams(window.location.search).get("ref");
 
-  let res = await fetch(url);
-  let data = await res.json();
+let url = API + "/user/" + user.id;
+if(ref) url += "/" + ref;
 
-  state.coins = data.coins;
-  state.usdt = data.usdt;
-  state.referrals = data.referrals || 0;
+let res = await fetch(url);
+let data = await res.json();
 
-  render();
+state.coins = data.coins;
+state.usdt = data.usdt;
+
+render();
+updateTasks(data.tasks || []);
 }
 
 /* RENDER */
-function render() {
-  document.getElementById("coins").innerText = Math.floor(state.coins);
-  document.getElementById("usdt").innerText = state.usdt.toFixed(3);
+function render(){
+document.getElementById("coins").innerText = Math.floor(state.coins);
+document.getElementById("usdt").innerText = state.usdt.toFixed(3);
 }
 
 /* NAV */
@@ -402,84 +399,85 @@ document.getElementById(id).classList.add("active");
 }
 
 /* TAP */
-let lastTapTime = 0;
+let lastPostCoins = 0;
 
-function tap(e) {
-  if (e) e.preventDefault();
-
-  const now = Date.now();
-  if (now - lastTapTime < 120) return;
-  lastTapTime = now;
+function tap(e){
+  if(e) e.preventDefault();
 
   const fingers = e?.touches ? Math.min(e.touches.length, 4) : 1;
-
-  let daily = getDailyCoins();
-
-  if (daily.date !== getTodayKey()) {
-    daily = { date: getTodayKey(), coins: 0 };
-  }
-
-  if (daily.coins >= DAILY_LIMIT) {
-    alert("Daily limit reached");
-    return;
-  }
-
-  if (daily.coins + fingers > DAILY_LIMIT) {
-    alert("Near limit");
-    return;
-  }
-
-  daily.coins += fingers;
-  saveDailyCoins(daily.coins);
 
   state.coins += fingers;
   state.usdt += fingers * 0.001;
 
   render();
 
-  fetch(API + "/tap", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      userId: user?.id || 0,
-      fingers,
-      date: getTodayKey()
-    })
-  }).catch(() => {});
-      }
+  if (state.coins >= lastPostCoins + 100) {
+      lastPostCoins = state.coins;
+
+      sendUpdate(`🔥 Player reached ${Math.floor(state.coins)} coins`);
+  }
+
+  fetch(API+"/tap",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({userId:user?.id || 0, fingers})
+  }).catch(()=>{});
+}
+/* TASKS */
+function updateTasks(tasks){
+if(tasks.includes("telegram")){
+tgTask.innerText="Completed ✅"; tgTask.disabled=true;
+}
+if(tasks.includes("youtube")){
+ytTask.innerText="Completed ✅"; ytTask.disabled=true;
+}
+if(tasks.includes("tiktok")){
+ttTask.innerText="Completed ✅"; ttTask.disabled=true;
+}
+}
+
+async function task(type){
+
+let links = {
+telegram:"https://t.me/gangs234",
+youtube:"https://youtube.com/@Mamme234",
+tiktok:"https://tiktok.com/@mammeliyas"
+};
+
+window.open(links[type],"_blank");
+
+let res = await fetch(API+"/task",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({userId:user.id,type})
+});
+
+let data = await res.json();
+
+state.coins = data.coins;
+state.usdt = data.usdt;
+
+render();
+alert(data.message);
+
+loadUser();
+}
 
 /* WITHDRAW */
-async function withdraw() {
+async function withdraw(){
 
-  let wallet = document.getElementById("wallet").value;
-  let amount = parseFloat(document.getElementById("amount").value);
+let wallet=document.getElementById("wallet").value;
+let amount=parseFloat(document.getElementById("amount").value);
 
-  if (!wallet) return alert("Enter wallet address");
-  if (!amount || amount <= 0) return alert("Invalid amount");
+let res = await fetch(API+"/withdraw",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({userId:user.id,wallet,amount})
+});
 
-  // ⛔ minimum rule
-  if (amount < WITHDRAW_MIN) {
-    return alert("⛔ Minimum withdraw is 20 USDT");
-  }
-
-  // ⛔ referral rule
-  if (state.referrals < WITHDRAW_REF_MIN) {
-    return alert("⛔ You need 10 referrals to withdraw");
-  }
-
-  let res = await fetch(API + "/withdraw", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      userId: user.id,
-      wallet,
-      amount
-    })
-  });
-
-  let data = await res.json();
-  alert(data.message || "Withdrawal sent");
-      }
+let data = await res.json();
+alert(data.message);
+}
 
 /* COPY */
 function copyRef(){

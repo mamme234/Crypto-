@@ -401,33 +401,38 @@ document.getElementById(id).classList.add("active");
 }
 
 /* TAP */
-let lasttap time=0;
+let lastTapTime = 0;
+
 function tap(e) {
   if (e) e.preventDefault();
 
   const now = Date.now();
-  if (now - lastTapTime < 80) return;
+
+  // ⛔ anti spam (prevents stacking)
+  if (now - lastTapTime < 120) return;
   lastTapTime = now;
 
-  const daily = getDailyCoins();
   const fingers = e?.touches ? Math.min(e.touches.length, 4) : 1;
 
-  /* =======================
-     TAP LIMIT RULE (IMPORTANT)
-  ======================= */
+  let daily = getDailyCoins();
+
+  // ⛔ reset daily
+  if (daily.date !== getTodayKey()) {
+    daily = { date: getTodayKey(), coins: 0 };
+  }
+
+  // ⛔ limit rule
   if (daily.coins >= DAILY_LIMIT) {
     alert("⛔ Daily limit reached (5000 coins)");
     return;
   }
 
   if (daily.coins + fingers > DAILY_LIMIT) {
-    alert("⛔ You are close to daily limit");
+    alert("⛔ Near daily limit");
     return;
   }
 
-  /* =======================
-     APPLY COINS
-  ======================= */
+  // ✔ update daily + state
   daily.coins += fingers;
   saveDailyCoins(daily.coins);
 
@@ -436,6 +441,7 @@ function tap(e) {
 
   render();
 
+  // send backend
   fetch(API + "/tap", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -449,35 +455,36 @@ function tap(e) {
 
 /* WITHDRAW */
 async function withdraw() {
+
   let wallet = document.getElementById("wallet").value;
   let amount = parseFloat(document.getElementById("amount").value);
 
-  let result = checkWithdraw(amount, state.referrals);
+  if (!wallet) return alert("Enter wallet address");
+  if (!amount || amount <= 0) return alert("Invalid amount");
 
-  if (result === "MIN_WITHDRAW") {
-    alert("⛔ Minimum withdraw is 20 USDT");
-    return;
+  // ⛔ minimum rule
+  if (amount < WITHDRAW_MIN) {
+    return alert("⛔ Minimum withdraw is 20 USDT");
   }
 
-  if (result === "REF_REQUIRED") {
-    alert("⛔ You need 10 referrals to withdraw");
-    return;
+  // ⛔ referral rule
+  if (state.referrals < WITHDRAW_REF_MIN) {
+    return alert("⛔ You need 10 referrals to withdraw");
   }
 
   let res = await fetch(API + "/withdraw", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      userId: user?.id || 0,
+      userId: user.id,
       wallet,
-      amount,
-      status: "pending"
+      amount
     })
   });
 
   let data = await res.json();
-  alert("⏳ Withdrawal sent (pending approval)");
-    }
+  alert(data.message || "Withdrawal sent");
+      }
 
 /* COPY */
 function copyRef(){

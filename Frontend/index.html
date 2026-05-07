@@ -36,16 +36,14 @@ window.addEventListener("load", () => {
 });
 
 function watchAd() {
+  const url = "https://ads-xi-nine.vercel.app/";
 
-  if (!adsReady) {
-    alert("❌ Ads still loading");
-    return;
+  if (window.Telegram && Telegram.WebApp) {
+    Telegram.WebApp.openLink(url);
+  } else {
+    window.open(url, "_blank");
   }
-
-  if (adCooldown) {
-    alert("⏳ Wait before next ad");
-    return;
-  }
+}
 
   adCooldown = true;
 

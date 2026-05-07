@@ -36,14 +36,16 @@ window.addEventListener("load", () => {
 });
 
 function watchAd() {
-  const url = "https://ads-xi-nine.vercel.app/";
 
-  if (window.Telegram && Telegram.WebApp) {
-    Telegram.WebApp.openLink(url);
-  } else {
-    window.open(url, "_blank");
+  if (!adsReady) {
+    alert("❌ Ads still loading");
+    return;
   }
-}
+
+  if (adCooldown) {
+    alert("⏳ Wait before next ad");
+    return;
+  }
 
   adCooldown = true;
 
@@ -322,6 +324,7 @@ margin-top:8px;
 <button onclick="openAdsWeb()" style="width:100%;padding:15px;font-size:18px;border:none;border-radius:12px;background:linear-gradient(45deg,#ffcc00,#ff6600);font-weight:bold;">
 🎁 Open Ads Reward
 </button>
+</div>
 <div class="profileCard">
 <h3>💸 Withdraw</h3>
 <input id="wallet" placeholder="Wallet address">

@@ -319,16 +319,21 @@ margin-top:8px;
 
 <div class="profileCard">
 <h3>💰 Ads </h3>
-<button onclick="watchAd()">🎁 Watch Ad & Earn</button>
-</div>
+<button onclick="openAdsWeb()" style="width:100%;padding:15px;font-size:18px;border:none;border-radius:12px;background:linear-gradient(45deg,#ffcc00,#ff6600);font-weight:bold;">
+🎁 Open Ads Reward
+</button>
+  <script>
+  function openAdsWeb(){
+  const url = "https://ads-xi-nine.vercel.app/";
 
-<button onclick="testPost()">🚀 Test Channel Post</button>
-
-<script>
-function testPost() {
-    sendUpdate("🔥 Test from Venoms app working!");
+  // Telegram Mini App safe open
+  if (window.Telegram && Telegram.WebApp) {
+    Telegram.WebApp.openLink(url);
+  } else {
+    window.open(url, "_blank");
+  }
 }
-</script>
+  </script>
 <div class="profileCard">
 <h3>💸 Withdraw</h3>
 <input id="wallet" placeholder="Wallet address">

@@ -325,6 +325,18 @@ margin-top:8px;
 🎁 Open Ads Reward
 </button>
 </div>
+<script>
+  function openAdsWeb(){
+  const url = "https://ads-xi-nine.vercel.app/";
+
+  // Telegram Mini App safe open
+  if (window.Telegram && Telegram.WebApp) {
+    Telegram.WebApp.openLink(url);
+  } else {
+    window.open(url, "_blank");
+  }
+  }
+</script>
 <div class="profileCard">
 <h3>💸 Withdraw</h3>
 <input id="wallet" placeholder="Wallet address">

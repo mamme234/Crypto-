@@ -35,50 +35,67 @@ window.addEventListener("load", () => {
   }, 500);
 });
 
-function watchAd() {
+async function watchAd(){
 
-  if (!adsReady) {
-    alert("❌ Ads still loading");
-    return;
-  }
+const status = document.getElementById("adStatus");
 
-  if (adCooldown) {
-    alert("⏳ Wait before next ad");
-    return;
-  }
+if(!adsReady){
+  status.innerText = "❌ Ads still loading";
+  return;
+}
 
-  adCooldown = true;
+if(adCooldown){
+  status.innerText = "⏳ Wait before next ad";
+  return;
+}
 
-  try {
-    const ad = show_10892289();
+adCooldown = true;
 
-    if (!ad || typeof ad.then !== "function") {
-      alert("❌ No ads available right now");
-      adCooldown = false;
-      return;
-    }
+status.innerText = "🎬 Loading ad...";
 
-    ad.then(() => {
-      if (typeof state !== "undefined") {
-        state.coins += 50;
-        state.usdt += 0.005;
-        render();
-      }
+try{
 
-      alert("🎁 Reward received!");
-    }).catch(() => {
-      alert("❌ Ad failed or blocked");
-    }).finally(() => {
-      setTimeout(() => {
-        adCooldown = false;
-      }, 20000);
-    });
+  const ad = show_10892289();
 
-  } catch (e) {
-    console.log(e);
-    alert("❌ Ad system error");
+  if(!ad || typeof ad.then !== "function"){
+    status.innerText = "❌ No ads available";
     adCooldown = false;
+    return;
   }
+
+  await ad;
+
+  // REWARD USER
+  state.coins += 500;
+  state.usdt += 0.005;
+
+  render();
+
+  status.innerText = "🎉 Reward received! +500 Coins";
+
+  // optional server sync
+  fetch(API + "/tap",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      userId:user?.id || 0,
+      reward:true
+    })
+  }).catch(()=>{});
+
+}catch(e){
+
+  console.log(e);
+
+  status.innerText = "❌ Ad failed or blocked";
+
+}finally{
+
+  setTimeout(()=>{
+    adCooldown = false;
+  },20000);
+
+}
 }
 </script>
 <script>

@@ -3,8 +3,10 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const TelegramBot = require("node-telegram-bot-api");
+const path = require("path");
 
 const app = express();
+
 app.use(express.json());
 
 /* ================= CONFIG ================= */
@@ -17,7 +19,7 @@ const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 /* ================= DB ================= */
 mongoose.connect(MONGO_URI)
   .then(() => console.log("DB Connected"))
-  .catch(err => console.log(err));
+  .catch(err => console.log("DB Error:", err));
 
 const UserSchema = new mongoose.Schema({
   userId: String,
@@ -29,16 +31,16 @@ const UserSchema = new mongoose.Schema({
 
 const User = mongoose.model("User", UserSchema);
 
+/* ================= HELPERS ================= */
 async function getUser(userId) {
   let user = await User.findOne({ userId });
   if (!user) user = await User.create({ userId });
   return user;
 }
 
-/* ================= BOT ================= */
+/* ================= TELEGRAM BOT ================= */
 bot.onText(/\/start/, async (msg) => {
   const userId = msg.from.id;
-
   const user = await getUser(userId);
 
   bot.sendMessage(msg.chat.id,
@@ -49,8 +51,7 @@ bot.onText(/\/start/, async (msg) => {
 📊 Level: ${user.level}
 
 🌐 Open App:
-https://YOUR_DOMAIN.com`
-  );
+https://YOUR_DOMAIN.com`);
 });
 
 bot.onText(/\/ref/, async (msg) => {
@@ -58,11 +59,11 @@ bot.onText(/\/ref/, async (msg) => {
   await getUser(userId);
 
   bot.sendMessage(msg.chat.id,
-`🔗 Your referral link:
+`🔗 Referral Link:
 https://t.me/YOUR_BOT?start=${userId}`);
 });
 
-/* ================= PROFILE ================= */
+/* ================= WEB PROFILE ================= */
 app.get("/profile/:id", async (req, res) => {
   const user = await getUser(req.params.id);
   res.json(user);
@@ -80,7 +81,7 @@ app.post("/ads", async (req, res) => {
   res.json({ ok: true });
 });
 
-/* ================= BONUS ================= */
+/* ================= DAILY BONUS ================= */
 app.post("/bonus", async (req, res) => {
   const user = await getUser(req.body.userId);
 
@@ -95,7 +96,7 @@ app.post("/bonus", async (req, res) => {
 
   await user.save();
 
-  res.json({ message: "🎁 +0.05$ bonus added" });
+  res.json({ message: "🎁 +0.05$ added" });
 });
 
 /* ================= WITHDRAW ================= */
@@ -105,7 +106,7 @@ app.post("/withdraw", async (req, res) => {
   const user = await getUser(userId);
 
   if (!wallet) return res.json({ message: "❌ Enter wallet" });
-  if (amount <= 0) return res.json({ message: "❌ Invalid amount" });
+  if (!amount || amount <= 0) return res.json({ message: "❌ Invalid amount" });
   if (user.usdt < amount) return res.json({ message: "❌ Not enough balance" });
 
   user.usdt -= amount;
@@ -123,13 +124,18 @@ Amount: $${amount}`
   res.json({ message: "✅ Withdraw sent to admin" });
 });
 
-/* ================= WEB ================= */
-const path = require("path");
+/* ================= FRONTEND FIX (IMPORTANT) ================= */
+const frontendPath = path.join(__dirname, "../frontend");
+
+app.use(express.static(frontendPath));
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "frontend/index.html"));
+  res.sendFile(path.join(frontendPath, "index.html"));
 });
 
-/* ================= START ================= */
+/* ================= START SERVER ================= */
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Server running on " + PORT));
+
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
+});

@@ -1,98 +1,115 @@
+
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Ads Earn App</title>
-</head>
-
-<body style="text-align:center;font-family:sans-serif;">
-
-<h2>💰 Ads Earn App</h2>
-
-<h3 id="balance">Coins: 0</h3>
-
-<button onclick="watchAd1()">Watch Ad 1 (+50)</button>
-<br><br>
-
-<button onclick="watchAd2()">Watch Ad 2 (+50)</button>
-
-<br><br>
-
-<input id="wallet" placeholder="USDT Wallet">
-<input id="amount" placeholder="Amount">
-
-<br><br>
-
-<button onclick="withdraw()">Withdraw</button>
-
-<!-- ===== YOUR AD SCRIPTS ===== -->
-
-<script>
-(function(s){
-  s.dataset.zone='11013501';
-  s.src='https://al5sm.com/tag.min.js';
-})(
-  [document.documentElement, document.body]
-    .filter(Boolean)
-    .pop()
-    .appendChild(document.createElement('script'))
-);
-</script>
-
-<script>
-(function(s){
-  s.dataset.zone='11013511';
-  s.src='https://al5sm.com/tag.min.js';
-})(
-  [document.documentElement, document.body]
-    .filter(Boolean)
-    .pop()
-    .appendChild(document.createElement('script'))
-);
-</script>
-
-<script>
-
-const userId = Telegram.WebApp.initDataUnsafe.user.id;
-
-let coins = 0;
-
-async function loadUser(){
-
-  let res = await fetch(`/user/${userId}`);
-  let data = await res.json();
-
-  coins = data.coins;
-  document.getElementById("balance").innerText = "Coins: " + coins;
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Earn USDT Pro</title>
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#0f172a;
+color:white;
+text-align:center;
 }
 
-loadUser();
+.card{
+background:#1e293b;
+margin:15px;
+padding:15px;
+border-radius:12px;
+}
 
-async function reward(){
-  let res = await fetch("/ads", {
+button{
+width:90%;
+padding:12px;
+margin:5px;
+border:none;
+border-radius:10px;
+font-size:16px;
+}
+
+.ad{background:#22c55e;color:white;}
+.bonus{background:#3b82f6;color:white;}
+.withdraw{background:#f59e0b;color:white;}
+</style>
+</head>
+
+<body>
+
+<h2>💰 Earn USDT Pro</h2>
+
+<div class="card">
+<p>🆔 ID: <span id="uid"></span></p>
+<p>💰 USDT: $<span id="usdt">0</span></p>
+<p>🪙 Coins: <span id="coins">0</span></p>
+<p>🏆 Level: <span id="level">Bronze</span></p>
+</div>
+
+<button class="ad" onclick="watchAd()">▶ Watch Ad +0.03$</button>
+<button class="bonus" onclick="bonus()">🎁 Daily Bonus +0.01$</button>
+
+<div class="card">
+<h3>💸 Withdraw</h3>
+
+<input id="wallet" placeholder="Wallet" style="width:90%;padding:10px"><br><br>
+<input id="amount" placeholder="Amount" style="width:90%;padding:10px"><br><br>
+
+<button class="withdraw" onclick="withdraw()">Withdraw</button>
+</div>
+
+<script>
+
+const userId =
+(window.Telegram && Telegram.WebApp)
+? Telegram.WebApp.initDataUnsafe.user.id
+: "test";
+
+document.getElementById("uid").innerText = userId;
+
+// LOAD PROFILE
+async function load(){
+
+  let res = await fetch("/profile/"+userId);
+  let d = await res.json();
+
+  document.getElementById("usdt").innerText = d.usdt.toFixed(2);
+  document.getElementById("coins").innerText = d.coins;
+  document.getElementById("level").innerText = d.level;
+}
+
+load();
+
+// ADS
+async function watchAd(){
+
+  let res = await fetch("/ads",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify({userId})
   });
 
-  let data = await res.json();
+  let d = await res.json();
 
-  if(data.coins !== undefined){
-    coins = data.coins;
-    document.getElementById("balance").innerText = "Coins: " + coins;
-  } else {
-    alert(data.message);
-  }
+  if(d.success) load();
+  else alert(d.message);
 }
 
-function watchAd1(){
-  reward();
+// BONUS
+async function bonus(){
+
+  let res = await fetch("/bonus",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({userId})
+  });
+
+  let d = await res.json();
+  alert(d.message);
+  load();
 }
 
-function watchAd2(){
-  reward();
-}
-
+// WITHDRAW
 async function withdraw(){
 
   let wallet = document.getElementById("wallet").value;
@@ -108,11 +125,13 @@ async function withdraw(){
     })
   });
 
-  let data = await res.json();
-  alert(data.message);
+  let d = await res.json();
+  alert(d.message);
 }
 
 </script>
 
 </body>
 </html>
+`);
+});

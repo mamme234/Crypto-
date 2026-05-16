@@ -1,597 +1,118 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<meta name="f460705ac2eb12d36b09d6d4c5298a15fb324925" content="f460705ac2eb12d36b09d6d4c5298a15fb324925" />
-<title>Crypto Tap Pro</title>
-<script src="https://libtl.com/sdk.js" data-zone="10892289" data-sdk="show_10892289"></script>
+  <meta charset="UTF-8">
+  <title>Ads Earn App</title>
+</head>
+
+<body style="text-align:center;font-family:sans-serif;">
+
+<h2>💰 Ads Earn App</h2>
+
+<h3 id="balance">Coins: 0</h3>
+
+<button onclick="watchAd1()">Watch Ad 1 (+50)</button>
+<br><br>
+
+<button onclick="watchAd2()">Watch Ad 2 (+50)</button>
+
+<br><br>
+
+<input id="wallet" placeholder="USDT Wallet">
+<input id="amount" placeholder="Amount">
+
+<br><br>
+
+<button onclick="withdraw()">Withdraw</button>
+
+<!-- ===== YOUR AD SCRIPTS ===== -->
 
 <script>
-let adsReady = false;
-
-window.addEventListener("load", () => {
-  const check = setInterval(() => {
-    if (typeof show_10892289 === "function") {
-      adsReady = true;
-      console.log("✅ Ads SDK ready");
-      clearInterval(check);
-    }
-  }, 500);
-});
+(function(s){
+  s.dataset.zone='11013501';
+  s.src='https://al5sm.com/tag.min.js';
+})(
+  [document.documentElement, document.body]
+    .filter(Boolean)
+    .pop()
+    .appendChild(document.createElement('script'))
+);
 </script>
+
 <script>
-let adCooldown = false;
-let adsReady = false;
-let adCooldown = false;
+(function(s){
+  s.dataset.zone='11013511';
+  s.src='https://al5sm.com/tag.min.js';
+})(
+  [document.documentElement, document.body]
+    .filter(Boolean)
+    .pop()
+    .appendChild(document.createElement('script'))
+);
+</script>
 
-// wait for SDK
-window.addEventListener("load", () => {
-  const check = setInterval(() => {
-    if (typeof show_10892289 === "function") {
-      adsReady = true;
-      console.log("✅ Ads SDK ready");
-      clearInterval(check);
-    }
-  }, 500);
-});
+<script>
 
-async function watchAd(){
+const userId = Telegram.WebApp.initDataUnsafe.user.id;
 
-const status = document.getElementById("adStatus");
+let coins = 0;
 
-if(!adsReady){
-  status.innerText = "❌ Ads still loading";
-  return;
+async function loadUser(){
+
+  let res = await fetch(`/user/${userId}`);
+  let data = await res.json();
+
+  coins = data.coins;
+  document.getElementById("balance").innerText = "Coins: " + coins;
 }
 
-if(adCooldown){
-  status.innerText = "⏳ Wait before next ad";
-  return;
-}
+loadUser();
 
-adCooldown = true;
+async function reward(){
+  let res = await fetch("/ads", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({userId})
+  });
 
-status.innerText = "🎬 Loading ad...";
+  let data = await res.json();
 
-try{
-
-  const ad = show_10892289();
-
-  if(!ad || typeof ad.then !== "function"){
-    status.innerText = "❌ No ads available";
-    adCooldown = false;
-    return;
+  if(data.coins !== undefined){
+    coins = data.coins;
+    document.getElementById("balance").innerText = "Coins: " + coins;
+  } else {
+    alert(data.message);
   }
+}
 
-  await ad;
+function watchAd1(){
+  reward();
+}
 
-  // REWARD USER
-  state.coins += 500;
-  state.usdt += 0.005;
+function watchAd2(){
+  reward();
+}
 
-  render();
+async function withdraw(){
 
-  status.innerText = "🎉 Reward received! +500 Coins";
+  let wallet = document.getElementById("wallet").value;
+  let amount = document.getElementById("amount").value;
 
-  // optional server sync
-  fetch(API + "/tap",{
+  let res = await fetch("/withdraw",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify({
-      userId:user?.id || 0,
-      reward:true
+      userId,
+      wallet,
+      amount:Number(amount)
     })
-  }).catch(()=>{});
+  });
 
-}catch(e){
-
-  console.log(e);
-
-  status.innerText = "❌ Ad failed or blocked";
-
-}finally{
-
-  setTimeout(()=>{
-    adCooldown = false;
-  },20000);
-
+  let data = await res.json();
+  alert(data.message);
 }
-}
+
 </script>
-<script>
-const API_POST = "https://my-channel-1.onrender.com/post";
 
-function sendUpdate(text) {
-  fetch(API_POST, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text })
-  }).catch(() => {});
-}
-let coins = 0;
-
-function tapCoin() {
-    coins++;
-
-    // your existing UI update here
-
-    if (coins % 50 === 0) {
-        sendUpdate(`🐍 *We are Venoms*
-
-💰 Player reached ${coins} coins!
-🚀 Keep grinding!`);
-    }
-}
-</script><script>
-sendUpdate(`🐍 *We are Venoms*
-
-🚀 New user joined the app!`);
-</script>
-<script>
-// ✅ Only send once per user (saved locally)
-if (!localStorage.getItem("joinedPosted")) {
-    sendUpdate("🚀 New player joined!");
-    localStorage.setItem("joinedPosted", "yes");
-}
-</script>
-<style>
-body{
-margin:0;
-font-family:Arial;
-background:radial-gradient(circle at top,#1b2a4a,#050914 70%);
-color:white;
-}
-
-/* TOP BAR */
-.topbar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:14px;
-background:rgba(255,255,255,0.06);
-backdrop-filter:blur(10px);
-}
-
-.user{
-display:flex;
-gap:10px;
-align-items:center;
-}
-
-.user img{
-width:48px;
-height:48px;
-border-radius:50%;
-border:2px solid #facc15;
-box-shadow:0 0 15px rgba(250,204,21,0.5);
-}
-
-/* STATS */
-.stats{
-display:flex;
-justify-content:space-around;
-margin-top:12px;
-}
-
-.box{
-background:rgba(255,255,255,0.06);
-padding:12px;
-border-radius:14px;
-width:40%;
-text-align:center;
-backdrop-filter:blur(8px);
-}
-
-.box strong{
-display:block;
-font-size:20px;
-color:#facc15;
-}
-
-/* TAP */
-.tap{
-display:flex;
-justify-content:center;
-margin-top:70px;
-}
-
-.tap button{
-width:220px;
-height:220px;
-border-radius:50%;
-border:none;
-font-size:22px;
-font-weight:bold;
-color:#111;
-background:radial-gradient(circle,#ffe066,#facc15);
-box-shadow:0 0 40px rgba(250,204,21,0.6);
-}
-
-/* SCREEN */
-.screen{
-display:none;
-padding:15px;
-animation:fade 0.2s ease;
-}
-
-.active{display:block;}
-
-@keyframes fade{
-from{opacity:0;transform:translateY(10px);}
-to{opacity:1;transform:translateY(0);}
-}
-
-/* NAV */
-.nav{
-position:fixed;
-bottom:0;
-width:100%;
-display:flex;
-background:rgba(0,0,0,0.6);
-}
-
-.nav button{
-flex:1;
-padding:12px;
-background:none;
-color:white;
-border:none;
-}
-
-/* PROFILE */
-.profileCard{
-background:rgba(255,255,255,0.07);
-padding:15px;
-border-radius:18px;
-margin-top:10px;
-backdrop-filter:blur(10px);
-border:1px solid rgba(255,255,255,0.1);
-}
-
-.profileHeader{
-display:flex;
-align-items:center;
-gap:10px;
-}
-
-.profileHeader img{
-width:60px;
-height:60px;
-border-radius:50%;
-border:2px solid gold;
-}
-
-.badge{
-background:gold;
-color:black;
-padding:3px 8px;
-border-radius:10px;
-font-size:12px;
-margin-left:10px;
-}
-
-input{
-width:100%;
-padding:12px;
-border-radius:10px;
-border:none;
-background:rgba(255,255,255,0.08);
-color:white;
-margin-top:8px;
-}
-</style>
-</head>
-
-<body>
-
-<!-- HOME -->
-<div id="home" class="screen active">
-
-<div class="topbar">
-<div class="user">
-<img id="photo">
-<div>
-<div id="name">User</div>
-<div id="uname">@user</div>
-</div>
-</div>
-<div>Lv <span id="level">1</span></div>
-</div>
-
-<div class="stats">
-<div class="box">Coins<strong id="coins">0</strong></div>
-<div class="box">USDT<strong id="usdt">0.000</strong></div>
-</div>
-
-<div class="tap">
-<button id="tapBtn"></button>
-</div>
-
-</div>
-
-<!-- PROFILE -->
-<div id="profile" class="screen">
-
-<div class="profileCard">
-<div class="profileHeader">
-<img id="pPhoto">
-<div>
-<h3 id="pName">User</h3>
-<span class="badge">VIP Player</span>
-</div>
-</div>
-<p id="pUser"></p>
-</div>
-
-<div class="profileCard">
-<h3>🔗 Referral Link</h3>
-<input id="refLink" readonly>
-<button onclick="copyRef()" style="width:100%">Copy Link</button>
-</div>
-
-<div class="profileCard">
-<h3>🔥 Social Tasks</h3>
-<button id="tgTask" onclick="task('telegram')" style="width:100%">Telegram (+500)</button>
-<button id="ytTask" onclick="task('youtube')" style="width:100%">YouTube (+1250)</button>
-<button id="ttTask" onclick="task('tiktok')" style="width:100%">TikTok (+1000)</button>
-</div>
-
-<div class="profileCard">
-<h3>💰 Ads </h3>
-<button onclick="openAdsWeb()" style="width:100%;padding:15px;font-size:18px;border:none;border-radius:12px;background:linear-gradient(45deg,#ffcc00,#ff6600);font-weight:bold;">
-🎁 Open Ads Reward
-</button>
-</div>
-<script>
-  function openAdsWeb(){
-  const url = "https://ads-xi-nine.vercel.app/";
-
-  // safest method for Telegram Mini Apps
-  if (window.Telegram && Telegram.WebApp) {
-    Telegram.WebApp.openLink(url);
-  } else {
-    window.location.href = url;
-  }
-  }
-</script>
-<div class="profileCard">
-<h3>💸 Withdraw</h3>
-<input id="wallet" placeholder="Wallet address">
-<input id="amount" placeholder="Amount USDT">
-<button onclick="withdraw()" style="width:100%">Withdraw</button>
-</div>
-
-</div>
-
-<!-- DEPOSIT -->
-<div id="deposit" class="screen">
-<div class="profileCard">
-<h2>💰 Deposit</h2>
-<input id="depWallet" readonly value="UQAYjMccjJ8Xn1z9hodUImMjJCB2qmWGjlMup9-sVZtEQFWH">
-<button onclick="copyWallet()" style="width:100%">Copy Address</button>
-</div>
-</div>
-
-<!-- NAV -->
-<div class="nav">
-<button onclick="show('home')">Home</button>
-<button onclick="show('profile')">Profile</button>
-<button onclick="show('deposit')">Deposit</button>
-</div>
-
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-<script>
-
-const API = "https://crypto-4bbj.onrender.com";
-
-let state = {coins:0,usdt:0};
-
-const tg = window.Telegram?.WebApp;
-const user = tg?.initDataUnsafe?.user;
-
-if(tg) tg.expand();
-
-/* LOAD USER */
-async function loadUser(){
-
-if(!user) return;
-
-let ref = new URLSearchParams(window.location.search).get("ref");
-
-let url = API + "/user/" + user.id;
-if(ref) url += "/" + ref;
-
-let res = await fetch(url);
-let data = await res.json();
-
-state.coins = data.coins;
-state.usdt = data.usdt;
-
-render();
-updateTasks(data.tasks || []);
-}
-
-/* RENDER */
-function render(){
-document.getElementById("coins").innerText = Math.floor(state.coins);
-document.getElementById("usdt").innerText = state.usdt.toFixed(3);
-}
-
-/* NAV */
-function show(id){
-document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-document.getElementById(id).classList.add("active");
-}
-
-/* TAP */
-let lastPostCoins = 0;
-
-function tap(e){
-  if(e) e.preventDefault();
-
-  const fingers = e?.touches ? Math.min(e.touches.length, 4) : 1;
-
-  state.coins += fingers;
-  state.usdt += fingers * 0.001;
-
-  render();
-
-  if (state.coins >= lastPostCoins + 100) {
-      lastPostCoins = state.coins;
-
-      sendUpdate(`🔥 Player reached ${Math.floor(state.coins)} coins`);
-  }
-
-  fetch(API+"/tap",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({userId:user?.id || 0, fingers})
-  }).catch(()=>{});
-}
-let lastTapTime = 0;
-const DAILY_LIMIT = 5000;
-
-function getTodayKey(){
-  return new Date().toISOString().split("T")[0];
-}
-/* TASKS */
-function updateTasks(tasks){
-if(tasks.includes("telegram")){
-tgTask.innerText="Completed ✅"; tgTask.disabled=true;
-}
-if(tasks.includes("youtube")){
-ytTask.innerText="Completed ✅"; ytTask.disabled=true;
-}
-if(tasks.includes("tiktok")){
-ttTask.innerText="Completed ✅"; ttTask.disabled=true;
-}
-}
-
-async function task(type){
-
-let links = {
-telegram:"https://t.me/gangs234",
-youtube:"https://youtube.com/@Mamme234",
-tiktok:"https://tiktok.com/@mammeliyas"
-};
-
-window.open(links[type],"_blank");
-
-let res = await fetch(API+"/task",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({userId:user.id,type})
-});
-
-let data = await res.json();
-
-state.coins = data.coins;
-state.usdt = data.usdt;
-
-render();
-alert(data.message);
-
-loadUser();
-}
-
-/* WITHDRAW */
-async function withdraw(){
-    if (amount < 20) {
-  alert("⛔ Minimum withdraw is 20 USDT");
-  return;
-}
-
-if (state.referrals < 10) {
-  alert("⛔ You need 10 referrals");
-  return;
-    }
-
-let wallet=document.getElementById("wallet").value;
-let amount=parseFloat(document.getElementById("amount").value);
-
-let res = await fetch(API+"/withdraw",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({userId:user.id,wallet,amount})
-});
-
-let data = await res.json();
-alert(data.message);
-}
-
-/* COPY */
-function copyRef(){
-navigator.clipboard.writeText(document.getElementById("refLink").value);
-alert("Copied");
-}
-
-function copyWallet(){
-navigator.clipboard.writeText(document.getElementById("depWallet").value);
-alert("Copied");
-}
-
-/* TELEGRAM USER */
-if(user){
-document.getElementById("name").innerText=user.first_name;
-document.getElementById("uname").innerText="@"+(user.username||"user");
-document.getElementById("pName").innerText=user.first_name;
-document.getElementById("pUser").innerText="ID: "+user.id;
-
-document.getElementById("refLink").value =
-"https://t.me/Studybuddy_2025Bot?start="+user.id;
-
-if(user.photo_url){
-photo.src=user.photo_url;
-pPhoto.src=user.photo_url;
-}
-}
-
-/* START */
-loadUser();
-  function runAd(){
-  if(typeof show_10892289 === "function"){
-    show_10892289().then(()=>{
-      state.coins += 300;
-      state.usdt += 0.003;
-      render();
-    }).catch(()=>{});
-  } else {
-    console.log("Ad not available");
-  }
-}window.addEventListener("load", () => {
-  const btn = document.getElementById("tapBtn");
-
-  if(btn){
-    btn.addEventListener("click", tap);
-    btn.addEventListener("touchstart", tap, { passive:false });
-  }
-
-  console.log("Tap system ready");
-});
-</script>
-<script>
-function detectAdBlock(callback) {
-    let ad = document.createElement("div");
-    ad.className = "adsbox";
-    ad.style.height = "1px";
-    ad.style.width = "1px";
-    ad.style.position = "absolute";
-    ad.style.left = "-9999px";
-    document.body.appendChild(ad);
-
-    setTimeout(() => {
-        let blocked = ad.offsetHeight === 0;
-        document.body.removeChild(ad);
-        callback(blocked);
-    }, 100);
-}
-
-detectAdBlock(function(blocked) {
-    if (blocked) {
-        alert("⚠️ AdBlock detected. Please disable it for rewards.");
-    }
-});
-</script>
 </body>
-  </html>
+</html>

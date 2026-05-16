@@ -1,5 +1,5 @@
 {
-  "name": "crypto-bot",
+  "name": "studybuddy-bot",
   "version": "1.0.0",
   "main": "Backend/server.js",
   "scripts": {

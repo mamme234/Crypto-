@@ -1,9 +1,13 @@
-
+app.get("/", (req,res)=>{
+res.send(`
 <!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Earn USDT Pro</title>
+
+<script src="//libtl.com/sdk.js" data-zone="10892289" data-sdk="show_10892289"></script>
+
 <style>
 body{
 margin:0;
@@ -11,6 +15,26 @@ font-family:Arial;
 background:#0f172a;
 color:white;
 text-align:center;
+}
+
+.header{
+background:#1e293b;
+padding:15px;
+text-align:left;
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.avatar{
+width:40px;
+height:40px;
+border-radius:50%;
+background:#334155;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
 }
 
 .card{
@@ -23,51 +47,78 @@ border-radius:12px;
 button{
 width:90%;
 padding:12px;
-margin:5px;
+margin:6px;
 border:none;
 border-radius:10px;
 font-size:16px;
 }
 
-.ad{background:#22c55e;color:white;}
-.bonus{background:#3b82f6;color:white;}
-.withdraw{background:#f59e0b;color:white;}
+.ad{background:#22c55e;color:white}
+.bonus{background:#3b82f6;color:white}
+.withdraw{background:#f59e0b;color:white}
 </style>
 </head>
 
 <body>
 
-<h2>💰 Earn USDT Pro</h2>
-
-<div class="card">
-<p>🆔 ID: <span id="uid"></span></p>
-<p>💰 USDT: $<span id="usdt">0</span></p>
-<p>🪙 Coins: <span id="coins">0</span></p>
-<p>🏆 Level: <span id="level">Bronze</span></p>
+<!-- HEADER -->
+<div class="header">
+  <div class="avatar" id="avatar">U</div>
+  <div>
+    <div id="tgName">Telegram User</div>
+    <small>ID: <span id="uid"></span></small>
+  </div>
 </div>
 
-<button class="ad" onclick="watchAd()">▶ Watch Ad +0.03$</button>
-<button class="bonus" onclick="bonus()">🎁 Daily Bonus +0.01$</button>
-
+<!-- BALANCE -->
 <div class="card">
-<h3>💸 Withdraw</h3>
+  <h3>💰 Balance</h3>
+  <p>USDT: <b>$<span id="usdt">0</span></b></p>
+  <p>Coins: <span id="coins">0</span></p>
+  <p>Level: <span id="level">Bronze</span></p>
+</div>
 
-<input id="wallet" placeholder="Wallet" style="width:90%;padding:10px"><br><br>
-<input id="amount" placeholder="Amount" style="width:90%;padding:10px"><br><br>
+<!-- ADS -->
+<button class="ad" onclick="watchAd()">▶ Watch Ad +0.03$</button>
 
-<button class="withdraw" onclick="withdraw()">Withdraw</button>
+<!-- BONUS -->
+<button class="bonus" onclick="bonus()">🎁 Daily Bonus</button>
+
+<!-- WITHDRAW -->
+<div class="card">
+  <h3>💸 Withdraw</h3>
+
+  <input id="wallet" placeholder="USDT Wallet"
+    style="width:90%;padding:10px;border-radius:8px;border:none"><br><br>
+
+  <input id="amount" placeholder="Amount"
+    style="width:90%;padding:10px;border-radius:8px;border:none"><br><br>
+
+  <button class="withdraw" onclick="withdraw()">Withdraw</button>
 </div>
 
 <script>
 
-const userId =
-(window.Telegram && Telegram.WebApp)
-? Telegram.WebApp.initDataUnsafe.user.id
-: "test";
+// ================= TELEGRAM PROFILE =================
+let userId = "test";
+let tgName = "User";
+let avatar = "U";
+
+if(window.Telegram && Telegram.WebApp){
+  const user = Telegram.WebApp.initDataUnsafe.user;
+
+  if(user){
+    userId = user.id;
+    tgName = user.first_name || "User";
+    avatar = (user.first_name || "U")[0];
+  }
+}
 
 document.getElementById("uid").innerText = userId;
+document.getElementById("tgName").innerText = tgName;
+document.getElementById("avatar").innerText = avatar;
 
-// LOAD PROFILE
+// ================= LOAD PROFILE =================
 async function load(){
 
   let res = await fetch("/profile/"+userId);
@@ -80,22 +131,25 @@ async function load(){
 
 load();
 
-// ADS
-async function watchAd(){
+// ================= REWARDED ADS =================
+function watchAd(){
 
-  let res = await fetch("/ads",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({userId})
+  show_10892289().then(()=>{
+
+    fetch("/ads",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({userId})
+    }).then(()=>load());
+
+    alert("🎉 +0.03$ earned!");
+
+  }).catch(e=>{
+    alert("Ad error");
   });
-
-  let d = await res.json();
-
-  if(d.success) load();
-  else alert(d.message);
 }
 
-// BONUS
+// ================= BONUS =================
 async function bonus(){
 
   let res = await fetch("/bonus",{
@@ -109,7 +163,7 @@ async function bonus(){
   load();
 }
 
-// WITHDRAW
+// ================= WITHDRAW =================
 async function withdraw(){
 
   let wallet = document.getElementById("wallet").value;
@@ -133,5 +187,4 @@ async function withdraw(){
 
 </body>
 </html>
-`);
-});
+

@@ -3,7 +3,6 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const fs = require("fs");
 const path = require("path");
 const TelegramBot = require("node-telegram-bot-api");
 
@@ -12,28 +11,19 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 const MONGO_URI = process.env.MONGO_URI;
 const PORT = process.env.PORT || 3000;
 
-/* ================= PATH FIX (YOUR STRUCTURE) ================= */
-const FRONTEND_PATH = path.join(__dirname, "../Frontend");
-
 /* ================= APP ================= */
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-/* ================= FRONTEND FIX ================= */
+/* ================= FRONTEND ================= */
+const FRONTEND_PATH = path.join(__dirname, "../Frontend");
 
-// Serve frontend static files
 app.use(express.static(FRONTEND_PATH));
 
-// Main route
 app.get("/", (req, res) => {
-  const indexPath = path.join(FRONTEND_PATH, "index.html");
-
-  if (fs.existsSync(indexPath)) {
-    res.sendFile(indexPath);
-  } else {
-    res.status(404).send("❌ Frontend index.html not found");
-  }
+  res.sendFile(path.join(FRONTEND_PATH, "index.html"));
 });
 
 /* ================= DB ================= */
@@ -44,31 +34,23 @@ mongoose.connect(MONGO_URI)
 /* ================= USER MODEL ================= */
 const User = mongoose.model("User", new mongoose.Schema({
   userId: String,
-  coins: { type: Number, default: 0 },
   usdt: { type: Number, default: 0 },
   refBy: String,
   referrals: { type: Number, default: 0 }
 }));
 
-/* ================= TELEGRAM BOT ================= */
-const bot = new TelegramBot(BOT_TOKEN, { polling: true });
-
-const CHANNEL_ID = process.env.CHANNEL_ID;
-const GROUP_ID = process.env.GROUP_ID;
-const BOT_USERNAME = process.env.BOT_USERNAME;
-
 /* ================= HELPERS ================= */
 async function getUser(userId) {
   let user = await User.findOne({ userId });
-  if (!user) {
-    user = await User.create({ userId });
-  }
+  if (!user) user = await User.create({ userId });
   return user;
 }
 
-/* ================= START COMMAND ================= */
+/* ================= TELEGRAM BOT ================= */
+const bot = new TelegramBot(BOT_TOKEN, { polling: true });
+
+/* ================= START ================= */
 bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
-  const chatId = msg.chat.id;
   const userId = msg.from.id.toString();
   const ref = match?.[1];
 
@@ -82,28 +64,16 @@ bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
       await user.save();
 
       refUser.referrals += 1;
-      refUser.coins += 10;
+      refUser.usdt += 0.1;
       await refUser.save();
     }
   }
 
-  bot.sendMessage(chatId,
-`👋 Welcome!
-
-🔥 Earn coins by watching ads
-💰 Use /ref to get referral link
-📊 Use /balance to check balance`);
-});
-
-/* ================= REF ================= */
-bot.onText(/\/ref/, async (msg) => {
-  const userId = msg.from.id.toString();
-
-  const link = `https://t.me/${BOT_USERNAME}?start=${userId}`;
-
   bot.sendMessage(msg.chat.id,
-`🔗 Your referral link:
-${link}`);
+`👋 Welcome to StudyBuddy
+
+💰 Earn USDT by watching ads
+📊 Use /balance`);
 });
 
 /* ================= BALANCE ================= */
@@ -111,51 +81,69 @@ bot.onText(/\/balance/, async (msg) => {
   const user = await getUser(msg.from.id.toString());
 
   bot.sendMessage(msg.chat.id,
-`💰 Balance:
-Coins: ${user.coins}
-USDT: ${user.usdt}
-Referrals: ${user.referrals}`);
+`💰 Your Balance:
+USDT: ${user.usdt.toFixed(4)}
+👥 Referrals: ${user.referrals}`);
 });
 
-/* ================= MOTIVATE POST ================= */
-bot.onText(/\/motivate\/post (.+)/, async (msg, match) => {
-  const text = match[1];
+/* ================= REF LINK (NO HARDCODE LOGIC) ================= */
+bot.onText(/\/ref/, async (msg) => {
+  const botUsername = process.env.BOT_USERNAME;
 
-  const post =
-`🔥 BIG UPDATE RELEASED!
+  const link = `https://t.me/${botUsername}?start=${msg.from.id}`;
 
-${text}
-
-📢 The owner changed the system`;
-
-  if (CHANNEL_ID) bot.sendMessage(CHANNEL_ID, post);
-  if (GROUP_ID) bot.sendMessage(GROUP_ID, post);
-
-  bot.sendMessage(msg.chat.id, "✅ Posted!");
+  bot.sendMessage(msg.chat.id,
+`🔗 Referral Link:
+${link}`);
 });
 
-/* ================= VIDEO POST ================= */
-bot.onText(/\/postvideo (.+)/, async (msg, match) => {
-  const videoId = match[1];
-
-  if (CHANNEL_ID) {
-    bot.sendVideo(CHANNEL_ID, videoId, {
-      caption: "🎥 New Update Video"
-    });
-  }
-
-  bot.sendMessage(msg.chat.id, "✅ Video posted!");
-});
-
-/* ================= ADS REWARD API ================= */
+/* ================= ADS CLICK ================= */
 app.post("/ads-click", async (req, res) => {
-  const { userId, reward } = req.body;
+  try {
+    const { userId, reward } = req.body;
+
+    if (!userId) return res.status(400).json({ error: "Missing userId" });
+
+    const user = await getUser(userId);
+
+    user.usdt += Number(reward) || 0.03;
+
+    await user.save();
+
+    res.json({
+      success: true,
+      usdt: user.usdt
+    });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+/* ================= PROFILE ================= */
+app.get("/profile/:userId", async (req, res) => {
+  const user = await getUser(req.params.userId);
+
+  res.json({
+    usdt: user.usdt
+  });
+});
+
+/* ================= WITHDRAW ================= */
+app.post("/withdraw", async (req, res) => {
+  const { userId, wallet, amount } = req.body;
 
   const user = await getUser(userId);
-  user.coins += reward || 1;
+
+  if (user.usdt < amount) {
+    return res.json({ message: "❌ Not enough USDT" });
+  }
+
+  user.usdt -= amount;
   await user.save();
 
-  res.json({ success: true, coins: user.coins });
+  res.json({ message: "✅ Withdraw request sent (manual approval)" });
 });
 
 /* ================= START SERVER ================= */

@@ -1,14 +1,14 @@
 {
-  "name": "crypto-app",
+  "name": "earn-usdt-bot",
   "version": "1.0.0",
-  "main": "backend/server.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node backend/server.js"
+    "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
+    "express": "^4.19.2",
     "mongoose": "^8.0.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "node-telegram-bot-api": "^0.66.0"
   }
 }

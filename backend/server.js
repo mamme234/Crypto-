@@ -13,19 +13,30 @@ const PORT = process.env.PORT || 3000;
 
 // ===== MongoDB =====
 mongoose.connect(process.env.MONGO_URI)
-.then(()=>console.log("MongoDB Connected ✅"))
+.then(async ()=>{
+
+  console.log("MongoDB Connected ✅");
+
+  // RUN ONCE ONLY (optional conversion)
+  // await User.updateMany({}, {
+  //   $set: {
+  //     coins: { $floor: { $divide: ["$coins", 2] } }
+  //   }
+  // });
+
+})
 .catch(err=>console.log(err));
 
-// ===== Model =====
+// ===== MODEL =====
 const User = mongoose.model("User",{
   userId:Number,
   coins:{type:Number,default:0},
   usdt:{type:Number,default:0},
   referredBy:Number,
-  tasks:{type:Array,default:[]}
+  lastAd:{type:Number,default:0}
 });
 
-// ===== GET USER + REF =====
+// ===== USER =====
 app.get("/user/:id/:ref?", async (req,res)=>{
 
   let {id,ref} = req.params;
@@ -38,12 +49,12 @@ app.get("/user/:id/:ref?", async (req,res)=>{
       referredBy:ref || null
     });
 
-    // give referral reward
+    // referral bonus
     if(ref){
       let refUser = await User.findOne({userId:ref});
       if(refUser){
         refUser.coins += 100;
-        refUser.usdt = refUser.coins/1000;
+        refUser.usdt = refUser.coins / 1000;
         await refUser.save();
       }
     }
@@ -52,62 +63,42 @@ app.get("/user/:id/:ref?", async (req,res)=>{
   res.json(user);
 });
 
-// ===== TAP =====
-app.post("/tap", async (req,res)=>{
-  let {userId,fingers} = req.body;
-
-  let user = await User.findOne({userId});
-  fingers = Math.min(fingers,4);
-
-  user.coins += fingers;
-  user.usdt = user.coins/1000;
-
-  await user.save();
-  res.json(user);
-});
-
-// ===== TASK =====
-app.post("/task", async (req,res)=>{
-  let {userId,type} = req.body;
-
-  let user = await User.findOne({userId});
-
-  if(user.tasks.includes(type)){
-    return res.json({message:"Already completed",coins:user.coins,usdt:user.usdt});
-  }
-
-  let reward =
-    type==="telegram"?500:
-    type==="youtube"?1250:
-    type==="tiktok"?1000:0;
-
-  user.coins += reward;
-  user.usdt = user.coins/1000;
-  user.tasks.push(type);
-
-  await user.save();
-
-  res.json({message:"Task completed",coins:user.coins,usdt:user.usdt});
-});
-
-// ===== ADS =====
+// ===== ADS REWARD =====
 app.post("/ads", async (req,res)=>{
+
   let {userId} = req.body;
 
   let user = await User.findOne({userId});
 
-  user.coins += 300;
-  user.usdt = user.coins/1000;
+  if(!user) return res.json({message:"User not found"});
+
+  const now = Date.now();
+
+  if(user.lastAd && now - user.lastAd < 30000){
+    return res.json({message:"Wait 30 seconds"});
+  }
+
+  user.coins += 50;
+  user.usdt = user.coins / 1000;
+  user.lastAd = now;
 
   await user.save();
-  res.json(user);
+
+  res.json({
+    message:"Ad rewarded",
+    coins:user.coins,
+    usdt:user.usdt
+  });
 });
 
 // ===== WITHDRAW =====
 app.post("/withdraw", async (req,res)=>{
+
   let {userId,wallet,amount} = req.body;
 
   let user = await User.findOne({userId});
+
+  if(!user) return res.json({message:"User not found"});
 
   if(amount < 20){
     return res.json({message:"Minimum 20 USDT"});

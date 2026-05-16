@@ -2,135 +2,169 @@ require("dotenv").config();
 
 const express = require("express");
 const mongoose = require("mongoose");
-const TelegramBot = require("node-telegram-bot-api");
+const cors = require("cors");
+const fs = require("fs");
 const path = require("path");
-
-const app = express();
-app.use(express.json());
+const TelegramBot = require("node-telegram-bot-api");
 
 /* ================= CONFIG ================= */
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const MONGO_URI = process.env.MONGO_URI;
-const ADMIN_ID = process.env.ADMIN_ID;
+const PORT = process.env.PORT || 3000;
 
-const bot = new TelegramBot(BOT_TOKEN, { polling: true });
+// Change this if your frontend folder is different
+const FRONTEND_PATH = path.join(__dirname, "../frontend");
+
+/* ================= APP ================= */
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+/* ================= STATIC FRONTEND FIX ================= */
+if (fs.existsSync(FRONTEND_PATH)) {
+  app.use(express.static(FRONTEND_PATH));
+} else {
+  console.log("⚠️ Frontend folder not found at:", FRONTEND_PATH);
+}
+
+/* fallback index.html fix (IMPORTANT for Render/Vercel issues) */
+app.get("/", (req, res) => {
+  const indexPath = path.join(FRONTEND_PATH, "index.html");
+
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).send("index.html not found in frontend folder");
+  }
+});
 
 /* ================= DB ================= */
 mongoose.connect(MONGO_URI)
-  .then(() => console.log("DB Connected"))
-  .catch(err => console.log("Mongo Error:", err));
+  .then(() => console.log("✅ DB Connected"))
+  .catch(err => console.log("DB Error:", err));
 
-const UserSchema = new mongoose.Schema({
+/* ================= USER MODEL ================= */
+const User = mongoose.model("User", new mongoose.Schema({
   userId: String,
-  usdt: { type: Number, default: 0 },
   coins: { type: Number, default: 0 },
-  level: { type: String, default: "Bronze" },
-  lastBonus: Number
-});
+  usdt: { type: Number, default: 0 },
+  refBy: String,
+  referrals: { type: Number, default: 0 }
+}));
 
-const User = mongoose.model("User", UserSchema);
+/* ================= TELEGRAM BOT ================= */
+const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 
+const CHANNEL_ID = process.env.CHANNEL_ID; // @yourchannel
+const GROUP_ID = process.env.GROUP_ID;     // -100xxxxxxxx
+
+/* ================= HELPERS ================= */
 async function getUser(userId) {
   let user = await User.findOne({ userId });
-  if (!user) user = await User.create({ userId });
+  if (!user) {
+    user = await User.create({ userId });
+  }
   return user;
 }
 
-/* ================= TELEGRAM BOT ================= */
-bot.onText(/\/start/, async (msg) => {
-  const user = await getUser(msg.from.id);
+/* ================= START COMMAND ================= */
+bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
+  const chatId = msg.chat.id;
+  const userId = msg.from.id.toString();
 
-  bot.sendMessage(msg.chat.id,
-`👋 Welcome!
+  const ref = match?.[1];
 
-💰 USDT: $${user.usdt}
-🪙 Coins: ${user.coins}
-📊 Level: ${user.level}
+  let user = await getUser(userId);
 
-🌐 Open App:
-https://YOUR_DOMAIN.com`);
-});
+  // referral system
+  if (ref && ref !== userId) {
+    const refUser = await User.findOne({ userId: ref });
+    if (refUser && !user.refBy) {
+      user.refBy = ref;
+      await user.save();
 
-bot.onText(/\/ref/, async (msg) => {
-  await getUser(msg.from.id);
-
-  bot.sendMessage(msg.chat.id,
-`🔗 Referral Link:
-https://t.me/YOUR_BOT?start=${msg.from.id}`);
-});
-
-/* ================= API ================= */
-app.get("/profile/:id", async (req, res) => {
-  const user = await getUser(req.params.id);
-  res.json(user);
-});
-
-app.post("/ads", async (req, res) => {
-  const user = await getUser(req.body.userId);
-
-  user.usdt += 0.03;
-  user.coins += 1;
-
-  await user.save();
-
-  res.json({ ok: true });
-});
-
-app.post("/bonus", async (req, res) => {
-  const user = await getUser(req.body.userId);
-
-  const now = Date.now();
-
-  if (user.lastBonus && now - user.lastBonus < 86400000) {
-    return res.json({ message: "❌ Already claimed today" });
+      refUser.referrals += 1;
+      refUser.coins += 10;
+      await refUser.save();
+    }
   }
 
-  user.usdt += 0.05;
-  user.lastBonus = now;
+  bot.sendMessage(chatId,
+`👋 Welcome!
 
-  await user.save();
-
-  res.json({ message: "🎁 +0.05$ added" });
+🔥 Earn coins by watching ads
+💰 Use /ref to get referral link
+📊 Use /balance to check balance
+`);
 });
 
-app.post("/withdraw", async (req, res) => {
-  const { userId, wallet, amount } = req.body;
+/* ================= REF COMMAND ================= */
+bot.onText(/\/ref/, async (msg) => {
+  const userId = msg.from.id.toString();
 
+  const link = `https://t.me/${process.env.BOT_USERNAME}?start=${userId}`;
+
+  bot.sendMessage(msg.chat.id,
+`🔗 Your referral link:
+${link}
+
+Invite friends and earn rewards!`);
+});
+
+/* ================= BALANCE ================= */
+bot.onText(/\/balance/, async (msg) => {
+  const userId = msg.from.id.toString();
   const user = await getUser(userId);
 
-  if (!wallet) return res.json({ message: "❌ Enter wallet" });
-  if (!amount || amount <= 0) return res.json({ message: "❌ Invalid amount" });
-  if (user.usdt < amount) return res.json({ message: "❌ Not enough balance" });
+  bot.sendMessage(msg.chat.id,
+`💰 Balance:
+Coins: ${user.coins}
+USDT: ${user.usdt}
+Referrals: ${user.referrals}`);
+});
 
-  user.usdt -= amount;
+/* ================= MOTIVATE POST ================= */
+bot.onText(/\/motivate\/post (.+)/, async (msg, match) => {
+  const text = match[1];
+
+  const postText =
+`🔥 BIG UPDATE RELEASED!
+
+${text}
+
+📢 The owner changed the system`;
+
+  if (CHANNEL_ID) bot.sendMessage(CHANNEL_ID, postText);
+  if (GROUP_ID) bot.sendMessage(GROUP_ID, postText);
+
+  bot.sendMessage(msg.chat.id, "✅ Posted successfully!");
+});
+
+/* ================= POST VIDEO ID ================= */
+bot.onText(/\/postvideo (.+)/, async (msg, match) => {
+  const videoId = match[1];
+
+  if (CHANNEL_ID) {
+    bot.sendVideo(CHANNEL_ID, videoId, {
+      caption: "🎥 New Video Update"
+    });
+  }
+
+  bot.sendMessage(msg.chat.id, "✅ Video posted!");
+});
+
+/* ================= ADS CLICK EARNING API ================= */
+app.post("/ads-click", async (req, res) => {
+  const { userId, reward } = req.body;
+
+  const user = await getUser(userId);
+  user.coins += reward || 1;
   await user.save();
 
-  bot.sendMessage(
-    ADMIN_ID,
-`💸 WITHDRAW REQUEST
-
-User: ${userId}
-Wallet: ${wallet}
-Amount: $${amount}`
-  );
-
-  res.json({ message: "✅ Sent to admin" });
+  res.json({ success: true, coins: user.coins });
 });
 
-/* ================= FRONTEND (FIXED SAFE METHOD) ================= */
-
-// ALWAYS go ONE LEVEL UP from backend
-const frontendPath = path.resolve(__dirname, "../frontend");
-
-app.use(express.static(frontendPath));
-
-app.get("/", (req, res) => {
-  res.sendFile(path.join(frontendPath, "index.html"));
-});
-
-/* ================= START ================= */
-const PORT = process.env.PORT || 3000;
-
+/* ================= START SERVER ================= */
 app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
+  console.log("🚀 Server running on port", PORT);
 });

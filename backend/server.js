@@ -70,10 +70,22 @@ bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
   }
 
   bot.sendMessage(msg.chat.id,
-`👋 Welcome to StudyBuddy
+`👋 Welcome to StudyBuddy!
 
 💰 Earn USDT by watching ads
-📊 Use /balance`);
+📊 Use /balance
+🔗 Use /ref`);
+});
+
+/* ================= REF (FIXED) ================= */
+bot.onText(/\/ref/, async (msg) => {
+  const botUsername = process.env.BOT_USERNAME;
+
+  const link = `https://t.me/${botUsername}?start=${msg.from.id}`;
+
+  bot.sendMessage(msg.chat.id,
+`🔗 Your Referral Link:
+${link}`);
 });
 
 /* ================= BALANCE ================= */
@@ -81,20 +93,9 @@ bot.onText(/\/balance/, async (msg) => {
   const user = await getUser(msg.from.id.toString());
 
   bot.sendMessage(msg.chat.id,
-`💰 Your Balance:
+`💰 Balance:
 USDT: ${user.usdt.toFixed(4)}
 👥 Referrals: ${user.referrals}`);
-});
-
-/* ================= REF LINK (NO HARDCODE LOGIC) ================= */
-bot.onText(/\/ref/, async (msg) => {
-  const botUsername = process.env.BOT_USERNAME;
-
-  const link = `https://t.me/${botUsername}?start=${msg.from.id}`;
-
-  bot.sendMessage(msg.chat.id,
-`🔗 Referral Link:
-${link}`);
 });
 
 /* ================= ADS CLICK ================= */

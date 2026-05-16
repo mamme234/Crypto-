@@ -6,7 +6,6 @@ const TelegramBot = require("node-telegram-bot-api");
 const path = require("path");
 
 const app = express();
-
 app.use(express.json());
 
 /* ================= CONFIG ================= */
@@ -19,7 +18,7 @@ const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 /* ================= DB ================= */
 mongoose.connect(MONGO_URI)
   .then(() => console.log("DB Connected"))
-  .catch(err => console.log("DB Error:", err));
+  .catch(err => console.log("Mongo Error:", err));
 
 const UserSchema = new mongoose.Schema({
   userId: String,
@@ -31,7 +30,6 @@ const UserSchema = new mongoose.Schema({
 
 const User = mongoose.model("User", UserSchema);
 
-/* ================= HELPERS ================= */
 async function getUser(userId) {
   let user = await User.findOne({ userId });
   if (!user) user = await User.create({ userId });
@@ -40,8 +38,7 @@ async function getUser(userId) {
 
 /* ================= TELEGRAM BOT ================= */
 bot.onText(/\/start/, async (msg) => {
-  const userId = msg.from.id;
-  const user = await getUser(userId);
+  const user = await getUser(msg.from.id);
 
   bot.sendMessage(msg.chat.id,
 `👋 Welcome!
@@ -55,21 +52,19 @@ https://YOUR_DOMAIN.com`);
 });
 
 bot.onText(/\/ref/, async (msg) => {
-  const userId = msg.from.id;
-  await getUser(userId);
+  await getUser(msg.from.id);
 
   bot.sendMessage(msg.chat.id,
 `🔗 Referral Link:
-https://t.me/YOUR_BOT?start=${userId}`);
+https://t.me/YOUR_BOT?start=${msg.from.id}`);
 });
 
-/* ================= WEB PROFILE ================= */
+/* ================= API ================= */
 app.get("/profile/:id", async (req, res) => {
   const user = await getUser(req.params.id);
   res.json(user);
 });
 
-/* ================= ADS REWARD ================= */
 app.post("/ads", async (req, res) => {
   const user = await getUser(req.body.userId);
 
@@ -81,7 +76,6 @@ app.post("/ads", async (req, res) => {
   res.json({ ok: true });
 });
 
-/* ================= DAILY BONUS ================= */
 app.post("/bonus", async (req, res) => {
   const user = await getUser(req.body.userId);
 
@@ -99,7 +93,6 @@ app.post("/bonus", async (req, res) => {
   res.json({ message: "🎁 +0.05$ added" });
 });
 
-/* ================= WITHDRAW ================= */
 app.post("/withdraw", async (req, res) => {
   const { userId, wallet, amount } = req.body;
 
@@ -121,11 +114,13 @@ Wallet: ${wallet}
 Amount: $${amount}`
   );
 
-  res.json({ message: "✅ Withdraw sent to admin" });
+  res.json({ message: "✅ Sent to admin" });
 });
 
-/* ================= FRONTEND FIX (IMPORTANT) ================= */
-const frontendPath = path.join(__dirname, "../frontend");
+/* ================= FRONTEND (FIXED SAFE METHOD) ================= */
+
+// ALWAYS go ONE LEVEL UP from backend
+const frontendPath = path.resolve(__dirname, "../frontend");
 
 app.use(express.static(frontendPath));
 
@@ -133,7 +128,7 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(frontendPath, "index.html"));
 });
 
-/* ================= START SERVER ================= */
+/* ================= START ================= */
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

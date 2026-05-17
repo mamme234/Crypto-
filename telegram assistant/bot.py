@@ -1,10 +1,9 @@
 import os
 import time
 import requests
-from gtts import gTTS
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
 from dotenv import load_dotenv
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
 
 load_dotenv()
 
@@ -17,9 +16,9 @@ CHANNEL = "KING_OF_CRY"
 msg_count = 0
 mode = "ai"
 last_active = time.time()
-replied = set()
+replied_users = set()
 
-# ───────── AI ─────────
+# ───────── AI FUNCTION ─────────
 def ai_reply(text):
     try:
         r = requests.post(
@@ -31,7 +30,7 @@ def ai_reply(text):
             json={
                 "model": "gpt-4o-mini",
                 "messages": [
-                    {"role": "system", "content": "You are a professional assistant."},
+                    {"role": "system", "content": "You are a professional Telegram assistant."},
                     {"role": "user", "content": text}
                 ]
             }
@@ -43,13 +42,13 @@ def ai_reply(text):
 # ───────── START PANEL ─────────
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
-        [InlineKeyboardButton("🤖 AI", callback_data="ai"),
-         InlineKeyboardButton("💼 Luxury", callback_data="luxury")],
-        [InlineKeyboardButton("📊 Stats", callback_data="stats")]
+        [InlineKeyboardButton("🤖 AI MODE", callback_data="ai"),
+         InlineKeyboardButton("💼 LUXURY", callback_data="luxury")],
+        [InlineKeyboardButton("📊 STATS", callback_data="stats")]
     ]
 
     await update.message.reply_text(
-        "👑 CEO Assistant Bot Panel",
+        "👑 Telegram Assistant Panel",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
@@ -73,10 +72,9 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ───────── MESSAGE HANDLER ─────────
 async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    global msg_count, last_active
+    global msg_count
 
     msg_count += 1
-
     text = update.message.text
 
     # forward to channel
@@ -85,18 +83,19 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except:
         pass
 
-    # AI reply
+    # AI mode
     if mode == "ai":
         reply = ai_reply(text)
         await update.message.reply_text(reply)
         return
 
-    # luxury mode
+    # Luxury mode
     await update.message.reply_text(
-        "👑 I’m currently away.\nCall +251934600018 for urgent matters."
+        "👑 I am currently away on private business.\n"
+        "📞 Call +251934600018 for urgent matters."
     )
 
-# ───────── MAIN ─────────
+# ───────── APP SETUP ─────────
 app = Application.builder().token(TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))

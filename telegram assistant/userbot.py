@@ -1,28 +1,25 @@
 import os
 import time
 import requests
-from dotenv import load_dotenv
-from telethon import TelegramClient, events, Button
 from gtts import gTTS
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
+from dotenv import load_dotenv
 
 load_dotenv()
 
-# ───────── ENV ─────────
-API_ID = int(os.getenv("API_ID"))
-API_HASH = os.getenv("API_HASH")
+TOKEN = os.getenv("BOT_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 OWNER_ID = 7154361039
 CHANNEL = "KING_OF_CRY"
 
-client = TelegramClient("my_session", API_ID, API_HASH)
-
-last_active = time.time()
 msg_count = 0
 mode = "ai"
-replied_users = set()
+last_active = time.time()
+replied = set()
 
-# ───────── AI FUNCTION ─────────
+# ───────── AI ─────────
 def ai_reply(text):
     try:
         r = requests.post(
@@ -34,145 +31,77 @@ def ai_reply(text):
             json={
                 "model": "gpt-4o-mini",
                 "messages": [
-                    {
-                        "role": "system",
-                        "content": "You are a professional Telegram assistant."
-                    },
-                    {
-                        "role": "user",
-                        "content": text
-                    }
+                    {"role": "system", "content": "You are a professional assistant."},
+                    {"role": "user", "content": text}
                 ]
             }
         )
+        return r.json()["choices"][0]["message"]["content"]
+    except:
+        return "⚡ AI unavailable"
 
-        data = r.json()
-        return data["choices"][0]["message"]["content"]
-
-    except Exception as e:
-        return f"⚠ AI Error: {e}"
-
-# ───────── VOICE SYSTEM ─────────
-def text_to_voice(text):
-    filename = "voice.mp3"
-    tts = gTTS(text=text, lang="en")
-    tts.save(filename)
-    return filename
-
-# ───────── CONTROL PANEL ─────────
-@client.on(events.NewMessage(pattern="/panel"))
-async def panel(event):
-    if event.sender_id != OWNER_ID:
-        return
-
+# ───────── START PANEL ─────────
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
-        [
-            Button.inline("🤖 AI", b"ai"),
-            Button.inline("💼 Luxury", b"luxury")
-        ],
-        [
-            Button.inline("📊 Stats", b"stats"),
-            Button.inline("🔄 Reset", b"reset")
-        ]
+        [InlineKeyboardButton("🤖 AI", callback_data="ai"),
+         InlineKeyboardButton("💼 Luxury", callback_data="luxury")],
+        [InlineKeyboardButton("📊 Stats", callback_data="stats")]
     ]
 
-    await event.reply(
-        "👑 Telegram CEO Assistant Panel",
-        buttons=keyboard
+    await update.message.reply_text(
+        "👑 CEO Assistant Bot Panel",
+        reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
 # ───────── BUTTONS ─────────
-@client.on(events.CallbackQuery)
-async def buttons(event):
-    global mode
-    global msg_count
+async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global mode, msg_count
 
-    if event.sender_id != OWNER_ID:
-        return
+    query = update.callback_query
+    await query.answer()
 
-    data = event.data.decode()
-
-    if data == "ai":
+    if query.data == "ai":
         mode = "ai"
-        await event.answer("🤖 AI mode enabled")
+        await query.edit_message_text("🤖 AI mode ON")
 
-    elif data == "luxury":
+    elif query.data == "luxury":
         mode = "luxury"
-        await event.answer("💼 Luxury mode enabled")
+        await query.edit_message_text("💼 Luxury mode ON")
 
-    elif data == "stats":
-        await event.edit(f"📊 Total messages: {msg_count}")
+    elif query.data == "stats":
+        await query.edit_message_text(f"📊 Messages: {msg_count}")
 
-    elif data == "reset":
-        msg_count = 0
-        await event.answer("♻ Stats reset")
-
-# ───────── TRACK ACTIVITY ─────────
-@client.on(events.NewMessage(outgoing=True))
-async def track(event):
-    global last_active
-    last_active = time.time()
-
-# ───────── MAIN MESSAGE HANDLER ─────────
-@client.on(events.NewMessage(incoming=True))
-async def handler(event):
-    global msg_count
-
-    if not event.is_private:
-        return
+# ───────── MESSAGE HANDLER ─────────
+async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global msg_count, last_active
 
     msg_count += 1
 
-    text = event.raw_text
-    user_id = event.sender_id
+    text = update.message.text
 
     # forward to channel
     try:
-        await client.send_message(
-            CHANNEL,
-            f"📩 New Message:\n\n{text}"
-        )
+        await context.bot.send_message(CHANNEL, f"📩 {text}")
     except:
         pass
 
-    # offline check
-    if time.time() - last_active < 300:
-        return
-
-    # avoid spam
-    if user_id in replied_users:
-        return
-
-    replied_users.add(user_id)
-
-    # AI mode
+    # AI reply
     if mode == "ai":
         reply = ai_reply(text)
-
-        try:
-            voice = text_to_voice(reply)
-
-            await client.send_file(
-                event.chat_id,
-                voice,
-                voice_note=True
-            )
-
-            os.remove(voice)
-
-        except:
-            pass
-
-        await event.reply(reply)
+        await update.message.reply_text(reply)
         return
 
-    # Luxury mode
-    await event.reply(
-        "👑 I am currently unavailable due to private business commitments.\n\n"
-        "📞 For urgent matters call: +251934600018"
+    # luxury mode
+    await update.message.reply_text(
+        "👑 I’m currently away.\nCall +251934600018 for urgent matters."
     )
 
-print("🚀 Telegram Assistant Running...")
+# ───────── MAIN ─────────
+app = Application.builder().token(TOKEN).build()
 
-client.start()
-client.run_until_disconnected()
+app.add_handler(CommandHandler("start", start))
+app.add_handler(CallbackQueryHandler(buttons))
+app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle))
+
+print("🚀 Bot Running...")
+app.run_polling()

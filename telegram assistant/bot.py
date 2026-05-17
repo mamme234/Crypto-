@@ -12,7 +12,7 @@ from telegram.ext import (
     filters
 )
 
-# ───────── LOGGING ─────────
+# ───────── LOGGING (IMPORTANT) ─────────
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     level=logging.INFO
@@ -20,15 +20,15 @@ logging.basicConfig(
 
 print("🚀 BOT STARTING...")
 
-# ───────── ENV SAFETY (CRITICAL) ─────────
+# ───────── ENV CHECK ─────────
 TOKEN = os.getenv("BOT_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-print("BOT_TOKEN LOADED:", bool(TOKEN))
-print("OPENAI LOADED:", bool(OPENAI_API_KEY))
+print("TOKEN EXISTS:", bool(TOKEN))
+print("OPENAI EXISTS:", bool(OPENAI_API_KEY))
 
 if not TOKEN:
-    print("❌ BOT_TOKEN missing in Render Environment Variables")
+    print("❌ BOT_TOKEN MISSING (Render Environment Variables)")
     sys.exit(1)
 
 # ───────── VARIABLES ─────────
@@ -62,9 +62,9 @@ def ai_reply(text):
 
     except Exception as e:
         print("AI ERROR:", e)
-        return "⚡ AI temporarily unavailable"
+        return "⚡ AI unavailable"
 
-# ───────── START ─────────
+# ───────── START COMMAND ─────────
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [
@@ -77,11 +77,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
 
     await update.message.reply_text(
-        "👑 Stable Bot Online",
+        "👑 Stable Telegram Bot Online",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
-# ───────── BUTTONS ─────────
+# ───────── BUTTON HANDLER ─────────
 async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global mode
 
@@ -90,16 +90,16 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if query.data == "ai":
         mode = "ai"
-        await query.edit_message_text("🤖 AI MODE ON")
+        await query.edit_message_text("🤖 AI MODE ENABLED")
 
     elif query.data == "luxury":
         mode = "luxury"
         await query.edit_message_text(
-            "💼 I am away.\n📞 Call +251934600018"
+            "💼 I am currently away.\n📞 Call +251934600018"
         )
 
     elif query.data == "stats":
-        await query.edit_message_text("📊 Bot running successfully")
+        await query.edit_message_text(f"📊 Bot is running\nMessages handled successfully")
 
 # ───────── MESSAGE HANDLER ─────────
 async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -108,27 +108,32 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg_count += 1
     text = update.message.text
 
-    # forward to channel safely
+    # forward safely
     try:
-        await context.bot.send_message(chat_id=CHANNEL, text=f"📩 {text}")
+        await context.bot.send_message(
+            chat_id=CHANNEL,
+            text=f"📩 {text}"
+        )
     except Exception as e:
-        print("Channel error:", e)
+        print("CHANNEL ERROR:", e)
 
-    # reply system
+    # reply mode
     if mode == "ai":
         reply = ai_reply(text)
         await update.message.reply_text(reply)
     else:
         await update.message.reply_text(
-            "💼 I am currently away.\n📞 Call +251934600018"
+            "💼 I am away.\n📞 Call +251934600018"
         )
 
 # ───────── ERROR HANDLER ─────────
 async def error_handler(update, context):
     print("BOT ERROR:", context.error)
 
-# ───────── MAIN ─────────
+# ───────── MAIN APP ─────────
 def main():
+    print("🚀 INITIALIZING APP...")
+
     app = Application.builder().token(TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
@@ -136,13 +141,18 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle))
     app.add_error_handler(error_handler)
 
-    print("🚀 BOT RUNNING STABLE 24/7")
-    app.run_polling()
+    print("🚀 BOT RUNNING 24/7 SAFE MODE")
 
-# ───────── RUN SAFELY ─────────
+    app.run_polling(
+        drop_pending_updates=True
+    )
+
+# ───────── ENTRY ─────────
 if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        print("FATAL ERROR:", e)
+        print("🔥 FATAL ERROR:")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)

@@ -1,5 +1,5 @@
 import os
-import time
+import sys
 import logging
 import requests
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -12,7 +12,7 @@ from telegram.ext import (
     filters
 )
 
-# ───────── LOGGING (IMPORTANT) ─────────
+# ───────── LOGGING ─────────
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     level=logging.INFO
@@ -20,17 +20,18 @@ logging.basicConfig(
 
 print("🚀 BOT STARTING...")
 
-# ───────── ENV SAFETY ─────────
+# ───────── ENV SAFETY (CRITICAL) ─────────
 TOKEN = os.getenv("BOT_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 print("BOT_TOKEN LOADED:", bool(TOKEN))
-print("OPENAI KEY LOADED:", bool(OPENAI_API_KEY))
+print("OPENAI LOADED:", bool(OPENAI_API_KEY))
 
 if not TOKEN:
-    print("❌ ERROR: BOT_TOKEN missing in Render Environment Variables")
-    raise SystemExit()
+    print("❌ BOT_TOKEN missing in Render Environment Variables")
+    sys.exit(1)
 
+# ───────── VARIABLES ─────────
 msg_count = 0
 mode = "ai"
 CHANNEL = "KING_OF_CRY"
@@ -50,21 +51,20 @@ def ai_reply(text):
             json={
                 "model": "gpt-4o-mini",
                 "messages": [
-                    {"role": "system", "content": "You are a helpful Telegram assistant."},
+                    {"role": "system", "content": "You are a Telegram assistant."},
                     {"role": "user", "content": text}
                 ]
             },
             timeout=15
         )
 
-        data = r.json()
-        return data["choices"][0]["message"]["content"]
+        return r.json()["choices"][0]["message"]["content"]
 
     except Exception as e:
         print("AI ERROR:", e)
         return "⚡ AI temporarily unavailable"
 
-# ───────── START COMMAND ─────────
+# ───────── START ─────────
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [
@@ -77,7 +77,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
 
     await update.message.reply_text(
-        "👑 Stable Telegram Assistant Bot",
+        "👑 Stable Bot Online",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
@@ -90,16 +90,16 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if query.data == "ai":
         mode = "ai"
-        await query.edit_message_text("🤖 AI MODE ENABLED")
+        await query.edit_message_text("🤖 AI MODE ON")
 
     elif query.data == "luxury":
         mode = "luxury"
         await query.edit_message_text(
-            "💼 I am currently away.\n📞 Call +251934600018"
+            "💼 I am away.\n📞 Call +251934600018"
         )
 
     elif query.data == "stats":
-        await query.edit_message_text("📊 Bot is running successfully")
+        await query.edit_message_text("📊 Bot running successfully")
 
 # ───────── MESSAGE HANDLER ─────────
 async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -114,7 +114,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         print("Channel error:", e)
 
-    # AI mode
+    # reply system
     if mode == "ai":
         reply = ai_reply(text)
         await update.message.reply_text(reply)
@@ -124,10 +124,10 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
 # ───────── ERROR HANDLER ─────────
-async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
+async def error_handler(update, context):
     print("BOT ERROR:", context.error)
 
-# ───────── MAIN APP ─────────
+# ───────── MAIN ─────────
 def main():
     app = Application.builder().token(TOKEN).build()
 
@@ -136,12 +136,13 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle))
     app.add_error_handler(error_handler)
 
-    print("🚀 BOT RUNNING STABLE ON RENDER...")
+    print("🚀 BOT RUNNING STABLE 24/7")
     app.run_polling()
 
-# ───────── RUN ─────────
+# ───────── RUN SAFELY ─────────
 if __name__ == "__main__":
     try:
         main()
     except Exception as e:
         print("FATAL ERROR:", e)
+        sys.exit(1)

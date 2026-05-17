@@ -5,15 +5,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Earn USDT Pro</title>
+<title>Meta Pro Earn</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-<script
-src='//libtl.com/sdk.js'
+<script src='//libtl.com/sdk.js'
 data-zone='10892289'
-data-sdk='show_10892289'>
-</script>
+data-sdk='show_10892289'></script>
 
 <style>
 
@@ -53,54 +51,50 @@ text-align:left;
 background:#1e293b;
 margin:15px;
 padding:18px;
-border-radius:15px;
+border-radius:18px;
 }
 
 .balance{
-font-size:32px;
+font-size:38px;
 font-weight:bold;
 color:#22c55e;
-margin-top:10px;
+margin:15px 0;
 }
 
-button{
+.watch{
 width:90%;
-padding:15px;
-margin:8px;
+padding:18px;
 border:none;
-border-radius:12px;
-font-size:17px;
-font-weight:bold;
-cursor:pointer;
-}
-
-.ad{
+border-radius:18px;
 background:#22c55e;
 color:white;
-}
-
-.bonus{
-background:#3b82f6;
-color:white;
+font-size:18px;
+font-weight:bold;
+cursor:pointer;
 }
 
 .withdraw{
 background:#f59e0b;
 color:white;
+width:90%;
+padding:14px;
+border:none;
+border-radius:14px;
+margin-top:10px;
+font-size:16px;
+font-weight:bold;
 }
 
 input{
 width:90%;
 padding:12px;
 border:none;
-border-radius:10px;
+border-radius:12px;
 margin-top:10px;
 font-size:16px;
-outline:none;
 }
 
 </style>
-
 </head>
 
 <body>
@@ -108,21 +102,11 @@ outline:none;
 <!-- PROFILE -->
 <div class="topbar">
 
-<div class="avatar" id="avatar">
-U
-</div>
+<div class="avatar" id="avatar">U</div>
 
 <div class="userinfo">
-
-<div id="tgname">
-Telegram User
-</div>
-
-<small>
-ID:
-<span id="uid"></span>
-</small>
-
+<div id="tgname">Telegram User</div>
+<small>ID: <span id="uid"></span></small>
 </div>
 
 </div>
@@ -130,50 +114,28 @@ ID:
 <!-- BALANCE -->
 <div class="card">
 
-<h2>💰 Your Balance</h2>
+<h2>Your Balance</h2>
 
 <div class="balance">
 $<span id="usdt">0.00</span>
 </div>
 
-<p>
-🪙 Coins:
-<span id="coins">0</span>
-</p>
-
-<p>
-🏆 Level:
-<span id="level">Bronze</span>
-</p>
+<button class="watch" onclick="watchAd()">
+Watch Ad & Earn
+</button>
 
 </div>
-
-<!-- ADS -->
-<button class="ad" onclick="watchAd()">
-▶ Watch Ad +0.03$
-</button>
-
-<!-- BONUS -->
-<button class="bonus" onclick="bonus()">
-🎁 Daily Bonus +0.01$
-</button>
 
 <!-- WITHDRAW -->
 <div class="card">
 
-<h3>💸 Withdraw</h3>
+<h3>Withdraw</h3>
 
-<input
-id="wallet"
-placeholder="USDT Wallet Address">
+<input id="wallet" placeholder="USDT Wallet">
 
-<input
-id="amount"
-placeholder="Amount">
+<input id="amount" placeholder="Amount">
 
-<button
-class="withdraw"
-onclick="withdrawNow()">
+<button class="withdraw" onclick="withdrawNow()">
 Withdraw
 </button>
 
@@ -181,196 +143,113 @@ Withdraw
 
 <script>
 
-// ================= TELEGRAM USER =================
+// TELEGRAM USER
 
-let userId = "guest";
-let tgName = "Telegram User";
-let avatar = "U";
+let userId="guest";
+let tgName="Telegram User";
+let avatar="U";
 
 if(window.Telegram && Telegram.WebApp){
 
-  Telegram.WebApp.ready();
+Telegram.WebApp.ready();
 
-  const tgUser =
-    Telegram.WebApp.initDataUnsafe.user;
+const tgUser=Telegram.WebApp.initDataUnsafe.user;
 
-  if(tgUser){
+if(tgUser){
 
-    userId = tgUser.id;
+userId=tgUser.id;
 
-    tgName =
-      tgUser.username
-      ? "@"+tgUser.username
-      : tgUser.first_name || "Telegram User";
+tgName=tgUser.username
+?"@"+tgUser.username
+:tgUser.first_name||"Telegram User";
 
-    avatar =
-      tgName
-      .replace("@","")
-      .charAt(0)
-      .toUpperCase();
-  }
+avatar=tgName.replace("@","").charAt(0).toUpperCase();
+
+}
 }
 
-document.getElementById("uid").innerText =
-  userId;
+uid.innerText=userId;
+tgname.innerText=tgName;
+document.getElementById("avatar").innerText=avatar;
 
-document.getElementById("tgname").innerText =
-  tgName;
 
-document.getElementById("avatar").innerText =
-  avatar;
-
-// ================= LOAD PROFILE =================
+// LOAD PROFILE
 
 async function load(){
 
-  try{
+let res=await fetch(
+"/profile/"+userId+"/"+encodeURIComponent(tgName)
+);
 
-    let res = await fetch(
-      "/profile/" +
-      userId +
-      "/" +
-      encodeURIComponent(tgName)
-    );
+let d=await res.json();
 
-    let d = await res.json();
+document.getElementById("usdt").innerText=
+Number(d.usdt||0).toFixed(2);
 
-    document.getElementById("usdt").innerText =
-      Number(d.usdt || 0).toFixed(2);
-
-    document.getElementById("coins").innerText =
-      d.coins || 0;
-
-    document.getElementById("level").innerText =
-      d.level || "Bronze";
-
-  }catch(err){
-
-    console.log(err);
-  }
 }
 
 load();
 
-// ================= WATCH ADS =================
+
+// WATCH AD + REWARD
 
 async function watchAd(){
 
-  try{
+try{
 
-    // show rewarded ad
-    await show_10892289();
+await show_10892289();
 
-    // reward user
-    let res = await fetch("/ads",{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify({
-        userId
-      })
-    });
+let res=await fetch("/ads",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({userId})
+});
 
-    let d = await res.json();
+let d=await res.json();
 
-    if(d.success){
+if(d.success){
 
-      document.getElementById("usdt").innerText =
-        Number(d.usdt).toFixed(2);
+document.getElementById("usdt").innerText=
+Number(d.usdt).toFixed(2);
 
-      document.getElementById("coins").innerText =
-        d.coins;
+alert("+0.03 USDT Added");
 
-      alert("🎉 +0.03 USDT Added!");
-
-      load();
-
-    }else{
-
-      alert(d.message || "Reward failed");
-    }
-
-  }catch(err){
-
-    console.log(err);
-
-    // SDK sometimes throws error even after ad watched
-    // so reward once anyway
-
-    let res = await fetch("/ads",{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify({
-        userId
-      })
-    });
-
-    let d = await res.json();
-
-    if(d.success){
-
-      document.getElementById("usdt").innerText =
-        Number(d.usdt).toFixed(2);
-
-      document.getElementById("coins").innerText =
-        d.coins;
-
-      alert("🎉 Reward Added!");
-
-      load();
-    }
-  }
 }
 
-// ================= BONUS =================
+}catch(err){
 
-async function bonus(){
+alert("Complete ad to earn reward");
 
-  let res = await fetch("/bonus",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({
-      userId
-    })
-  });
-
-  let d = await res.json();
-
-  alert(d.message);
-
-  load();
 }
 
-// ================= WITHDRAW =================
+}
+
+
+// WITHDRAW
 
 async function withdrawNow(){
 
-  let wallet =
-    document.getElementById("wallet").value;
+let wallet=document.getElementById("wallet").value;
+let amount=document.getElementById("amount").value;
 
-  let amount =
-    document.getElementById("amount").value;
+let res=await fetch("/withdraw",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+userId,
+wallet,
+amount:Number(amount)
+})
+});
 
-  let res = await fetch("/withdraw",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({
-      userId,
-      wallet,
-      amount:Number(amount)
-    })
-  });
+let d=await res.json();
 
-  let d = await res.json();
+alert(d.message);
 
-  alert(d.message);
 }
 
 </script>

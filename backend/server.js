@@ -5,20 +5,25 @@ require("dotenv").config();
 
 const app = express();
 
+// ================= MIDDLEWARE =================
+
 app.use(cors());
 app.use(express.json());
 
 // ================= DATABASE =================
 
 mongoose.connect(process.env.MONGO_URI)
-.then(()=>console.log("MongoDB Connected ✅"))
-.catch(err=>console.log(err));
+.then(() => console.log("MongoDB Connected ✅"))
+.catch(err => console.log(err));
 
 // ================= MODEL =================
 
-const User = mongoose.model("User",{
+const UserSchema = new mongoose.Schema({
 
-  userId:String,
+  userId:{
+    type:String,
+    unique:true
+  },
 
   username:{
     type:String,
@@ -28,69 +33,88 @@ const User = mongoose.model("User",{
   usdt:{
     type:Number,
     default:0
+  },
+
+  adsWatched:{
+    type:Number,
+    default:0
+  },
+
+  lastAdTime:{
+    type:Number,
+    default:0
   }
 
 });
 
-// ================= FRONTEND =================
+const User = mongoose.model("User", UserSchema);
 
-app.use(express.static("frontend"));
+// ================= HOME =================
+
+app.get("/", (req,res)=>{
+  res.send("Meta Pro Earn Backend Running ✅");
+});
 
 // ================= PROFILE =================
 
-app.get("/profile/:id/:name", async (req,res)=>{
+app.get("/profile/:userId/:username", async(req,res)=>{
 
   try{
 
-    let user = await User.findOne({
-      userId:req.params.id
-    });
+    const { userId, username } = req.params;
 
+    let user = await User.findOne({ userId });
+
+    // CREATE USER
     if(!user){
 
       user = await User.create({
-
-        userId:req.params.id,
-
-        username:req.params.name,
-
-        usdt:0
-
+        userId,
+        username
       });
 
     }else{
 
-      user.username = req.params.name;
-
+      // UPDATE USERNAME
+      user.username = username;
       await user.save();
+
     }
 
-    res.json(user);
+    res.json({
+      success:true,
+      userId:user.userId,
+      username:user.username,
+      usdt:user.usdt,
+      adsWatched:user.adsWatched
+    });
 
   }catch(err){
 
     console.log(err);
 
     res.json({
-      usdt:0
+      success:false,
+      message:"Profile error"
     });
+
   }
 
 });
 
-// ================= ADS REWARD =================
+// ================= WATCH ADS =================
 
-app.post("/ads", async (req,res)=>{
+app.post("/ads", async(req,res)=>{
 
   try{
 
-    let { userId } = req.body;
+    const { userId } = req.body;
 
     if(!userId){
 
       return res.json({
         success:false,
-        message:"No userId"
+        message:"User ID missing"
       });
 
     }
@@ -99,25 +123,42 @@ app.post("/ads", async (req,res)=>{
 
     if(!user){
 
-      user = await User.create({
-        userId,
-        usdt:0
+      return res.json({
+        success:false,
+        message:"User not found"
       });
 
     }
 
-    // reward
-    user.usdt =
-      Number(user.usdt || 0) + 0.03;
+    // ================= COOLDOWN =================
+
+    const now = Date.now();
+
+    const cooldown = 10000; // 10 seconds
+
+    if(now - user.lastAdTime < cooldown){
+
+      return res.json({
+        success:false,
+        message:"Wait before watching next ad"
+      });
+
+    }
+
+    // ================= REWARD =================
+
+    user.usdt += 0.03;
+
+    user.adsWatched += 1;
+
+    user.lastAdTime = now;
 
     await user.save();
 
     res.json({
-
       success:true,
-
-      usdt:user.usdt
-
+      usdt:user.usdt,
+      adsWatched:user.adsWatched
     });
 
   }catch(err){
@@ -125,23 +166,39 @@ app.post("/ads", async (req,res)=>{
     console.log(err);
 
     res.json({
-
       success:false,
-
-      message:"Server error"
-
+      message:"Ads reward failed"
     });
 
   }
 
 });
 
-// ================= SERVER =================
+// ================= LEADERBOARD =================
+
+app.get("/top", async(req,res)=>{
+
+  try{
+
+    const users = await User.find()
+    .sort({ usdt:-1 })
+    .limit(20);
+
+    res.json(users);
+
+  }catch(err){
+
+    console.log(err);
+
+    res.json([]);
+  }
+
+});
+
+// ================= START =================
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT,()=>{
-
-  console.log("Server running on",PORT);
-
+app.listen(PORT, ()=>{
+  console.log("Server running on port " + PORT);
 });

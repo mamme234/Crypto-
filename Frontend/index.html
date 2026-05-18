@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-
 <title>Meta Pro Earn</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -17,12 +15,17 @@ data-sdk='show_10892289'>
 
 <style>
 
-body{
+*{
 margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
 font-family:Arial;
-background:#0f172a;
+background:linear-gradient(to bottom,#0f172a,#020617);
 color:white;
-text-align:center;
+min-height:100vh;
 }
 
 .topbar{
@@ -31,57 +34,90 @@ padding:15px;
 display:flex;
 align-items:center;
 gap:12px;
+border-bottom:1px solid #1e293b;
 }
 
 .avatar{
-width:50px;
-height:50px;
+width:55px;
+height:55px;
 border-radius:50%;
-background:#334155;
+background:#22c55e;
 display:flex;
 align-items:center;
 justify-content:center;
 font-size:22px;
 font-weight:bold;
+color:white;
 }
 
-.userinfo{
-text-align:left;
+.name{
+font-size:18px;
+font-weight:bold;
+}
+
+.uid{
+font-size:13px;
+color:#94a3b8;
+}
+
+.container{
+padding:20px;
 }
 
 .card{
 background:#1e293b;
-margin:15px;
-padding:18px;
-border-radius:18px;
+border-radius:24px;
+padding:25px;
+text-align:center;
+box-shadow:0 0 25px rgba(0,0,0,.4);
+}
+
+.title{
+font-size:20px;
+margin-bottom:15px;
+color:#cbd5e1;
 }
 
 .balance{
-font-size:38px;
+font-size:42px;
 font-weight:bold;
 color:#22c55e;
-margin:15px 0;
+margin:20px 0;
 }
 
 .watch{
-width:90%;
+width:100%;
 padding:18px;
 border:none;
 border-radius:18px;
-background:#22c55e;
+background:linear-gradient(45deg,#22c55e,#16a34a);
 color:white;
 font-size:18px;
 font-weight:bold;
 cursor:pointer;
+box-shadow:0 0 20px rgba(34,197,94,.4);
+transition:.2s;
+}
+
+.watch:active{
+transform:scale(.96);
+}
+
+.info{
+margin-top:20px;
+font-size:14px;
+color:#94a3b8;
+}
+
+.loading{
+opacity:.6;
+pointer-events:none;
 }
 
 </style>
-
 </head>
 
 <body>
-
-<!-- PROFILE -->
 
 <div class="topbar">
 
@@ -89,143 +125,191 @@ cursor:pointer;
 U
 </div>
 
-<div class="userinfo">
-
-<div id="tgname">
+<div>
+<div class="name" id="tgname">
 Telegram User
 </div>
 
-<small>
+<div class="uid">
 ID:
 <span id="uid"></span>
-</small>
-
+</div>
 </div>
 
 </div>
 
-<!-- BALANCE -->
+<div class="container">
 
 <div class="card">
 
-<h2>Your Balance</h2>
+<div class="title">
+Your Balance
+</div>
 
 <div class="balance">
 $<span id="usdt">0.00</span>
 </div>
 
-<button class="watch" onclick="watchAd()">
+<button class="watch" id="watchBtn" onclick="watchAd()">
 Watch Ad & Earn
 </button>
+
+<div class="info">
+Earn 0.03 USDT for every completed ad
+</div>
+
+</div>
 
 </div>
 
 <script>
 
-// ================= TELEGRAM USER =================
+const BACKEND =
+"https://crypto-4bbj.onrender.com";
 
 let userId = "guest";
 let tgName = "Telegram User";
-let avatar = "U";
+let avatarLetter = "U";
+
+// ================= TELEGRAM USER =================
 
 if(window.Telegram && Telegram.WebApp){
 
-  Telegram.WebApp.ready();
+Telegram.WebApp.ready();
 
-  const tgUser =
-    Telegram.WebApp.initDataUnsafe.user;
+const tgUser =
+Telegram.WebApp.initDataUnsafe.user;
 
-  if(tgUser){
+if(tgUser){
 
-    userId = String(tgUser.id);
+userId = String(tgUser.id);
 
-    tgName =
-      tgUser.username
-      ? "@"+tgUser.username
-      : tgUser.first_name || "Telegram User";
+tgName = tgUser.username
+? "@"+tgUser.username
+: tgUser.first_name;
 
-    avatar =
-      tgName
-      .replace("@","")
-      .charAt(0)
-      .toUpperCase();
-  }
+avatarLetter =
+tgName.replace("@","")
+.charAt(0)
+.toUpperCase();
+
+}
+
 }
 
 document.getElementById("uid").innerText =
-  userId;
+userId;
 
 document.getElementById("tgname").innerText =
-  tgName;
+tgName;
 
 document.getElementById("avatar").innerText =
-  avatar;
+avatarLetter;
 
 // ================= LOAD PROFILE =================
 
-async function load(){
+async function loadProfile(){
 
-  try{
+try{
 
-    let res = await fetch(
-      "/profile/" +
-      userId +
-      "/" +
-      encodeURIComponent(tgName)
-    );
+let res = await fetch(
+`${BACKEND}/profile/${userId}/${encodeURIComponent(tgName)}`
+);
 
-    let d = await res.json();
+let data = await res.json();
 
-    document.getElementById("usdt").innerText =
-      Number(d.usdt || 0).toFixed(2);
+document.getElementById("usdt").innerText =
+Number(data.usdt || 0).toFixed(2);
 
-  }catch(err){
+}catch(err){
 
-    console.log(err);
-  }
+console.log(err);
+
 }
 
-load();
+}
+
+loadProfile();
 
 // ================= WATCH AD =================
 
 async function watchAd(){
 
-  try{
+const btn =
+document.getElementById("watchBtn");
 
-    await show_10892289();
+try{
 
-    let res = await fetch("/ads",{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify({
-        userId
-      })
-    });
+btn.innerText = "Loading Ad...";
+btn.classList.add("loading");
 
-    let d = await res.json();
+const result =
+await show_10892289();
 
-    if(d.success){
+console.log(result);
 
-      document.getElementById("usdt").innerText =
-        Number(d.usdt).toFixed(2);
+// CHECK COMPLETION
 
-      alert("🎉 +0.03 USDT Added!");
+if(result === true || result?.done){
 
-    }else{
+// INSTANT UI UPDATE
 
-      alert(d.message);
-    }
+let current =
+parseFloat(
+document.getElementById("usdt").innerText
+) || 0;
 
-  }catch(err){
+current += 0.03;
 
-    console.log(err);
+document.getElementById("usdt").innerText =
+current.toFixed(2);
 
-    alert("Ad failed or closed");
+// SAVE TO BACKEND
 
-  }
+let res = await fetch(
+`${BACKEND}/ads`,
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+userId
+})
+}
+);
+
+let data = await res.json();
+
+if(data.success){
+
+document.getElementById("usdt").innerText =
+Number(data.usdt).toFixed(2);
+
+alert("+0.03 USDT Added!");
+
+}else{
+
+alert(data.message || "Reward failed");
+
+}
+
+}else{
+
+alert("Watch full ad to earn");
+
+}
+
+}catch(err){
+
+console.log(err);
+
+alert("Ad closed or failed");
+
+}
+
+btn.innerText = "Watch Ad & Earn";
+btn.classList.remove("loading");
 
 }
 

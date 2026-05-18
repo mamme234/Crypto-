@@ -10,10 +10,11 @@
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
+<!-- ADS SDK -->
 <script
-src='//libtl.com/sdk.js'
-data-zone='10892289'
-data-sdk='show_10892289'>
+src="//libtl.com/sdk.js"
+data-zone="10892289"
+data-sdk="show_10892289">
 </script>
 
 <style>
@@ -50,6 +51,7 @@ align-items:center;
 justify-content:center;
 font-size:22px;
 font-weight:bold;
+color:white;
 }
 
 .userinfo{
@@ -87,7 +89,7 @@ color:#cbd5e1;
 }
 
 .balance{
-font-size:44px;
+font-size:46px;
 font-weight:bold;
 color:#22c55e;
 margin:20px 0;
@@ -103,12 +105,12 @@ color:white;
 font-size:18px;
 font-weight:bold;
 cursor:pointer;
-box-shadow:0 0 20px rgba(34,197,94,.4);
 transition:.2s;
+box-shadow:0 0 20px rgba(34,197,94,.3);
 }
 
 .watch:active{
-transform:scale(.96);
+transform:scale(.97);
 }
 
 .watch:disabled{
@@ -124,21 +126,20 @@ color:#94a3b8;
 .stats{
 margin-top:20px;
 display:flex;
-justify-content:space-between;
-gap:10px;
+gap:12px;
 }
 
 .statbox{
 flex:1;
 background:#0f172a;
 padding:15px;
-border-radius:16px;
+border-radius:18px;
 }
 
 .statbox h3{
-font-size:18px;
-margin-bottom:5px;
+font-size:20px;
 color:#22c55e;
+margin-bottom:5px;
 }
 
 .statbox p{
@@ -151,6 +152,8 @@ color:#94a3b8;
 </head>
 
 <body>
+
+<!-- TOP BAR -->
 
 <div class="topbar">
 
@@ -172,6 +175,8 @@ ID:
 </div>
 
 </div>
+
+<!-- CONTENT -->
 
 <div class="container">
 
@@ -195,7 +200,7 @@ Watch Ad & Earn
 </button>
 
 <div class="info">
-Earn 0.03 USDT for every completed ad
+Watch ads and earn 0.03 USDT
 </div>
 
 <div class="stats">
@@ -207,7 +212,7 @@ Earn 0.03 USDT for every completed ad
 
 <div class="statbox">
 <h3>0.03</h3>
-<p>Reward / Ad</p>
+<p>USDT / Ad</p>
 </div>
 
 </div>
@@ -306,37 +311,10 @@ try{
 btn.disabled = true;
 btn.innerText = "Loading Ad...";
 
-// SHOW REWARDED POPUP
+// SHOW REAL REWARDED AD
+await show_10892289();
 
-await show_10892289('pop');
-
-// ================= ADD REWARD =================
-
-// INSTANT UI UPDATE
-
-let current =
-parseFloat(
-document.getElementById("usdt").innerText
-) || 0;
-
-current += 0.03;
-
-document.getElementById("usdt").innerText =
-current.toFixed(2);
-
-// UPDATE ADS COUNT
-
-let ads =
-parseInt(
-document.getElementById("adsCount").innerText
-) || 0;
-
-ads += 1;
-
-document.getElementById("adsCount").innerText =
-ads;
-
-// SAVE TO BACKEND
+// SAVE REWARD TO SERVER
 
 const res = await fetch(`${BACKEND}/ads`,{
 
@@ -353,6 +331,8 @@ userId
 });
 
 const data = await res.json();
+
+// SUCCESS
 
 if(data.success){
 
@@ -374,9 +354,11 @@ alert(data.message || "Reward failed");
 
 console.log(err);
 
-alert("Ad closed or failed");
+alert("Ad failed or closed");
 
 }
+
+// RESET BUTTON
 
 btn.disabled = false;
 btn.innerText = "Watch Ad & Earn";

@@ -1,142 +1,387 @@
+require("dotenv").config();
+
+const TelegramBot = require("node-telegram-bot-api");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
+// ================= CONFIG =================
+
+const BOT_TOKEN = process.env.BOT_TOKEN;
+const MONGO_URI = process.env.MONGO_URI;
+const PORT = process.env.PORT || 3000;
+
+const ADMIN_ID = "7154361039";
+const BOT_USERNAME = "Studybuddy_2025Bot";
+const WEB_APP_URL = "https://myapp1-khaki.vercel.app/";
+const CHANNEL = "@gangs234";
+
+// ================= INIT =================
+
+const bot = new TelegramBot(BOT_TOKEN, { polling: true });
+
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
 // ================= DB =================
-mongoose.connect(process.env.MONGO_URI)
-.then(()=>console.log("Collab Server Connected"));
 
-// ================= MODELS =================
-const User = mongoose.model("User",{
-  userId:String,
-  username:String,
-  adsWatched:{type:Number,default:0}
+mongoose.connect(MONGO_URI)
+.then(() => console.log("✅ MongoDB Connected"))
+.catch(err => console.log(err));
+
+// ================= USER MODEL =================
+
+const User = mongoose.model("User", {
+
+userId: { type: String, unique: true },
+
+username: String,
+firstName: String,
+
+balance: { type: Number, default: 0 },
+refs: { type: Number, default: 0 },
+
+referredBy: String,
+
+adsWatched: { type: Number, default: 0 },
+
+walletType: { type: String, default: "" },
+walletAddress: { type: String, default: "" }
+
 });
 
-const Ledger = mongoose.model("Ledger",{
-  userId:String,
-  type:String,
-  amount:Number,
-  createdAt:{type:Date,default:Date.now}
-});
+// ================= CHECK JOIN =================
 
-const Withdraw = mongoose.model("Withdraw",{
-  userId:String,
-  wallet:String,
-  amount:Number,
-  status:{type:String,default:"pending"}
-});
+async function checkJoin(userId){
 
-// ================= BALANCE =================
-async function getBalance(userId){
-  const tx = await Ledger.find({userId});
-  return tx.reduce((s,t)=>s+t.amount,0);
+try{
+
+const m = await bot.getChatMember(CHANNEL, userId);
+
+return ["member","administrator","creator"].includes(m.status);
+
+}catch{
+return false;
 }
 
-// ================= PROFILE =================
-app.get("/profile/:id", async (req,res)=>{
-  let user = await User.findOne({userId:req.params.id});
-  if(!user) user = await User.create({userId:req.params.id});
-
-  res.json({
-    success:true,
-    user,
-    balance:await getBalance(req.params.id)
-  });
-});
-
-// ================= ADS =================
-app.post("/ads", async (req,res)=>{
-  const {userId} = req.body;
-
-  const reward = 0.03;
-
-  await Ledger.create({
-    userId,
-    type:"ads",
-    amount:reward
-  });
-
-  await User.updateOne(
-    {userId},
-    {$inc:{adsWatched:1}}
-  );
-
-  res.json({
-    success:true,
-    reward,
-    balance:await getBalance(userId)
-  });
-});
-
-// ================= WITHDRAW =================
-app.post("/withdraw", async (req,res)=>{
-  const {userId,wallet,amount} = req.body;
-
-  const balance = await getBalance(userId);
-
-  if(balance < amount){
-    return res.json({success:false,message:"Low balance"});
-  }
-
-  await Withdraw.create({userId,wallet,amount});
-
-  res.json({success:true,message:"Sent to admin"});
-});
-
-// ================= ADMIN =================
-const ADMIN_KEY = process.env.ADMIN_KEY;
-
-// middleware
-function admin(req,res,next){
-  if(req.headers.key !== ADMIN_KEY){
-    return res.json({success:false,message:"No access"});
-  }
-  next();
 }
 
-// ================= GET WITHDRAW REQUESTS =================
-app.get("/admin/withdraws", admin, async (req,res)=>{
-  const list = await Withdraw.find().sort({_id:-1});
-  res.json(list);
+// ================= REF LINK =================
+
+function getRefLink(username){
+return `https://t.me/${BOT_USERNAME}?start=ref_${username.replace("@","")}`;
+}
+
+// ================= PROFILE API =================
+
+app.get("/profile/:userId/:username/:firstName", async(req,res)=>{
+
+try{
+
+let { userId, username, firstName } = req.params;
+
+let user = await User.findOne({ userId });
+
+if(!user){
+
+user = await User.create({
+userId,
+username,
+firstName
 });
 
-// ================= APPROVE =================
-app.post("/admin/approve", admin, async (req,res)=>{
-  const w = await Withdraw.findById(req.body.id);
-  if(!w) return res.json({success:false});
+}else{
 
-  await Ledger.create({
-    userId:w.userId,
-    type:"withdraw",
-    amount:-w.amount
-  });
+user.username = username;
+user.firstName = firstName;
+await user.save();
 
-  w.status="approved";
-  await w.save();
+}
 
-  res.json({success:true});
+res.json({
+success:true,
+balance:user.balance,
+refs:user.refs,
+adsWatched:user.adsWatched,
+username:user.username,
+firstName:user.firstName
 });
 
-// ================= REJECT =================
-app.post("/admin/reject", admin, async (req,res)=>{
-  await Withdraw.findByIdAndUpdate(req.body.id,{status:"rejected"});
-  res.json({success:true});
+}catch(err){
+res.json({ success:false });
+}
+
 });
 
-// ================= TOP =================
-app.get("/top", async (req,res)=>{
-  const users = await Ledger.aggregate([
-    {$group:{_id:"$userId",balance:{$sum:"$amount"}}},
-    {$sort:{balance:-1}},
-    {$limit:10}
-  ]);
+// ================= ADS API =================
 
-  res.json(users);
+app.post("/ads", async(req,res)=>{
+
+try{
+
+const { userId } = req.body;
+
+let user = await User.findOne({ userId });
+
+if(!user){
+return res.json({ success:false });
+}
+
+user.balance += 0.03;
+user.adsWatched += 1;
+
+await user.save();
+
+res.json({
+success:true,
+balance:user.balance,
+adsWatched:user.adsWatched
 });
 
-app.listen(3000,()=>console.log("Collab API Running"));
+}catch(err){
+res.json({ success:false });
+}
+
+});
+
+// ================= START =================
+
+bot.onText(/\/start(?: (.+))?/, async(msg,match)=>{
+
+const id = String(msg.chat.id);
+
+const username = msg.from.username
+? "@"+msg.from.username
+: "@user"+id;
+
+const firstName = msg.from.first_name || "User";
+
+const param = match?.[1];
+
+// CHECK JOIN
+
+const joined = await checkJoin(id);
+
+if(!joined){
+
+return bot.sendMessage(id,"📢 Join channel first",{
+reply_markup:{
+inline_keyboard:[
+[
+{ text:"📢 Join Channel", url:"https://t.me/gangs234" }
+],
+[
+{ text:"✅ Check Join", callback_data:"check_join" }
+]
+]
+}
+});
+
+}
+
+// USER
+
+let user = await User.findOne({ userId:id });
+
+if(!user){
+
+user = await User.create({
+userId:id,
+username,
+firstName
+});
+
+}else{
+
+user.username = username;
+user.firstName = firstName;
+await user.save();
+
+}
+
+// REFERRAL
+
+if(param && param.startsWith("ref_")){
+
+const refUsername = "@"+param.replace("ref_","");
+
+if(refUsername !== username && !user.referredBy){
+
+const refUser = await User.findOne({ username:refUsername });
+
+if(refUser){
+
+user.referredBy = refUsername;
+refUser.refs += 1;
+refUser.balance += 1;
+
+await user.save();
+await refUser.save();
+
+bot.sendMessage(refUser.userId,"🎉 Referral +1 USDT");
+
+}
+
+}
+
+}
+
+// MAIN MENU
+
+bot.sendMessage(id,
+
+`🔥 *META PRO*
+
+👤 ${firstName}
+🆔 ${username}
+
+💰 Balance: ${user.balance.toFixed(2)} USDT
+👥 Referrals: ${user.refs}`,
+
+{
+parse_mode:"Markdown",
+reply_markup:{
+inline_keyboard:[
+[
+{ text:"🚀 Open App", web_app:{ url:WEB_APP_URL } }
+],
+[
+{ text:"💰 Balance", callback_data:"balance" },
+{ text:"👥 Ref", callback_data:"refs" }
+],
+[
+{ text:"💸 Withdraw", callback_data:"withdraw" }
+]
+]
+}
+});
+
+});
+
+// ================= CALLBACKS =================
+
+bot.on("callback_query", async(query)=>{
+
+const id = String(query.message.chat.id);
+
+const user = await User.findOne({ userId:id });
+
+if(!user) return;
+
+// BALANCE
+
+if(query.data === "balance"){
+return bot.sendMessage(id,
+`💰 Balance: ${user.balance.toFixed(2)} USDT`);
+}
+
+// REFS
+
+if(query.data === "refs"){
+return bot.sendMessage(id,
+`👥 Referrals: ${user.refs}
+
+🔗 ${getRefLink(user.username)}`);
+}
+
+// WITHDRAW MENU
+
+if(query.data === "withdraw"){
+
+if(user.balance < 5){
+return bot.sendMessage(id,"❌ Min withdraw 5 USDT");
+}
+
+return bot.sendMessage(id,
+"Choose method",
+{
+reply_markup:{
+inline_keyboard:[
+[
+{ text:"Binance", callback_data:"binance" }
+],
+[
+{ text:"TON", callback_data:"ton" }
+]
+]
+}
+});
+
+}
+
+// BINANCE
+
+if(query.data === "binance"){
+
+user.walletType = "Binance";
+await user.save();
+
+return bot.sendMessage(id,"Send Binance address");
+
+}
+
+// TON
+
+if(query.data === "ton"){
+
+user.walletType = "TON";
+await user.save();
+
+return bot.sendMessage(id,"Send TON address");
+
+}
+
+bot.answerCallbackQuery(query.id);
+
+});
+
+// ================= WALLET MESSAGE =================
+
+bot.on("message", async(msg)=>{
+
+if(!msg.text) return;
+if(msg.text.startsWith("/")) return;
+
+const id = String(msg.chat.id);
+
+const user = await User.findOne({ userId:id });
+
+if(!user || !user.walletType) return;
+
+user.walletAddress = msg.text;
+
+await user.save();
+
+// SEND TO ADMIN
+
+bot.sendMessage(ADMIN_ID,
+
+`💸 WITHDRAW REQUEST
+
+👤 ${user.firstName}
+🆔 ${user.username}
+
+💰 Balance: ${user.balance.toFixed(2)}
+🏦 Method: ${user.walletType}
+📬 Address: ${user.walletAddress}`);
+
+// RESET METHOD ONLY
+
+user.walletType = "";
+await user.save();
+
+bot.sendMessage(id,"✅ Request sent");
+
+});
+
+// ================= SERVER =================
+
+app.get("/",(req,res)=>{
+res.send("Bot Running");
+});
+
+app.listen(PORT,()=>{
+console.log("🚀 Server running on " + PORT);
+});

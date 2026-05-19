@@ -2,222 +2,60 @@
 <html lang="en">
 
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-
 <title>Meta Pro Earn</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-<script
-src="//libtl.com/sdk.js"
+<script src="//libtl.com/sdk.js"
 data-zone="10892289"
 data-sdk="show_10892289">
 </script>
 
 <style>
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial;
-}
-
 body{
-background:#020617;
-color:white;
-padding-bottom:100px;
-}
-
-/* HEADER */
-
-.header{
-padding:20px;
-display:flex;
-align-items:center;
-gap:15px;
+margin:0;
+font-family:Arial;
 background:#0f172a;
-border-bottom:1px solid #1e293b;
-}
-
-.avatar{
-width:60px;
-height:60px;
-border-radius:50%;
-background:linear-gradient(45deg,#22c55e,#16a34a);
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:26px;
-font-weight:bold;
-}
-
-/* USER */
-
-.userinfo h2{
-font-size:20px;
-}
-
-.userinfo p{
-font-size:13px;
-color:#94a3b8;
-margin-top:4px;
-}
-
-/* BALANCE */
-
-.balanceCard{
-margin:20px;
-padding:25px;
-border-radius:28px;
-background:linear-gradient(145deg,#111827,#1e293b);
-box-shadow:0 0 30px rgba(34,197,94,.15);
+color:white;
 text-align:center;
 }
 
-.balanceTitle{
-font-size:18px;
-color:#cbd5e1;
+.card{
+margin:20px;
+padding:20px;
+background:#1e293b;
+border-radius:20px;
 }
 
 .balance{
-font-size:52px;
-font-weight:bold;
-margin:20px 0;
+font-size:40px;
 color:#22c55e;
+margin:10px 0;
 }
 
-/* BUTTONS */
-
-.btn{
+button{
 width:100%;
-padding:18px;
+padding:15px;
+margin-top:10px;
 border:none;
-border-radius:18px;
-font-size:17px;
+border-radius:15px;
 font-weight:bold;
-margin-top:12px;
+font-size:16px;
 cursor:pointer;
-transition:.2s;
-color:white;
 }
 
-.btn:active{
-transform:scale(.97);
-}
+.ad{background:#22c55e;color:white;}
+.daily{background:#2563eb;color:white;}
+.spin{background:#9333ea;color:white;}
+.withdraw{background:#dc2626;color:white;}
 
-.watch{
-background:linear-gradient(45deg,#22c55e,#16a34a);
-}
-
-.daily{
-background:#2563eb;
-}
-
-.spin{
-background:#9333ea;
-}
-
-.withdraw{
-background:#dc2626;
-}
-
-/* STATS */
-
-.stats{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:15px;
-padding:0 20px;
-}
-
-.box{
-background:#111827;
-padding:20px;
-border-radius:20px;
-text-align:center;
-}
-
-.box h2{
-font-size:26px;
-color:#22c55e;
-margin-bottom:6px;
-}
-
-.box p{
+.small{
 font-size:13px;
 color:#94a3b8;
-}
-
-/* REF */
-
-.refCard{
-margin:20px;
-background:#111827;
-padding:20px;
-border-radius:24px;
-}
-
-.refTitle{
-font-size:20px;
-margin-bottom:12px;
-}
-
-.refLink{
-background:#020617;
-padding:15px;
-border-radius:14px;
-font-size:13px;
-word-break:break-all;
-margin-bottom:12px;
-color:#22c55e;
-}
-
-.copyBtn{
-padding:14px;
-width:100%;
-border:none;
-border-radius:14px;
-background:#22c55e;
-color:white;
-font-weight:bold;
-}
-
-/* LEADERBOARD */
-
-.leaderboard{
-margin:20px;
-background:#111827;
-padding:20px;
-border-radius:24px;
-}
-
-.player{
-display:flex;
-justify-content:space-between;
-padding:12px 0;
-border-bottom:1px solid #1e293b;
-}
-
-.player:last-child{
-border:none;
-}
-
-/* FOOTER */
-
-.footer{
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-background:#0f172a;
-padding:15px;
-text-align:center;
-font-size:13px;
-color:#94a3b8;
-border-top:1px solid #1e293b;
+margin-top:10px;
 }
 
 </style>
@@ -226,134 +64,32 @@ border-top:1px solid #1e293b;
 
 <body>
 
-<!-- HEADER -->
+<div class="card">
 
-<div class="header">
+<h2 id="name">User</h2>
 
-<div class="avatar" id="avatar">
-U
-</div>
+<div class="balance">$<span id="balance">0.00</span></div>
 
-<div class="userinfo">
-
-<h2 id="name">
-Telegram User
-</h2>
-
-<p id="username">
-@username
-</p>
-
-</div>
-
-</div>
-
-<!-- BALANCE -->
-
-<div class="balanceCard">
-
-<div class="balanceTitle">
-Your Balance
-</div>
-
-<div class="balance">
-$<span id="balance">0.00</span>
-</div>
-
-<button class="btn watch"
-id="watchBtn"
-onclick="watchAd()">
-
+<button class="ad" onclick="watchAd()" id="adBtn">
 Watch Ad & Earn
-
 </button>
 
-<button class="btn daily"
-onclick="dailyBonus()">
-
+<button class="daily" onclick="dailyBonus()">
 Daily Reward
-
 </button>
 
-<button class="btn spin"
-onclick="spinWheel()">
-
+<button class="spin" onclick="spinWheel()">
 Spin & Win
-
 </button>
 
-<button class="btn withdraw"
-onclick="withdrawNow()">
-
+<button class="withdraw" onclick="withdrawNow()">
 Withdraw
-
 </button>
 
+<div class="small">
+Earn 0.03 USDT per ad
 </div>
 
-<!-- STATS -->
-
-<div class="stats">
-
-<div class="box">
-<h2 id="ads">0</h2>
-<p>Ads Watched</p>
-</div>
-
-<div class="box">
-<h2 id="refs">0</h2>
-<p>Referrals</p>
-</div>
-
-<div class="box">
-<h2 id="spins">0</h2>
-<p>Spins Left</p>
-</div>
-
-<div class="box">
-<h2>0.03+</h2>
-<p>USDT Per Ad</p>
-</div>
-
-</div>
-
-<!-- REF -->
-
-<div class="refCard">
-
-<div class="refTitle">
-Invite Friends
-</div>
-
-<div class="refLink" id="refLink">
-Loading...
-</div>
-
-<button class="copyBtn"
-onclick="copyRef()">
-
-Copy Referral Link
-
-</button>
-
-</div>
-
-<!-- LEADERBOARD -->
-
-<div class="leaderboard">
-
-<h2 style="margin-bottom:15px;">
-Top Earners
-</h2>
-
-<div id="leaders"></div>
-
-</div>
-
-<!-- FOOTER -->
-
-<div class="footer">
-Meta Pro Earn • Telegram Mini App
 </div>
 
 <script>
@@ -366,9 +102,7 @@ const BACKEND =
 // ================= USER =================
 
 let userId = "guest";
-let username = "@guest";
 let firstName = "User";
-let avatar = "U";
 
 // ================= TELEGRAM =================
 
@@ -382,156 +116,96 @@ Telegram.WebApp.initDataUnsafe.user;
 if(tg){
 
 userId = String(tg.id);
-
-username = tg.username
-? "@"+tg.username
-: "@user"+userId;
-
-firstName =
-tg.first_name || "User";
-
-avatar =
-firstName.charAt(0).toUpperCase();
-
-}
-
-}
-
-// ================= UI =================
-
-document.getElementById("avatar").innerText =
-avatar;
+firstName = tg.first_name || "User";
 
 document.getElementById("name").innerText =
 firstName;
 
-document.getElementById("username").innerText =
-username;
-
-// ================= REF LINK =================
-
-const botUsername = "YOUR_BOT_USERNAME";
-
-const refLink =
-`https://t.me/${botUsername}/app?startapp=${userId}`;
-
-document.getElementById("refLink").innerText =
-refLink;
-
-// ================= COPY REF =================
-
-function copyRef(){
-
-navigator.clipboard.writeText(refLink);
-
-alert("Referral link copied!");
+}
 
 }
 
 // ================= LOAD PROFILE =================
 
-async function loadProfile(){
+async function load(){
 
 try{
 
 const res = await fetch(
-`${BACKEND}/profile/${userId}/${encodeURIComponent(username)}`
+`${BACKEND}/profile/${userId}/user`
 );
 
 const data = await res.json();
 
 if(!data.success) return;
 
-const user = data.user;
-
 document.getElementById("balance").innerText =
-Number(user.usdt || 0).toFixed(2);
-
-document.getElementById("ads").innerText =
-user.adsWatched || 0;
-
-document.getElementById("refs").innerText =
-user.referrals || 0;
-
-document.getElementById("spins").innerText =
-user.spins || 0;
+Number(data.user.usdt || 0).toFixed(2);
 
 }catch(err){
-
 console.log(err);
-
 }
 
 }
 
-loadProfile();
+load();
 
 // ================= WATCH AD =================
 
 async function watchAd(){
 
 const btn =
-document.getElementById("watchBtn");
+document.getElementById("adBtn");
 
 try{
 
 btn.disabled = true;
-
-btn.innerText =
-"Loading Ad...";
+btn.innerText = "Loading Ad...";
 
 // SHOW AD
 
+const adResult =
 await show_10892289();
 
-// SAVE REWARD
+// ONLY REWARD IF AD OPENED SUCCESSFULLY
 
-const res =
-await fetch(`${BACKEND}/ads`,{
+if(!adResult){
+alert("Ad not completed");
+btn.disabled = false;
+btn.innerText = "Watch Ad & Earn";
+return;
+}
 
+// SEND REWARD
+
+const res = await fetch(`${BACKEND}/ads`,{
 method:"POST",
-
 headers:{
 "Content-Type":"application/json"
 },
-
-body:JSON.stringify({
-userId
-})
-
+body:JSON.stringify({ userId })
 });
 
-const data =
-await res.json();
+const data = await res.json();
 
 if(data.success){
 
 document.getElementById("balance").innerText =
-Number(data.usdt || 0).toFixed(2);
+Number(data.usdt).toFixed(2);
 
-document.getElementById("ads").innerText =
-data.adsWatched || 0;
-
-alert(`+${data.reward} USDT Added`);
+alert("+0.03 USDT Added!");
 
 }else{
-
-alert(data.message);
-
+alert("Server error");
 }
 
 }catch(err){
-
 console.log(err);
-
 alert("Ad failed");
-
 }
 
 btn.disabled = false;
-
-btn.innerText =
-"Watch Ad & Earn";
+btn.innerText = "Watch Ad & Earn";
 
 }
 
@@ -539,189 +213,65 @@ btn.innerText =
 
 async function dailyBonus(){
 
-try{
-
-const res =
 await fetch(`${BACKEND}/daily`,{
-
 method:"POST",
-
 headers:{
 "Content-Type":"application/json"
 },
-
-body:JSON.stringify({
-userId
-})
-
+body:JSON.stringify({ userId })
 });
 
-const data =
-await res.json();
+load();
 
-if(data.success){
-
-document.getElementById("balance").innerText =
-Number(data.usdt || 0).toFixed(2);
-
-alert("Daily reward claimed!");
-
-}else{
-
-alert(data.message);
-
-}
-
-}catch(err){
-
-console.log(err);
-
-}
-
+alert("Daily reward checked");
 }
 
 // ================= SPIN =================
 
 async function spinWheel(){
 
-try{
-
-const res =
 await fetch(`${BACKEND}/spin`,{
-
 method:"POST",
-
 headers:{
 "Content-Type":"application/json"
 },
-
-body:JSON.stringify({
-userId
-})
-
+body:JSON.stringify({ userId })
 });
 
-const data =
-await res.json();
+load();
 
-if(data.success){
-
-document.getElementById("balance").innerText =
-Number(data.usdt || 0).toFixed(2);
-
-document.getElementById("spins").innerText =
-data.spins || 0;
-
-alert(`You won ${data.reward} USDT`);
-
-}else{
-
-alert(data.message);
-
-}
-
-}catch(err){
-
-console.log(err);
-
-}
-
+alert("Spin done");
 }
 
 // ================= WITHDRAW =================
 
 async function withdrawNow(){
 
-const wallet =
-prompt("Enter USDT Wallet");
-
+let wallet = prompt("Enter Wallet");
 if(!wallet) return;
 
-const amount =
-prompt("Enter Amount");
-
+let amount = prompt("Enter Amount");
 if(!amount) return;
 
-try{
-
-const res =
-await fetch(`${BACKEND}/withdraw`,{
-
+const res = await fetch(`${BACKEND}/withdraw`,{
 method:"POST",
-
 headers:{
 "Content-Type":"application/json"
 },
-
 body:JSON.stringify({
 userId,
 wallet,
 amount:Number(amount)
 })
-
 });
 
-const data =
-await res.json();
+const data = await res.json();
 
-alert(data.message);
+alert(data.message || "Sent");
 
-loadProfile();
-
-}catch(err){
-
-console.log(err);
+load();
 
 }
-
-}
-
-// ================= LEADERBOARD =================
-
-async function loadTop(){
-
-try{
-
-const res =
-await fetch(`${BACKEND}/top`);
-
-const users =
-await res.json();
-
-let html = "";
-
-users.forEach((u,i)=>{
-
-html += `
-
-<div class="player">
-
-<div>
-${i + 1}. ${u.username}
-</div>
-
-<div>
-$${Number(u.usdt || 0).toFixed(2)}
-</div>
-
-</div>
-
-`;
-
-});
-
-document.getElementById("leaders").innerHTML =
-html;
-
-}catch(err){
-
-console.log(err);
-
-}
-
-}
-
-loadTop();
 
 </script>
 

@@ -1,204 +1,142 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-require("dotenv").config();
 
 const app = express();
-
-// ================= MIDDLEWARE =================
-
 app.use(cors());
 app.use(express.json());
 
-// ================= DATABASE =================
-
+// ================= DB =================
 mongoose.connect(process.env.MONGO_URI)
-.then(() => console.log("MongoDB Connected ✅"))
-.catch(err => console.log(err));
+.then(()=>console.log("Collab Server Connected"));
 
-// ================= MODEL =================
-
-const UserSchema = new mongoose.Schema({
-
-  userId:{
-    type:String,
-    unique:true
-  },
-
-  username:{
-    type:String,
-    default:"Telegram User"
-  },
-
-  usdt:{
-    type:Number,
-    default:0
-  },
-
-  adsWatched:{
-    type:Number,
-    default:0
-  },
-
-  lastAdTime:{
-    type:Number,
-    default:0
-  }
-
+// ================= MODELS =================
+const User = mongoose.model("User",{
+  userId:String,
+  username:String,
+  adsWatched:{type:Number,default:0}
 });
 
-const User = mongoose.model("User", UserSchema);
-
-// ================= HOME =================
-
-app.get("/", (req,res)=>{
-  res.send("Meta Pro Earn Backend Running ✅");
+const Ledger = mongoose.model("Ledger",{
+  userId:String,
+  type:String,
+  amount:Number,
+  createdAt:{type:Date,default:Date.now}
 });
+
+const Withdraw = mongoose.model("Withdraw",{
+  userId:String,
+  wallet:String,
+  amount:Number,
+  status:{type:String,default:"pending"}
+});
+
+// ================= BALANCE =================
+async function getBalance(userId){
+  const tx = await Ledger.find({userId});
+  return tx.reduce((s,t)=>s+t.amount,0);
+}
 
 // ================= PROFILE =================
+app.get("/profile/:id", async (req,res)=>{
+  let user = await User.findOne({userId:req.params.id});
+  if(!user) user = await User.create({userId:req.params.id});
 
-app.get("/profile/:userId/:username", async(req,res)=>{
+  res.json({
+    success:true,
+    user,
+    balance:await getBalance(req.params.id)
+  });
+});
 
-  try{
+// ================= ADS =================
+app.post("/ads", async (req,res)=>{
+  const {userId} = req.body;
 
-    const { userId, username } = req.params;
+  const reward = 0.03;
 
-    let user = await User.findOne({ userId });
+  await Ledger.create({
+    userId,
+    type:"ads",
+    amount:reward
+  });
 
-    // CREATE USER
-    if(!user){
+  await User.updateOne(
+    {userId},
+    {$inc:{adsWatched:1}}
+  );
 
-      user = await User.create({
-        userId,
-        username
-      });
+  res.json({
+    success:true,
+    reward,
+    balance:await getBalance(userId)
+  });
+});
 
-    }else{
+// ================= WITHDRAW =================
+app.post("/withdraw", async (req,res)=>{
+  const {userId,wallet,amount} = req.body;
 
-      // UPDATE USERNAME
-      user.username = username;
-      await user.save();
+  const balance = await getBalance(userId);
 
-    }
-
-    res.json({
-      success:true,
-      userId:user.userId,
-      username:user.username,
-      usdt:user.usdt,
-      adsWatched:user.adsWatched
-    });
-
-  }catch(err){
-
-    console.log(err);
-
-    res.json({
-      success:false,
-      message:"Profile error"
-    });
-
+  if(balance < amount){
+    return res.json({success:false,message:"Low balance"});
   }
 
+  await Withdraw.create({userId,wallet,amount});
+
+  res.json({success:true,message:"Sent to admin"});
 });
 
-// ================= WATCH ADS =================
+// ================= ADMIN =================
+const ADMIN_KEY = process.env.ADMIN_KEY;
 
-app.post("/ads", async(req,res)=>{
-
-  try{
-
-    const { userId } = req.body;
-
-    if(!userId){
-
-      return res.json({
-        success:false,
-        message:"User ID missing"
-      });
-
-    }
-
-    let user = await User.findOne({ userId });
-
-    if(!user){
-
-      return res.json({
-        success:false,
-        message:"User not found"
-      });
-
-    }
-
-    // ================= COOLDOWN =================
-
-    const now = Date.now();
-
-    const cooldown = 10000; // 10 seconds
-
-    if(now - user.lastAdTime < cooldown){
-
-      return res.json({
-        success:false,
-        message:"Wait before watching next ad"
-      });
-
-    }
-
-    // ================= REWARD =================
-
-    user.usdt += 0.03;
-
-    user.adsWatched += 1;
-
-    user.lastAdTime = now;
-
-    await user.save();
-
-    res.json({
-      success:true,
-      usdt:user.usdt,
-      adsWatched:user.adsWatched
-    });
-
-  }catch(err){
-
-    console.log(err);
-
-    res.json({
-      success:false,
-      message:"Ads reward failed"
-    });
-
+// middleware
+function admin(req,res,next){
+  if(req.headers.key !== ADMIN_KEY){
+    return res.json({success:false,message:"No access"});
   }
+  next();
+}
 
+// ================= GET WITHDRAW REQUESTS =================
+app.get("/admin/withdraws", admin, async (req,res)=>{
+  const list = await Withdraw.find().sort({_id:-1});
+  res.json(list);
 });
 
-// ================= LEADERBOARD =================
+// ================= APPROVE =================
+app.post("/admin/approve", admin, async (req,res)=>{
+  const w = await Withdraw.findById(req.body.id);
+  if(!w) return res.json({success:false});
 
-app.get("/top", async(req,res)=>{
+  await Ledger.create({
+    userId:w.userId,
+    type:"withdraw",
+    amount:-w.amount
+  });
 
-  try{
+  w.status="approved";
+  await w.save();
 
-    const users = await User.find()
-    .sort({ usdt:-1 })
-    .limit(20);
-
-    res.json(users);
-
-  }catch(err){
-
-    console.log(err);
-
-    res.json([]);
-  }
-
+  res.json({success:true});
 });
 
-// ================= START =================
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, ()=>{
-  console.log("Server running on port " + PORT);
+// ================= REJECT =================
+app.post("/admin/reject", admin, async (req,res)=>{
+  await Withdraw.findByIdAndUpdate(req.body.id,{status:"rejected"});
+  res.json({success:true});
 });
+
+// ================= TOP =================
+app.get("/top", async (req,res)=>{
+  const users = await Ledger.aggregate([
+    {$group:{_id:"$userId",balance:{$sum:"$amount"}}},
+    {$sort:{balance:-1}},
+    {$limit:10}
+  ]);
+
+  res.json(users);
+});
+
+app.listen(3000,()=>console.log("Collab API Running"));

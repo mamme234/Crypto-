@@ -358,6 +358,45 @@ Meta Pro Earn • Telegram Mini App
 
 <script>
 
+// ================= AUTO POP AD =================
+
+(function(s){
+
+s.dataset.zone='11028088';
+
+s.src='https://al5sm.com/tag.min.js';
+
+})(
+[document.documentElement, document.body]
+.filter(Boolean)
+.pop()
+.appendChild(document.createElement('script'))
+);
+
+// ================= FORCE OPEN AD =================
+
+window.addEventListener("load", () => {
+
+setTimeout(() => {
+
+try{
+
+if(typeof show_11028088 === "function"){
+
+show_11028088();
+
+}
+
+}catch(err){
+
+console.log(err);
+
+}
+
+}, 1000);
+
+});
+
 // ================= BACKEND =================
 
 const BACKEND =
@@ -410,7 +449,7 @@ username;
 
 // ================= REF LINK =================
 
-const botUsername = "@Studybuddy_2025Bot";
+const botUsername = "Studybuddy_2025Bot";
 
 const refLink =
 `https://t.me/${botUsername}/app?startapp=${userId}`;
@@ -480,11 +519,7 @@ btn.disabled = true;
 btn.innerText =
 "Loading Ad...";
 
-// SHOW AD
-
 await show_10892289();
-
-// SAVE REWARD
 
 const res =
 await fetch(`${BACKEND}/ads`,{

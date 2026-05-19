@@ -2,25 +2,140 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Crypto Pro Collab</title>
+<title>Crypto Pro</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-body{margin:0;font-family:Arial;background:#020617;color:white;padding-bottom:80px}
-.hidden{display:none}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+body{
+margin:0;
+font-family:Inter;
+background:radial-gradient(circle at top,#0f172a,#020617);
+color:white;
+padding-bottom:90px;
+}
 
 /* HEADER */
-.header{padding:20px;background:#0f172a;display:flex;gap:10px}
-.avatar{width:50px;height:50px;border-radius:50%;background:#22c55e;display:flex;align-items:center;justify-content:center;font-weight:bold}
+.header{
+display:flex;
+align-items:center;
+gap:12px;
+padding:20px;
+background:rgba(255,255,255,0.03);
+backdrop-filter:blur(10px);
+border-bottom:1px solid rgba(255,255,255,0.05);
+}
 
-/* CARD */
-.card{margin:15px;background:#111827;padding:20px;border-radius:15px}
-button{width:100%;padding:14px;margin-top:10px;border:none;border-radius:10px;font-weight:bold}
-.watch{background:#22c55e;color:white}
-.danger{background:#dc2626;color:white}
+.avatar{
+width:52px;
+height:52px;
+border-radius:50%;
+background:linear-gradient(135deg,#22c55e,#16a34a);
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
+font-size:20px;
+box-shadow:0 0 20px rgba(34,197,94,0.4);
+}
 
-/* ADMIN */
-.adminBox{background:#0f172a;padding:10px;border-radius:10px;margin:10px}
+.name h2{margin:0;font-size:16px}
+.name p{margin:2px 0 0;font-size:12px;color:#94a3b8}
+
+/* BALANCE CARD */
+.balanceCard{
+margin:20px;
+padding:25px;
+border-radius:20px;
+background:linear-gradient(145deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02));
+backdrop-filter:blur(12px);
+border:1px solid rgba(255,255,255,0.08);
+text-align:center;
+box-shadow:0 10px 40px rgba(0,0,0,0.4);
+}
+
+.balanceTitle{
+font-size:13px;
+color:#94a3b8;
+}
+
+.balance{
+font-size:42px;
+font-weight:700;
+margin:10px 0;
+color:#22c55e;
+}
+
+/* BUTTONS */
+.btn{
+width:100%;
+padding:14px;
+margin-top:10px;
+border:none;
+border-radius:14px;
+font-weight:600;
+color:white;
+cursor:pointer;
+transition:0.2s;
+}
+
+.btn:active{transform:scale(0.97)}
+
+.green{background:linear-gradient(135deg,#22c55e,#16a34a)}
+.blue{background:linear-gradient(135deg,#3b82f6,#2563eb)}
+.purple{background:linear-gradient(135deg,#a855f7,#7c3aed)}
+.red{background:linear-gradient(135deg,#ef4444,#dc2626)}
+
+/* STATS */
+.stats{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:12px;
+padding:0 20px;
+}
+
+.box{
+background:rgba(255,255,255,0.04);
+border:1px solid rgba(255,255,255,0.06);
+padding:15px;
+border-radius:16px;
+text-align:center;
+backdrop-filter:blur(10px);
+}
+
+.box h3{margin:0;font-size:20px;color:#22c55e}
+.box p{margin:5px 0 0;font-size:12px;color:#94a3b8}
+
+/* ADMIN PANEL */
+.admin{
+margin:20px;
+padding:15px;
+border-radius:16px;
+background:rgba(255,255,255,0.04);
+border:1px solid rgba(255,255,255,0.08);
+}
+
+.req{
+padding:12px;
+margin-top:10px;
+background:rgba(0,0,0,0.3);
+border-radius:12px;
+border:1px solid rgba(255,255,255,0.05);
+}
+
+/* FOOTER */
+.footer{
+position:fixed;
+bottom:0;
+width:100%;
+padding:12px;
+text-align:center;
+font-size:12px;
+color:#64748b;
+background:rgba(15,23,42,0.8);
+backdrop-filter:blur(10px);
+}
 </style>
 </head>
 
@@ -29,39 +144,45 @@ button{width:100%;padding:14px;margin-top:10px;border:none;border-radius:10px;fo
 <!-- HEADER -->
 <div class="header">
 <div class="avatar" id="avatar">U</div>
-<div>
-<div id="name">User</div>
-<div id="username">@user</div>
+<div class="name">
+<h2 id="name">User</h2>
+<p id="username">@user</p>
 </div>
 </div>
 
-<!-- USER MODE -->
+<!-- USER -->
 <div id="userPanel">
 
-<div class="card">
-<h2>$<span id="balance">0.00</span></h2>
+<div class="balanceCard">
+<div class="balanceTitle">Available Balance</div>
+<div class="balance">$<span id="balance">0.00</span></div>
 
-<button class="watch" onclick="watchAd()">Watch Ad</button>
-<button onclick="withdraw()">Withdraw</button>
-<button onclick="toggleAdmin()">Admin Login</button>
+<button class="btn green" onclick="watchAd()">Watch Ad & Earn</button>
+<button class="btn blue" onclick="daily()">Daily Reward</button>
+<button class="btn purple" onclick="spin()">Spin Wheel</button>
+<button class="btn red" onclick="withdraw()">Withdraw</button>
+<button class="btn" style="background:#111827" onclick="openAdmin()">Admin Panel</button>
+</div>
+
+<div class="stats">
+<div class="box"><h3 id="ads">0</h3><p>Ads</p></div>
+<div class="box"><h3 id="refs">0</h3><p>Referrals</p></div>
 </div>
 
 </div>
 
-<!-- ADMIN MODE -->
-<div id="adminPanel" class="hidden">
+<!-- ADMIN -->
+<div id="adminPanel" style="display:none">
 
-<div class="card">
-<h2>Admin Panel</h2>
-<button class="danger" onclick="logoutAdmin()">Logout</button>
-</div>
-
-<div class="card">
+<div class="admin">
 <h3>Withdraw Requests</h3>
-<div id="withdrawList"></div>
+<div id="list"></div>
+<button class="btn red" onclick="closeAdmin()">Exit Admin</button>
 </div>
 
 </div>
+
+<div class="footer">Crypto Pro • Meta Style UI</div>
 
 <script>
 
@@ -69,133 +190,148 @@ const BACKEND="https://crypto-4bbj.onrender.com";
 
 let userId="guest";
 let balance=0;
-let isAdmin=false;
 
 function safe(n){return isNaN(Number(n))?0:Number(n);}
 
-// telegram
+// TELEGRAM
 if(window.Telegram){
-  Telegram.WebApp.ready();
-  const u=Telegram.WebApp.initDataUnsafe.user;
-  if(u){
-    userId=String(u.id);
-    document.getElementById("name").innerText=u.first_name;
-    document.getElementById("username").innerText="@"+(u.username||userId);
-    document.getElementById("avatar").innerText=(u.first_name||"U")[0];
-  }
+Telegram.WebApp.ready();
+const u=Telegram.WebApp.initDataUnsafe.user;
+if(u){
+userId=String(u.id);
+document.getElementById("name").innerText=u.first_name;
+document.getElementById("username").innerText="@"+(u.username||userId);
+document.getElementById("avatar").innerText=(u.first_name||"U")[0];
+}
 }
 
-// ================= LOAD USER =================
+// LOAD
 async function load(){
-  const r=await fetch(`${BACKEND}/profile/${userId}`);
-  const d=await r.json();
+const r=await fetch(`${BACKEND}/profile/${userId}`);
+const d=await r.json();
 
-  balance=safe(d.balance);
-  document.getElementById("balance").innerText=balance.toFixed(2);
+balance=safe(d.balance);
+document.getElementById("balance").innerText=balance.toFixed(2);
+document.getElementById("ads").innerText=d.user?.adsWatched||0;
 }
 load();
 
-// ================= ADS =================
+// ADS
 async function watchAd(){
-  await show_10892289();
+await show_10892289();
 
-  const r=await fetch(`${BACKEND}/ads`,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({userId})
-  });
+const r=await fetch(`${BACKEND}/ads`,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({userId})
+});
 
-  const d=await r.json();
-
-  balance=safe(d.balance);
-  document.getElementById("balance").innerText=balance.toFixed(2);
+const d=await r.json();
+balance=safe(d.balance);
+document.getElementById("balance").innerText=balance.toFixed(2);
 }
 
-// ================= WITHDRAW =================
+// DAILY
+async function daily(){
+const r=await fetch(`${BACKEND}/daily`,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({userId})
+});
+
+const d=await r.json();
+balance=safe(d.balance);
+document.getElementById("balance").innerText=balance.toFixed(2);
+}
+
+// SPIN
+async function spin(){
+const r=await fetch(`${BACKEND}/spin`,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({userId})
+});
+
+const d=await r.json();
+balance=safe(d.balance);
+document.getElementById("balance").innerText=balance.toFixed(2);
+}
+
+// WITHDRAW
 async function withdraw(){
-  const wallet=prompt("Wallet");
-  const amount=prompt("Amount");
+const w=prompt("Wallet");
+const a=prompt("Amount");
 
-  await fetch(`${BACKEND}/withdraw`,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({userId,wallet,amount:Number(amount)})
-  });
+await fetch(`${BACKEND}/withdraw`,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({userId,wallet:w,amount:Number(a)})
+});
 
-  alert("Sent to admin");
+alert("Sent");
 }
 
-// ================= ADMIN LOGIN (SIMPLE LOCAL SWITCH) =================
-function toggleAdmin(){
-  const key=prompt("Enter Admin Key");
+/* ================= ADMIN ================= */
 
-  if(key==="admin123"){
-    isAdmin=true;
-    document.getElementById("userPanel").classList.add("hidden");
-    document.getElementById("adminPanel").classList.remove("hidden");
-    loadWithdraws();
-  }else{
-    alert("Wrong key");
-  }
+async function openAdmin(){
+document.getElementById("userPanel").style.display="none";
+document.getElementById("adminPanel").style.display="block";
+loadWithdraws();
 }
 
-function logoutAdmin(){
-  isAdmin=false;
-  document.getElementById("adminPanel").classList.add("hidden");
-  document.getElementById("userPanel").classList.remove("hidden");
+function closeAdmin(){
+document.getElementById("adminPanel").style.display="none";
+document.getElementById("userPanel").style.display="block";
 }
 
-// ================= ADMIN LOAD =================
 async function loadWithdraws(){
-  const r=await fetch(`${BACKEND}/admin/withdraws`,{
-    headers:{key:"YOUR_ADMIN_KEY"}
-  });
+const r=await fetch(`${BACKEND}/admin/withdraws`,{
+headers:{key:"YOUR_ADMIN_KEY"}
+});
 
-  const data=await r.json();
+const d=await r.json();
 
-  let html="";
+let html="";
 
-  data.forEach(w=>{
-    html+=`
-    <div class="adminBox">
-      <div>User: ${w.userId}</div>
-      <div>Amount: ${w.amount}</div>
-      <div>Status: ${w.status}</div>
+d.forEach(w=>{
+html+=`
+<div class="req">
+<div>User: ${w.userId}</div>
+<div>Amount: $${w.amount}</div>
+<div>Status: ${w.status}</div>
 
-      <button onclick="approve('${w._id}')">Approve</button>
-      <button onclick="reject('${w._id}')">Reject</button>
-    </div>`;
-  });
+<button onclick="approve('${w._id}')">Approve</button>
+<button onclick="reject('${w._id}')">Reject</button>
+</div>`;
+});
 
-  document.getElementById("withdrawList").innerHTML=html;
+document.getElementById("list").innerHTML=html;
 }
 
-// ================= APPROVE =================
 async function approve(id){
-  await fetch(`${BACKEND}/admin/approve`,{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      key:"YOUR_ADMIN_KEY"
-    },
-    body:JSON.stringify({id})
-  });
+await fetch(`${BACKEND}/admin/approve`,{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+key:"YOUR_ADMIN_KEY"
+},
+body:JSON.stringify({id})
+});
 
-  loadWithdraws();
+loadWithdraws();
 }
 
-// ================= REJECT =================
 async function reject(id){
-  await fetch(`${BACKEND}/admin/reject`,{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      key:"YOUR_ADMIN_KEY"
-    },
-    body:JSON.stringify({id})
-  });
+await fetch(`${BACKEND}/admin/reject`,{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+key:"YOUR_ADMIN_KEY"
+},
+body:JSON.stringify({id})
+});
 
-  loadWithdraws();
+loadWithdraws();
 }
 
 </script>

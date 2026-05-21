@@ -13,262 +13,682 @@ app.use(express.json());
 // ================= CONFIG =================
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
+
+const MONGO_URI = process.env.MONGO_URI;
+
+const PORT = process.env.PORT || 3000;
+
 const ADMIN_ID = "7154361039";
-const CHANNEL = "@gangs234";
 
-const bot = new TelegramBot(BOT_TOKEN, { polling: true });
+const WEB_APP_URL =
+"https://myapp1-khaki.vercel.app/";
 
-// ================= DB =================
+const BOT_USERNAME =
+"Studybuddy_2025Bot";
 
-mongoose.connect(process.env.MONGO_URI)
-.then(()=>console.log("DB Connected"))
-.catch(err=>console.log(err));
+// ================= BOT =================
 
-// ================= USER =================
+const bot = new TelegramBot(
+BOT_TOKEN,
+{
+polling:true
+}
+);
+
+// ================= DATABASE =================
+
+mongoose.connect(MONGO_URI)
+.then(()=>{
+
+console.log("MongoDB Connected");
+
+})
+.catch(err=>{
+
+console.log(err);
+
+});
+
+// ================= USER MODEL =================
 
 const User = mongoose.model("User",{
 
 userId:String,
+
 username:String,
+
 firstName:String,
 
-usdt:{ type:Number, default:0 },
-adsWatched:{ type:Number, default:0 },
-refs:{ type:Number, default:0 },
+usdt:{
+type:Number,
+default:0
+},
 
-walletType:String,
-walletAddress:String,
+adsWatched:{
+type:Number,
+default:0
+},
 
-lastDaily:{ type:Number, default:0 }
+refs:{
+type:Number,
+default:0
+},
+
+referredBy:{
+type:String,
+default:null
+},
+
+lastDaily:{
+type:Number,
+default:0
+}
 
 });
 
-// ================= ADS =================
+// ================= HOME =================
 
-app.post("/ads", async(req,res)=>{
+app.get("/",(req,res)=>{
 
-const { userId } = req.body;
-
-let user = await User.findOne({ userId });
-if(!user) return res.json({ success:false });
-
-user.usdt += 0.03;
-user.adsWatched += 1;
-
-await user.save();
-
-res.json({
-success:true,
-usdt:user.usdt,
-adsWatched:user.adsWatched,
-reward:0.03
-});
+res.send("Meta Pro Earn Running");
 
 });
 
 // ================= PROFILE =================
 
-app.get("/profile/:id/:username", async(req,res)=>{
+app.get(
+"/profile/:id/:username",
+async(req,res)=>{
 
-const { id, username } = req.params;
+try{
 
-let user = await User.findOne({ userId:id });
+const {
+id,
+username
+} = req.params;
+
+let user =
+await User.findOne({
+userId:id
+});
 
 if(!user){
 
-user = await User.create({
+user =
+await User.create({
+
 userId:id,
-username
+
+username,
+
+firstName:"User"
+
 });
 
 }
 
 res.json({
+
 success:true,
+
 user
+
 });
+
+}catch(err){
+
+console.log(err);
+
+res.json({
+success:false
+});
+
+}
+
+});
+
+// ================= ADS =================
+
+app.post(
+"/ads",
+async(req,res)=>{
+
+try{
+
+const {
+userId
+} = req.body;
+
+if(!userId){
+
+return res.json({
+success:false
+});
+
+}
+
+let user =
+await User.findOne({
+userId
+});
+
+if(!user){
+
+return res.json({
+success:false
+});
+
+}
+
+// REWARD
+
+const reward = 0.03;
+
+user.usdt += reward;
+
+user.adsWatched += 1;
+
+await user.save();
+
+res.json({
+
+success:true,
+
+usdt:user.usdt,
+
+adsWatched:user.adsWatched,
+
+reward
+
+});
+
+}catch(err){
+
+console.log(err);
+
+res.json({
+success:false
+});
+
+}
 
 });
 
 // ================= DAILY =================
 
-app.post("/daily", async(req,res)=>{
+app.post(
+"/daily",
+async(req,res)=>{
 
-const { userId } = req.body;
+try{
 
-let user = await User.findOne({ userId });
-if(!user) return res.json({ success:false });
+const {
+userId
+} = req.body;
 
-const now = Date.now();
+let user =
+await User.findOne({
+userId
+});
 
-if(now - user.lastDaily < 86400000){
+if(!user){
 
 return res.json({
+success:false
+});
+
+}
+
+const now =
+Date.now();
+
+if(
+now - user.lastDaily
+< 86400000
+){
+
+return res.json({
+
 success:false,
-message:"Already claimed"
+
+message:
+"Already claimed today"
+
 });
 
 }
 
 user.usdt += 0.2;
+
 user.lastDaily = now;
 
 await user.save();
 
 res.json({
+
 success:true,
+
 usdt:user.usdt
+
 });
+
+}catch(err){
+
+console.log(err);
+
+res.json({
+success:false
+});
+
+}
 
 });
 
 // ================= SPIN =================
 
-app.post("/spin", async(req,res)=>{
+app.post(
+"/spin",
+async(req,res)=>{
 
-const { userId } = req.body;
+try{
 
-let user = await User.findOne({ userId });
-if(!user) return res.json({ success:false });
+const {
+userId
+} = req.body;
 
-const reward = (Math.random()*0.1).toFixed(3);
-
-user.usdt += Number(reward);
-
-await user.save();
-
-res.json({
-success:true,
-usdt:user.usdt,
-reward
+let user =
+await User.findOne({
+userId
 });
 
-});
-
-// ================= WITHDRAW =================
-
-app.post("/withdraw", async(req,res)=>{
-
-const { userId, wallet, amount } = req.body;
-
-let user = await User.findOne({ userId });
-if(!user) return res.json({ success:false });
-
-if(amount < 5){
+if(!user){
 
 return res.json({
-success:false,
-message:"Min 5 USDT"
+success:false
 });
 
 }
 
-if(user.usdt < amount){
+const reward =
+Number(
+(Math.random()*0.1)
+.toFixed(3)
+);
 
-return res.json({
-success:false,
-message:"Not enough balance"
-});
-
-}
-
-user.usdt -= amount;
-user.walletAddress = wallet;
+user.usdt += reward;
 
 await user.save();
 
-// SEND TO ADMIN BOT
+res.json({
 
-bot.sendMessage(ADMIN_ID,
+success:true,
 
-`💸 WITHDRAW REQUEST
+reward,
 
-👤 ${user.username}
-🆔 ${user.userId}
+usdt:user.usdt
 
-💰 Amount: ${amount}
-🏦 Wallet: ${wallet}`);
+});
+
+}catch(err){
+
+console.log(err);
 
 res.json({
-success:true,
-message:"Withdraw sent to admin"
+success:false
 });
+
+}
 
 });
 
 // ================= TOP USERS =================
 
-app.get("/top", async(req,res)=>{
+app.get(
+"/top",
+async(req,res)=>{
 
-const users = await User.find()
-.sort({ usdt:-1 })
+try{
+
+const users =
+await User.find()
+.sort({
+usdt:-1
+})
 .limit(10);
 
 res.json(users);
 
+}catch(err){
+
+console.log(err);
+
+res.json([]);
+
+}
+
 });
 
-// ================= BOT START =================
+// ================= WITHDRAW =================
 
-bot.onText(/\/start/, async(msg)=>{
+app.post(
+"/withdraw",
+async(req,res)=>{
 
-const id = msg.chat.id;
+try{
 
-let user = await User.findOne({ userId:id });
+const {
+userId,
+wallet,
+amount
+} = req.body;
+
+if(
+!userId ||
+!wallet ||
+!amount
+){
+
+return res.json({
+
+success:false,
+
+message:
+"Missing data"
+
+});
+
+}
+
+let user =
+await User.findOne({
+userId
+});
 
 if(!user){
 
-user = await User.create({
-userId:id,
-username:msg.from.username || "@user"+id,
-firstName:msg.from.first_name
+return res.json({
+
+success:false,
+
+message:
+"User not found"
+
 });
 
 }
 
-bot.sendMessage(id,
+// MINIMUM
+
+if(
+Number(amount) < 5
+){
+
+return res.json({
+
+success:false,
+
+message:
+"Minimum withdraw is 5 USDT"
+
+});
+
+}
+
+// BALANCE CHECK
+
+if(
+user.usdt < Number(amount)
+){
+
+return res.json({
+
+success:false,
+
+message:
+"Not enough balance"
+
+});
+
+}
+
+// REMOVE BALANCE
+
+user.usdt -= Number(amount);
+
+await user.save();
+
+// SEND TO ADMIN
+
+await bot.sendMessage(
+
+ADMIN_ID,
+
+`💸 NEW WITHDRAW REQUEST
+
+👤 User:
+${user.firstName || "User"}
+
+🆔 ID:
+${user.userId}
+
+📛 Username:
+${user.username || "No Username"}
+
+💰 Amount:
+${Number(amount).toFixed(2)} USDT
+
+🏦 Wallet:
+${wallet}
+
+📊 Remaining Balance:
+${user.usdt.toFixed(2)} USDT`
+
+);
+
+// USER RESPONSE
+
+res.json({
+
+success:true,
+
+message:
+"Withdraw request sent"
+
+});
+
+}catch(err){
+
+console.log(err);
+
+res.json({
+
+success:false,
+
+message:
+"Server error"
+
+});
+
+}
+
+});
+
+// ================= REFERRAL =================
+
+function getRefLink(username){
+
+return
+`https://t.me/${BOT_USERNAME}?start=ref_${username}`;
+
+}
+
+// ================= START BOT =================
+
+bot.onText(
+/\/start(?: (.+))?/,
+async(msg,match)=>{
+
+try{
+
+const id =
+String(msg.chat.id);
+
+const username =
+msg.from.username
+? "@"+msg.from.username
+: "@user"+id;
+
+const firstName =
+msg.from.first_name
+|| "User";
+
+const param =
+match?.[1];
+
+let user =
+await User.findOne({
+userId:id
+});
+
+if(!user){
+
+user =
+await User.create({
+
+userId:id,
+
+username,
+
+firstName
+
+});
+
+}
+
+// REF SYSTEM
+
+if(
+param &&
+param.startsWith("ref_")
+){
+
+const refUsername =
+"@" +
+param.replace("ref_","");
+
+if(
+refUsername !== username &&
+!user.referredBy
+){
+
+const refUser =
+await User.findOne({
+username:refUsername
+});
+
+if(refUser){
+
+user.referredBy =
+refUsername;
+
+refUser.refs += 1;
+
+refUser.usdt += 1;
+
+await user.save();
+
+await refUser.save();
+
+bot.sendMessage(
+
+refUser.userId,
+
+"🎉 New referral joined! +1 USDT"
+
+);
+
+}
+
+}
+
+}
+
+bot.sendMessage(
+
+id,
 
 `🔥 META PRO EARN
 
-💰 Balance: ${user.usdt.toFixed(2)} USDT
-👥 Referrals: ${user.refs}
+👋 Welcome ${firstName}
 
-Start earning now!`,{
+💰 Balance:
+${user.usdt.toFixed(2)} USDT
 
+👥 Referrals:
+${user.refs}
+
+Start earning now 🚀`,
+
+{
 reply_markup:{
 inline_keyboard:[
+
 [
-{ text:"🚀 Open App", web_app:{ url:"https://myapp1-khaki.vercel.app/" } }
+{
+text:"🚀 Open App",
+web_app:{
+url:WEB_APP_URL
+}
+}
 ],
+
 [
-{ text:"💸 Withdraw", callback_data:"withdraw" }
+{
+text:"👥 Referral Link",
+url:getRefLink(
+username.replace("@","")
+)
+}
 ]
+
 ]
 }
-});
+}
 
-});
+);
 
-// ================= WITHDRAW BUTTON =================
+}catch(err){
 
-bot.on("callback_query", async(q)=>{
-
-const id = q.message.chat.id;
-
-if(q.data === "withdraw"){
-
-bot.sendMessage(id,
-
-"Send format:\n\nBINANCE or TON\nADDRESS AMOUNT");
+console.log(err);
 
 }
 
 });
 
-app.get("/",(req,res)=>{
-res.send("Running");
+// ================= ERRORS =================
+
+process.on(
+"uncaughtException",
+(err)=>{
+
+console.log(err);
+
 });
 
-app.listen(process.env.PORT || 3000,()=>{
-console.log("Server running");
+process.on(
+"unhandledRejection",
+(err)=>{
+
+console.log(err);
+
+});
+
+// ================= SERVER =================
+
+app.listen(PORT,()=>{
+
+console.log(
+"Server running on " + PORT
+);
+
 });

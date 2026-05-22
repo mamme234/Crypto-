@@ -1,6 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const path = require("path");
+const { spawn } = require("child_process");
 require("dotenv").config();
 
 const app = express();
@@ -8,12 +10,21 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-/* 👇 FRONTEND FIX */
-app.use(express.static("frontend"));
+/* FRONTEND (IMPORTANT) */
+app.use(express.static(path.join(__dirname, "../frontend")));
 
-/* DB CONNECT */
+const PORT = process.env.PORT || 3000;
+
+/* START BOT INSIDE SAME RENDER SERVICE */
+spawn("node", ["bot.js"], {
+cwd: __dirname,
+stdio: "inherit"
+});
+
+/* CONNECT MONGO */
 mongoose.connect(process.env.MONGO_URL)
-.then(()=>console.log("MongoDB Connected"));
+.then(()=>console.log("MongoDB Connected"))
+.catch(err=>console.log(err));
 
 /* USER MODEL */
 const User = mongoose.model("User", new mongoose.Schema({
@@ -35,38 +46,36 @@ date: { type: Date, default: Date.now }
 
 /* GET USER */
 async function getUser(userId){
-let u = await User.findOne({ userId });
-if(!u) u = await User.create({ userId });
-return u;
+let user = await User.findOne({ userId });
+if(!user) user = await User.create({ userId });
+return user;
 }
 
 /* PROFILE */
 app.get("/profile/:id", async (req,res)=>{
-const u = await getUser(req.params.id);
-res.json(u);
+const user = await getUser(req.params.id);
+res.json(user);
 });
 
 /* ADS REWARD */
 app.post("/ads", async (req,res)=>{
-const u = await getUser(req.body.userId);
+const user = await getUser(req.body.userId);
 
 const now = Date.now();
-
-/* anti spam */
-if(now - u.lastAd < 10000){
+if(now - user.lastAd < 10000){
 return res.json({ success:false, message:"Cooldown" });
 }
 
-u.lastAd = now;
-u.balance += 0.03;
-u.adsWatched++;
+user.lastAd = now;
+user.balance += 0.03;
+user.adsWatched++;
 
-await u.save();
+await user.save();
 
 res.json({
 success:true,
-balance:u.balance,
-adsWatched:u.adsWatched
+balance:user.balance,
+adsWatched:user.adsWatched
 });
 });
 
@@ -78,19 +87,19 @@ if(!refId || userId === refId){
 return res.json({ success:false });
 }
 
-const u = await getUser(userId);
-const r = await getUser(refId);
+const user = await getUser(userId);
+const ref = await getUser(refId);
 
-if(u.refUsed){
+if(user.refUsed){
 return res.json({ success:false });
 }
 
-u.refUsed = true;
-r.balance += 0.1;
-r.refs++;
+user.refUsed = true;
+ref.balance += 0.1;
+ref.refs++;
 
-await u.save();
-await r.save();
+await user.save();
+await ref.save();
 
 res.json({ success:true });
 });
@@ -99,14 +108,14 @@ res.json({ success:true });
 app.post("/withdraw", async (req,res)=>{
 const { userId, amount } = req.body;
 
-const u = await getUser(userId);
+const user = await getUser(userId);
 
-if(u.balance < amount){
+if(user.balance < amount){
 return res.json({ success:false, message:"Not enough balance" });
 }
 
-u.balance -= amount;
-await u.save();
+user.balance -= amount;
+await user.save();
 
 await Withdraw.create({
 userId,
@@ -144,6 +153,7 @@ await w.save();
 res.json({ success:true });
 });
 
-app.listen(3000, ()=>{
-console.log("Server running on port 3000");
+/* START SERVER */
+app.listen(PORT, ()=>{
+console.log("Server running on port " + PORT);
 });

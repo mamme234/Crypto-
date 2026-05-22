@@ -7,37 +7,61 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-body{background:#0f172a;color:white;font-family:Arial;text-align:center}
-.card{margin:20px;padding:20px;background:#1e293b;border-radius:15px}
-button{padding:15px;width:80%;margin:10px;border:none;border-radius:10px;background:#22c55e;color:white}
+body{
+margin:0;
+font-family:Arial;
+background:#0f172a;
+color:white;
+text-align:center;
+}
+
+.card{
+margin:20px;
+padding:20px;
+background:#1e293b;
+border-radius:20px;
+}
+
+button{
+padding:15px;
+width:85%;
+margin:10px;
+border:none;
+border-radius:12px;
+background:#22c55e;
+color:white;
+font-size:16px;
+}
 </style>
 </head>
 
 <body>
 
 <div class="card">
-<h2>$<span id="bal">0.00</span></h2>
+<h2>Balance: $<span id="bal">0.00</span></h2>
 <p>Ads: <span id="ads">0</span></p>
 <p>Refs: <span id="refs">0</span></p>
 
-<button onclick="ad()">Watch Ad (+0.03)</button>
-<button onclick="wd()">Withdraw</button>
+<button onclick="watchAd()">Watch Ad (+0.03)</button>
+<button onclick="withdraw()">Withdraw</button>
 </div>
 
 <script>
 
-const BACKEND = "";
-
 let userId = "guest";
 
+/* Telegram ID */
 if(window.Telegram){
 Telegram.WebApp.ready();
 const u = Telegram.WebApp.initDataUnsafe.user;
 if(u) userId = String(u.id);
 }
 
-function n(v){ return isNaN(Number(v))?0:Number(v); }
+function n(v){
+return isNaN(Number(v)) ? 0 : Number(v);
+}
 
+/* LOAD PROFILE */
 async function load(){
 const r = await fetch(`/profile/${userId}`);
 const d = await r.json();
@@ -46,9 +70,14 @@ document.getElementById("bal").innerText = n(d.balance).toFixed(2);
 document.getElementById("ads").innerText = d.adsWatched;
 document.getElementById("refs").innerText = d.refs;
 }
+
 load();
 
-async function ad(){
+/* WATCH AD */
+async function watchAd(){
+
+await show_10892289();
+
 await fetch("/ads",{
 method:"POST",
 headers:{ "Content-Type":"application/json" },
@@ -58,14 +87,21 @@ body:JSON.stringify({ userId })
 load();
 }
 
-async function wd(){
-const a = prompt("Amount:");
+/* WITHDRAW */
+async function withdraw(){
+
+const amount = prompt("Enter amount:");
+
 await fetch("/withdraw",{
 method:"POST",
 headers:{ "Content-Type":"application/json" },
-body:JSON.stringify({ userId, amount:Number(a) })
+body:JSON.stringify({
+userId,
+amount:Number(amount)
+})
 });
-alert("Sent");
+
+alert("Request sent");
 }
 
 </script>

@@ -9,7 +9,7 @@ const ADMIN_ID = process.env.ADMIN_ID;
 
 /* START */
 bot.onText(/\/start/, (msg)=>{
-bot.sendMessage(msg.chat.id, "🔥 Meta Pro Earn V2 Admin Bot");
+bot.sendMessage(msg.chat.id, "🔥 Meta Pro Earn V2 Admin Bot Running");
 });
 
 /* VIEW WITHDRAW REQUESTS */

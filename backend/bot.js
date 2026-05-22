@@ -1,112 +1,47 @@
 const TelegramBot = require("node-telegram-bot-api");
-const mongoose = require("mongoose");
+const axios = require("axios");
+require("dotenv").config();
 
-// ===== CONFIG =====
-const TOKEN = process.env.BOT_TOKEN;
-const MONGO = process.env.MONGO_URI;
-const APP_URL = "https://myapp1-khaki.vercel.app";
+const bot = new TelegramBot(process.env.BOT_TOKEN, { polling:true });
 
-// ===== CONNECT DB =====
-mongoose.connect(MONGO)
-.then(()=>console.log("MongoDB Connected"))
-.catch(err=>console.log(err));
+const API = "http://localhost:3000";
+const ADMIN_ID = process.env.ADMIN_ID;
 
-// ===== USER MODEL =====
-const User = mongoose.model("User", new mongoose.Schema({
-  tgId: String,
-  name: String,
-  coins: { type: Number, default: 0 },
-  referrals: { type: Number, default: 0 },
-  referredBy: String
-}));
-
-// ===== BOT =====
-const bot = new TelegramBot(TOKEN, { polling: true });
-
-// ===== START WITH REFERRAL =====
-bot.onText(/\/start (.+)/, async (msg, match) => {
-
-  const chatId = msg.chat.id;
-  const tgId = msg.from.id.toString();
-  const name = msg.from.first_name;
-
-  const refData = match[1]; // example: 12345_name
-  const refId = refData.split("_")[0];
-
-  let user = await User.findOne({ tgId });
-
-  // CREATE USER
-  if (!user) {
-
-    user = new User({
-      tgId,
-      name,
-      referredBy: refId !== tgId ? refId : null
-    });
-
-    await user.save();
-
-    // GIVE REFERRAL REWARD
-    if (refId && refId !== tgId) {
-
-      const refUser = await User.findOne({ tgId: refId });
-
-      if (refUser) {
-        refUser.coins += 100; // ✅ 100 coins
-        refUser.referrals += 1;
-        await refUser.save();
-
-        bot.sendMessage(refId, "🎉 You got 100 coins from referral!");
-      }
-    }
-  }
-
-  // OPEN APP BUTTON
-  bot.sendMessage(chatId, "🚀 Tap below to open app", {
-    reply_markup: {
-      inline_keyboard: [
-        [
-          {
-            text: "🔥 Open App",
-            web_app: { url: APP_URL }
-          }
-        ]
-      ]
-    }
-  });
-
+/* START */
+bot.onText(/\/start/, (msg)=>{
+bot.sendMessage(msg.chat.id, "🔥 Meta Pro Earn V2 Admin Bot");
 });
 
-// ===== NORMAL START =====
-bot.onText(/\/start$/, async (msg) => {
+/* VIEW WITHDRAW REQUESTS */
+bot.onText(/\/withdraws/, async (msg)=>{
 
-  const chatId = msg.chat.id;
-  const tgId = msg.from.id.toString();
-  const name = msg.from.first_name;
+if(String(msg.chat.id) !== ADMIN_ID){
+return bot.sendMessage(msg.chat.id, "Unauthorized");
+}
 
-  let user = await User.findOne({ tgId });
+const res = await axios.get(`${API}/withdraws/${ADMIN_ID}`);
 
-  if (!user) {
-    user = new User({ tgId, name });
-    await user.save();
-  }
+if(res.data.length === 0){
+return bot.sendMessage(msg.chat.id, "No pending requests");
+}
 
-  bot.sendMessage(chatId, "🚀 Tap below to open app", {
-    reply_markup: {
-      inline_keyboard: [
-        [
-          {
-            text: "🔥 Open App",
-            web_app: { url: APP_URL }
-          }
-        ]
-      ]
-    }
-  });
-
+res.data.forEach(w=>{
+bot.sendMessage(msg.chat.id,
+`🧾 ID: ${w._id}\n👤 User: ${w.userId}\n💰 Amount: ${w.amount}`);
+});
 });
 
-// ===== ERROR LOG =====
-bot.on("polling_error", (err) => console.log(err));
+/* APPROVE WITHDRAW */
+bot.onText(/\/approve (.+)/, async (msg, match)=>{
 
-console.log("🤖 Bot is running...");
+if(String(msg.chat.id) !== ADMIN_ID){
+return;
+}
+
+await axios.post(`${API}/approve`, {
+adminId: ADMIN_ID,
+withdrawId: match[1]
+});
+
+bot.sendMessage(msg.chat.id, "✅ Approved");
+});

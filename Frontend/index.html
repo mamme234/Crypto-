@@ -1,531 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-
-<title>Meta Pro Earn</title>
+<title>Meta Pro Earn V2</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-<script
-src="//libtl.com/sdk.js"
-data-zone="10892289"
-data-sdk="show_10892289">
-</script>
-
 <style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-}
-
-body{
-font-family:Arial;
-background:linear-gradient(to bottom,#0f172a,#020617);
-color:white;
-min-height:100vh;
-}
-
-/* ================= TOPBAR ================= */
-
-.topbar{
-background:#111827;
-padding:15px;
-display:flex;
-align-items:center;
-gap:12px;
-border-bottom:1px solid #1e293b;
-}
-
-.avatar{
-width:55px;
-height:55px;
-border-radius:50%;
-background:#22c55e;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:22px;
-font-weight:bold;
-color:white;
-}
-
-.userinfo{
-display:flex;
-flex-direction:column;
-}
-
-.name{
-font-size:18px;
-font-weight:bold;
-}
-
-.uid{
-font-size:13px;
-color:#94a3b8;
-margin-top:2px;
-}
-
-/* ================= PROFILE ================= */
-
-.profileCard{
-background:#1e293b;
-margin:20px;
-padding:20px;
-border-radius:24px;
-box-shadow:0 0 20px rgba(0,0,0,.3);
-}
-
-.profileTop{
-display:flex;
-align-items:center;
-gap:15px;
-margin-bottom:20px;
-}
-
-.profileAvatar{
-width:70px;
-height:70px;
-border-radius:50%;
-background:#22c55e;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:28px;
-font-weight:bold;
-color:white;
-}
-
-.profileTop h2{
-font-size:22px;
-margin-bottom:4px;
-}
-
-.profileTop p{
-color:#94a3b8;
-font-size:14px;
-}
-
-.profileStats{
-display:flex;
-gap:10px;
-}
-
-.pbox{
-flex:1;
-background:#0f172a;
-padding:15px;
-border-radius:18px;
-text-align:center;
-}
-
-.pbox h3{
-font-size:20px;
-color:#22c55e;
-margin-bottom:5px;
-}
-
-.pbox p{
-font-size:13px;
-color:#94a3b8;
-}
-
-/* ================= MAIN CARD ================= */
-
-.container{
-padding:20px;
-}
-
-.card{
-background:#1e293b;
-border-radius:24px;
-padding:25px;
-text-align:center;
-box-shadow:0 0 25px rgba(0,0,0,.4);
-}
-
-.title{
-font-size:22px;
-margin-bottom:10px;
-color:#cbd5e1;
-}
-
-.balance{
-font-size:46px;
-font-weight:bold;
-color:#22c55e;
-margin:20px 0;
-}
-
-.watch{
-width:100%;
-padding:18px;
-border:none;
-border-radius:18px;
-background:linear-gradient(45deg,#22c55e,#16a34a);
-color:white;
-font-size:18px;
-font-weight:bold;
-cursor:pointer;
-transition:.2s;
-box-shadow:0 0 20px rgba(34,197,94,.3);
-}
-
-.watch:active{
-transform:scale(.97);
-}
-
-.watch:disabled{
-opacity:.6;
-}
-
-.info{
-margin-top:18px;
-font-size:14px;
-color:#94a3b8;
-}
-
-.stats{
-margin-top:20px;
-display:flex;
-gap:12px;
-}
-
-.statbox{
-flex:1;
-background:#0f172a;
-padding:15px;
-border-radius:18px;
-}
-
-.statbox h3{
-font-size:20px;
-color:#22c55e;
-margin-bottom:5px;
-}
-
-.statbox p{
-font-size:13px;
-color:#94a3b8;
-}
-
+body{background:#0f172a;color:white;font-family:Arial;text-align:center}
+.card{margin:20px;padding:20px;background:#1e293b;border-radius:15px}
+button{padding:15px;width:80%;margin:10px;border:none;border-radius:10px;background:#22c55e;color:white}
 </style>
-
 </head>
 
 <body>
 
-<!-- ================= TOPBAR ================= -->
-
-<div class="topbar">
-
-<div class="avatar" id="avatar">
-U
-</div>
-
-<div class="userinfo">
-
-<div class="name" id="tgname">
-Telegram User
-</div>
-
-<div class="uid">
-ID:
-<span id="uid"></span>
-</div>
-
-</div>
-
-</div>
-
-<!-- ================= PROFILE ================= -->
-
-<div class="profileCard">
-
-<div class="profileTop">
-
-<div class="profileAvatar"
-id="profileAvatar">
-U
-</div>
-
-<div>
-
-<h2 id="profileName">
-Telegram User
-</h2>
-
-<p id="profileUsername">
-@username
-</p>
-
-</div>
-
-</div>
-
-<div class="profileStats">
-
-<div class="pbox">
-<h3 id="profileBalance">
-0.00
-</h3>
-<p>USDT</p>
-</div>
-
-<div class="pbox">
-<h3 id="profileRefs">
-0
-</h3>
-<p>Referrals</p>
-</div>
-
-<div class="pbox">
-<h3 id="profileAds">
-0
-</h3>
-<p>Ads</p>
-</div>
-
-</div>
-
-</div>
-
-<!-- ================= MAIN ================= -->
-
-<div class="container">
-
 <div class="card">
+<h2>$<span id="bal">0.00</span></h2>
+<p>Ads: <span id="ads">0</span></p>
+<p>Refs: <span id="refs">0</span></p>
 
-<div class="title">
-Your Balance
-</div>
-
-<div class="balance">
-$<span id="usdt">0.00</span>
-</div>
-
-<button
-class="watch"
-id="watchBtn"
-onclick="watchAd()">
-
-Watch Ad & Earn
-
-</button>
-
-<div class="info">
-Watch ads and earn 0.03 USDT
-</div>
-
-<div class="stats">
-
-<div class="statbox">
-<h3 id="adsCount">0</h3>
-<p>Ads Watched</p>
-</div>
-
-<div class="statbox">
-<h3>0.03</h3>
-<p>USDT / Ad</p>
-</div>
-
-</div>
-
-</div>
-
+<button onclick="ad()">Watch Ad (+0.03)</button>
+<button onclick="wd()">Withdraw</button>
 </div>
 
 <script>
 
-// ================= BACKEND =================
-
-const BACKEND =
-"https://crypto-4bbj.onrender.com";
-
-// ================= USER =================
+const BACKEND = "";
 
 let userId = "guest";
-let tgName = "Telegram User";
-let firstName = "User";
-let avatarLetter = "U";
 
-// ================= TELEGRAM =================
-
-if(window.Telegram && Telegram.WebApp){
-
+if(window.Telegram){
 Telegram.WebApp.ready();
-
-const tgUser =
-Telegram.WebApp.initDataUnsafe.user;
-
-if(tgUser){
-
-userId = String(tgUser.id);
-
-tgName = tgUser.username
-? "@"+tgUser.username
-: "@user"+userId;
-
-firstName =
-tgUser.first_name || "User";
-
-avatarLetter =
-firstName.charAt(0).toUpperCase();
-
+const u = Telegram.WebApp.initDataUnsafe.user;
+if(u) userId = String(u.id);
 }
 
+function n(v){ return isNaN(Number(v))?0:Number(v); }
+
+async function load(){
+const r = await fetch(`/profile/${userId}`);
+const d = await r.json();
+
+document.getElementById("bal").innerText = n(d.balance).toFixed(2);
+document.getElementById("ads").innerText = d.adsWatched;
+document.getElementById("refs").innerText = d.refs;
 }
+load();
 
-// ================= TOP UI =================
-
-document.getElementById("uid").innerText =
-userId;
-
-document.getElementById("tgname").innerText =
-tgName;
-
-document.getElementById("avatar").innerText =
-avatarLetter;
-
-// ================= LOAD PROFILE =================
-
-async function loadProfile(){
-
-try{
-
-const res = await fetch(
-
-`${BACKEND}/profile/${userId}/${encodeURIComponent(tgName)}/${encodeURIComponent(firstName)}`
-
-);
-
-const data = await res.json();
-
-// MAIN BALANCE
-
-document.getElementById("usdt").innerText =
-Number(data.balance || 0).toFixed(2);
-
-// PROFILE
-
-document.getElementById("profileName").innerText =
-data.firstName || firstName;
-
-document.getElementById("profileUsername").innerText =
-data.username || tgName;
-
-document.getElementById("profileAvatar").innerText =
-avatarLetter;
-
-document.getElementById("profileBalance").innerText =
-Number(data.balance || 0).toFixed(2);
-
-document.getElementById("profileRefs").innerText =
-data.refs || 0;
-
-document.getElementById("profileAds").innerText =
-data.adsWatched || 0;
-
-document.getElementById("adsCount").innerText =
-data.adsWatched || 0;
-
-}catch(err){
-
-console.log(err);
-
-}
-
-}
-
-loadProfile();
-
-// ================= WATCH AD =================
-
-async function watchAd(){
-
-const btn =
-document.getElementById("watchBtn");
-
-try{
-
-btn.disabled = true;
-
-btn.innerText =
-"Loading Ad...";
-
-// SHOW REAL AD
-
-await show_10892289();
-
-// SAVE REWARD
-
-const res =
-await fetch(
-`${BACKEND}/ads`,
-{
+async function ad(){
+await fetch("/ads",{
 method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({ userId })
+});
 
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify({
-userId
-})
-
-}
-);
-
-const data =
-await res.json();
-
-if(data.success){
-
-// UPDATE UI
-
-document.getElementById("usdt").innerText =
-Number(data.balance).toFixed(2);
-
-document.getElementById("profileBalance").innerText =
-Number(data.balance).toFixed(2);
-
-document.getElementById("adsCount").innerText =
-data.adsWatched;
-
-document.getElementById("profileAds").innerText =
-data.adsWatched;
-
-alert("+0.03 USDT Added!");
-
-}else{
-
-alert("Reward failed");
-
+load();
 }
 
-}catch(err){
-
-console.log(err);
-
-alert("Ad closed or failed");
-
-}
-
-// RESET BUTTON
-
-btn.disabled = false;
-
-btn.innerText =
-"Watch Ad & Earn";
-
+async function wd(){
+const a = prompt("Amount:");
+await fetch("/withdraw",{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({ userId, amount:Number(a) })
+});
+alert("Sent");
 }
 
 </script>
 
 </body>
-  </html>
+</html>

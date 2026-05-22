@@ -1,15 +1,18 @@
 {
-  "name": "studybuddy-bot",
-  "version": "1.0.0",
-  "main": "Backend/server.js",
+  "name": "meta-pro-earn-v2",
+  "version": "2.0.0",
+  "main": "backend/server.js",
+  "type": "commonjs",
   "scripts": {
-    "start": "node Backend/server.js"
+    "start": "node backend/server.js",
+    "bot": "node bot.js"
   },
   "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^8.0.0",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "mongoose": "^8.5.0",
-    "node-telegram-bot-api": "^0.66.0"
+    "dotenv": "^16.0.0",
+    "node-telegram-bot-api": "^0.64.0",
+    "axios": "^1.6.0"
   }
 }

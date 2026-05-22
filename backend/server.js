@@ -10,21 +10,20 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-/* FRONTEND (IMPORTANT) */
+/* FRONTEND */
 app.use(express.static(path.join(__dirname, "../frontend")));
 
 const PORT = process.env.PORT || 3000;
 
-/* START BOT INSIDE SAME RENDER SERVICE */
+/* START BOT */
 spawn("node", ["bot.js"], {
 cwd: __dirname,
 stdio: "inherit"
 });
 
-/* CONNECT MONGO */
+/* DB */
 mongoose.connect(process.env.MONGO_URL)
-.then(()=>console.log("MongoDB Connected"))
-.catch(err=>console.log(err));
+.then(()=>console.log("MongoDB Connected"));
 
 /* USER MODEL */
 const User = mongoose.model("User", new mongoose.Schema({
@@ -36,7 +35,7 @@ refUsed: { type: Boolean, default: false },
 lastAd: { type: Number, default: 0 }
 }));
 
-/* WITHDRAW MODEL */
+/* WITHDRAW */
 const Withdraw = mongoose.model("Withdraw", new mongoose.Schema({
 userId: String,
 amount: Number,
@@ -44,10 +43,21 @@ status: { type: String, default: "pending" },
 date: { type: Date, default: Date.now }
 }));
 
-/* GET USER */
+/* SAFE USER */
 async function getUser(userId){
 let user = await User.findOne({ userId });
-if(!user) user = await User.create({ userId });
+
+if(!user){
+user = await User.create({
+userId,
+balance: 0,
+refs: 0,
+adsWatched: 0,
+refUsed: false,
+lastAd: 0
+});
+}
+
 return user;
 }
 
@@ -57,13 +67,13 @@ const user = await getUser(req.params.id);
 res.json(user);
 });
 
-/* ADS REWARD */
+/* ADS */
 app.post("/ads", async (req,res)=>{
 const user = await getUser(req.body.userId);
 
 const now = Date.now();
 if(now - user.lastAd < 10000){
-return res.json({ success:false, message:"Cooldown" });
+return res.json({ success:false });
 }
 
 user.lastAd = now;
@@ -79,7 +89,7 @@ adsWatched:user.adsWatched
 });
 });
 
-/* REFERRAL */
+/* REF */
 app.post("/ref", async (req,res)=>{
 const { userId, refId } = req.body;
 
@@ -111,7 +121,7 @@ const { userId, amount } = req.body;
 const user = await getUser(userId);
 
 if(user.balance < amount){
-return res.json({ success:false, message:"Not enough balance" });
+return res.json({ success:false });
 }
 
 user.balance -= amount;
@@ -126,34 +136,6 @@ status:"pending"
 res.json({ success:true });
 });
 
-/* ADMIN WITHDRAW LIST */
-app.get("/withdraws/:adminId", async (req,res)=>{
-if(req.params.adminId !== process.env.ADMIN_ID){
-return res.json({ error:"no access" });
-}
-
-const list = await Withdraw.find({ status:"pending" });
-res.json(list);
-});
-
-/* APPROVE WITHDRAW */
-app.post("/approve", async (req,res)=>{
-const { adminId, withdrawId } = req.body;
-
-if(adminId !== process.env.ADMIN_ID){
-return res.json({ success:false });
-}
-
-const w = await Withdraw.findById(withdrawId);
-if(!w) return res.json({ success:false });
-
-w.status = "approved";
-await w.save();
-
-res.json({ success:true });
-});
-
-/* START SERVER */
 app.listen(PORT, ()=>{
 console.log("Server running on port " + PORT);
 });

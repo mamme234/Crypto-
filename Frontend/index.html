@@ -2,107 +2,53 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Alpha Pro Earn</title>
+<title>Meta Pro Earn V2</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-body{
-margin:0;
-font-family:Arial;
-background:#0f172a;
-color:white;
-text-align:center;
-}
-
-.card{
-margin:15px;
-padding:20px;
-background:#1e293b;
-border-radius:16px;
-}
-
-.big{
-font-size:42px;
-color:#22c55e;
-}
-
-button{
-width:90%;
-margin:10px;
-padding:15px;
-border:none;
-border-radius:12px;
-background:#22c55e;
-color:white;
-font-size:16px;
-}
+body{background:#0f172a;color:white;font-family:Arial;text-align:center}
+.card{margin:20px;padding:20px;background:#1e293b;border-radius:15px}
+button{padding:15px;width:80%;margin:10px;border:none;border-radius:10px;background:#22c55e;color:white}
 </style>
 </head>
 
 <body>
 
 <div class="card">
-<h2 id="name">User</h2>
-<p>ID: <span id="uid"></span></p>
-</div>
-
-<div class="card">
-<div class="big">$<span id="bal">0.00</span></div>
-
+<h2>$<span id="bal">0.00</span></h2>
 <p>Ads: <span id="ads">0</span></p>
 <p>Refs: <span id="refs">0</span></p>
-</div>
 
-<button onclick="watchAd()">Watch Ad (+0.03)</button>
+<button onclick="ad()">Watch Ad (+0.03)</button>
+<button onclick="wd()">Withdraw</button>
+</div>
 
 <script>
 
+const BACKEND = "";
+
 let userId = "guest";
 
-/* SAFE TELEGRAM USER */
-if(window.Telegram && Telegram.WebApp){
+if(window.Telegram){
 Telegram.WebApp.ready();
-
-const u = Telegram.WebApp.initDataUnsafe?.user;
-
-if(u && u.id){
-userId = String(u.id);
-} else {
-alert("Open inside Telegram WebApp!");
-}
+const u = Telegram.WebApp.initDataUnsafe.user;
+if(u) userId = String(u.id);
 }
 
-document.getElementById("uid").innerText = userId;
+function n(v){ return isNaN(Number(v))?0:Number(v); }
 
-/* LOAD PROFILE */
 async function load(){
-const res = await fetch(`/profile/${userId}`);
-const data = await res.json();
+const r = await fetch(`/profile/${userId}`);
+const d = await r.json();
 
-document.getElementById("bal").innerText =
-Number(data.balance || 0).toFixed(2);
-
-document.getElementById("ads").innerText = data.adsWatched || 0;
-document.getElementById("refs").innerText = data.refs || 0;
-
-document.getElementById("name").innerText = data.userId;
+document.getElementById("bal").innerText = n(d.balance).toFixed(2);
+document.getElementById("ads").innerText = d.adsWatched;
+document.getElementById("refs").innerText = d.refs;
 }
-
 load();
 
-/* ADS FIXED */
-async function watchAd(){
-
-try {
-
-if(typeof window.show_10892289 !== "function"){
-alert("Ad not ready yet");
-return;
-}
-
-await window.show_10892289();
-
+async function ad(){
 await fetch("/ads",{
 method:"POST",
 headers:{ "Content-Type":"application/json" },
@@ -110,20 +56,18 @@ body:JSON.stringify({ userId })
 });
 
 load();
-
-} catch(e){
-console.log(e);
-alert("Ad failed");
 }
 
+async function wd(){
+const a = prompt("Amount:");
+await fetch("/withdraw",{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({ userId, amount:Number(a) })
+});
+alert("Sent");
 }
 
-</script>
-
-<!-- ADS SDK -->
-<script src="//libtl.com/sdk.js"
-data-zone="10892289"
-data-sdk="show_10892289">
 </script>
 
 </body>

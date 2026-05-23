@@ -1,20 +1,12 @@
 {
   "name": "earn-app-backend",
   "version": "1.0.0",
-  "description": "Backend API with Express, MongoDB, and Telegram bot",
-  "main": "server.js",
+  "description": "Express + MongoDB + Telegram Bot backend",
+  "main": "backend/server.js",
   "scripts": {
     "start": "node backend/server.js",
     "dev": "nodemon backend/server.js"
   },
-  "keywords": [
-    "express",
-    "mongodb",
-    "telegram-bot",
-    "backend"
-  ],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

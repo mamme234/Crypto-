@@ -22,7 +22,7 @@ spawn("node", ["bot.js"], {
 });
 
 /* DB CONNECT */
-mongoose.connect(process.env.MONGO_URL)
+mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log("MongoDB Connected"))
 .catch(err => console.log(err));
 

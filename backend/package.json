@@ -1,17 +1,17 @@
 {
-  "name": "earn-app-server",
+  "name": "earn-app-backend",
   "version": "1.0.0",
-  "description": "Express backend with MongoDB, referral system, ads system, and Telegram bot",
+  "description": "Backend API with Express, MongoDB, and Telegram bot",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js"
   },
   "keywords": [
     "express",
     "mongodb",
     "telegram-bot",
-    "earn-app"
+    "backend"
   ],
   "author": "",
   "license": "ISC",

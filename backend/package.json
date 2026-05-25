@@ -1,22 +1,26 @@
 {
-  "name": "earn-app-backend",
+  "name": "meta-pro-earn",
   "version": "1.0.0",
-  "description": "Express + MongoDB + Telegram Bot backend",
-  "main": "backend/server.js",
+  "description": "Telegram WebApp USDT earning bot",
+  "main": "server.js",
   "scripts": {
-    "start": "node backend/server.js",
-    "dev": "nodemon backend/server.js"
+    "start": "node server.js"
   },
+  "keywords": [
+    "telegram",
+    "bot",
+    "webapp",
+    "earn",
+    "express",
+    "mongoose"
+  ],
+  "author": "Muhammad",
+  "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "mongoose": "^8.5.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.4"
-  },
-  "engines": {
-    "node": ">=18"
+    "mongoose": "^8.5.1",
+    "node-telegram-bot-api": "^0.66.0"
   }
 }

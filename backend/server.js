@@ -9,6 +9,7 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 const MONGO_URL = process.env.MONGO_URL;
 const ADMIN_ID = Number(process.env.ADMIN_ID);
 const SECRET_KEY = process.env.SECRET_KEY;
+const BOT_USERNAME = process.env.BOT_USERNAME;
 
 const WEB_APP_URL = "https://myapp1-khaki.vercel.app/";
 
@@ -28,9 +29,9 @@ app.use(express.json());
 
 mongoose.connect(MONGO_URL)
 .then(()=>console.log("MongoDB Connected"))
-.catch(err=>console.log(err));
+.catch(err=>console.log("DB ERROR:", err));
 
-/* ================= USER ================= */
+/* ================= USER MODEL ================= */
 
 const User = mongoose.model("User", new mongoose.Schema({
 
@@ -42,11 +43,11 @@ const User = mongoose.model("User", new mongoose.Schema({
 
   adsWatched: { type: Number, default: 0 },
 
-  level: { type: Number, default: 1 },
-
   lastAd: { type: Number, default: 0 },
 
-  isBlocked: { type: Boolean, default: false }
+  referredBy: { type: String, default: null },
+
+  wallet: { type: String, default: "" }
 
 }));
 
@@ -61,7 +62,7 @@ const Withdraw = mongoose.model("Withdraw", new mongoose.Schema({
 
 }));
 
-/* ================= GET USER ================= */
+/* ================= SAFE USER ================= */
 
 async function getUser(userId){
 
@@ -75,74 +76,62 @@ async function getUser(userId){
 
 }
 
+/* ================= REF LINK ================= */
+
+function getRefLink(userId){
+
+  return `https://t.me/${BOT_USERNAME}?start=ref_${userId}`;
+
+}
+
 /* ================= PROFILE ================= */
 
 app.get("/profile/:id", async (req,res)=>{
 
   const user = await getUser(req.params.id);
 
-  res.json({
-    balance: user.balance,
-    refs: user.refs,
-    adsWatched: user.adsWatched,
-    level: user.level
-  });
+  res.json(user);
 
 });
 
-/* ================= ADS SYSTEM ================= */
+/* ================= ADS ================= */
 
 app.post("/ads", async (req,res)=>{
 
   if(req.headers.authorization !== SECRET_KEY){
-    return res.json({ success:false });
+    return res.json({ success:false, message:"Unauthorized" });
   }
 
   const user = await getUser(req.body.userId);
 
-  if(user.isBlocked){
-    return res.json({ success:false, message:"Blocked" });
-  }
-
   const now = Date.now();
 
   if(now - user.lastAd < 30000){
-    user.isBlocked = true;
-    await user.save();
-    return res.json({ success:false, message:"Spam detected" });
+    return res.json({ success:false, message:"Cooldown" });
   }
 
   user.adsWatched += 1;
   user.lastAd = now;
 
-  user.balance += 0.03 * (1 + user.level * 0.1);
-
-  if(user.adsWatched % 100 === 0){
-    user.level += 1;
-  }
+  user.balance += 0.03;
 
   await user.save();
 
   res.json({
     success:true,
     balance:user.balance,
-    adsWatched:user.adsWatched,
-    level:user.level
+    adsWatched:user.adsWatched
   });
 
 });
 
-/* ================= WITHDRAW RULES ================= */
+/* ================= WITHDRAW ================= */
 
 app.post("/withdraw", async (req,res)=>{
 
   const { userId, amount } = req.body;
 
   const user = await getUser(userId);
-
-  if(user.balance < amount){
-    return res.json({ success:false, message:"Low balance" });
-  }
 
   if(amount < 5){
     return res.json({ success:false, message:"Min 5 USDT" });
@@ -154,6 +143,10 @@ app.post("/withdraw", async (req,res)=>{
 
   if(user.adsWatched < 500){
     return res.json({ success:false, message:"Need 500 ads" });
+  }
+
+  if(user.balance < amount){
+    return res.json({ success:false, message:"Low balance" });
   }
 
   user.balance -= amount;
@@ -179,12 +172,68 @@ app.post("/withdraw", async (req,res)=>{
 
 });
 
-/* ================= START BOT ================= */
+/* ================= POST SYSTEM ================= */
 
-bot.onText(/\/start/, async (msg)=>{
+async function sendGroupPost(){
+
+  const text = "🚀 START EARNING NOW";
+
+  const keyboard = {
+    reply_markup:{
+      inline_keyboard:[
+        [
+          { text:"🚀 Start App", web_app:{ url:WEB_APP_URL } }
+        ]
+      ]
+    }
+  };
+
+  for(const chat of CHATS){
+
+    try{
+      await bot.sendMessage(chat, text, keyboard);
+      console.log("POSTED TO:", chat);
+    }catch(err){
+      console.log("POST FAILED:", chat, err.message);
+    }
+
+  }
+
+}
+
+/* ================= START ================= */
+
+bot.onText(/\/start(?: (.+))?/, async (msg, match)=>{
 
   const id = String(msg.chat.id);
+  const param = match?.[1];
+
   const user = await getUser(id);
+
+  /* REF SYSTEM FIX */
+  if(param && param.startsWith("ref_")){
+
+    const refId = param.replace("ref_","");
+
+    if(refId !== id){
+
+      const refUser = await getUser(refId);
+
+      if(!user.referredBy){
+
+        user.referredBy = refId;
+
+        refUser.refs += 1;
+        refUser.balance += 0.1;
+
+        await user.save();
+        await refUser.save();
+
+      }
+
+    }
+
+  }
 
   bot.sendMessage(id,"🔥 META PRO EARN",{
     reply_markup:{
@@ -197,7 +246,7 @@ bot.onText(/\/start/, async (msg)=>{
           { text:"👥 Ref", callback_data:"ref" }
         ],
         [
-          { text:"💸 Withdraw", callback_data:"wd" }
+          { text:"🔗 My Link", callback_data:"link" }
         ]
       ]
     }
@@ -228,75 +277,20 @@ bot.on("callback_query", async (q)=>{
     });
   }
 
-  if(q.data === "wd"){
-
-    if(user.balance < 5 || user.refs < 10 || user.adsWatched < 500){
-      return bot.answerCallbackQuery(q.id,{
-        text:"❌ Not eligible",
-        show_alert:true
-      });
-    }
-
-    return bot.sendMessage(id,"Send wallet address");
-
-  }
-
-  if(q.data.startsWith("ap_") || q.data.startsWith("re_")){
-
-    if(q.from.id !== ADMIN_ID) return;
-
-    const wId = q.data.split("_")[1];
-    const w = await Withdraw.findById(wId);
-
-    if(!w) return;
-
-    if(q.data.startsWith("ap_")){
-      w.status = "approved";
-      bot.sendMessage(w.userId,"✅ Approved");
-    } else {
-      w.status = "rejected";
-      bot.sendMessage(w.userId,"❌ Rejected");
-    }
-
-    await w.save();
-
+  if(q.data === "link"){
+    return bot.sendMessage(id, getRefLink(id));
   }
 
 });
 
-/* ================= MULTI POST SYSTEM ================= */
+/* ================= TEST POST ================= */
 
-async function sendGroupPost(){
-
-  const text = "🚀 START EARNING NOW";
-
-  const keyboard = {
-    reply_markup:{
-      inline_keyboard:[
-        [
-          {
-            text:"🚀 Start App",
-            web_app:{ url:WEB_APP_URL }
-          }
-        ]
-      ]
-    }
-  };
-
-  for(const chat of CHATS){
-
-    try{
-      await bot.sendMessage(chat, text, keyboard);
-    }catch(e){
-      console.log("Post failed:", chat, e.message);
-    }
-
-  }
-
-}
+bot.onText(/\/posttest/, async ()=>{
+  await sendGroupPost();
+});
 
 /* ================= SERVER ================= */
 
 app.listen(process.env.PORT || 3000, ()=>{
-  console.log("🚀 V4 FINAL RUNNING");
+  console.log("🚀 FULL FIXED SERVER RUNNING");
 });

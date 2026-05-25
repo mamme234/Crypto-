@@ -10,6 +10,8 @@
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
+<!-- ADS SDK -->
+
 <script
 src="//libtl.com/sdk.js"
 data-zone="10892289"
@@ -73,7 +75,6 @@ background:#1e293b;
 margin:20px;
 padding:20px;
 border-radius:24px;
-box-shadow:0 0 20px rgba(0,0,0,.3);
 }
 
 .profileTop{
@@ -149,19 +150,6 @@ font-size:14px;
 color:#94a3b8;
 }
 
-.stats{
-margin-top:20px;
-display:flex;
-gap:10px;
-}
-
-.statbox{
-flex:1;
-background:#0f172a;
-padding:15px;
-border-radius:18px;
-}
-
 .progress{
 margin-top:15px;
 background:#0f172a;
@@ -180,8 +168,8 @@ background:#22c55e;
 margin-top:20px;
 text-align:left;
 font-size:14px;
+line-height:1.8;
 color:#cbd5e1;
-line-height:1.7;
 }
 
 </style>
@@ -189,6 +177,8 @@ line-height:1.7;
 </head>
 
 <body>
+
+<!-- TOP -->
 
 <div class="topbar">
 
@@ -210,6 +200,8 @@ ID:
 </div>
 
 </div>
+
+<!-- PROFILE -->
 
 <div class="profileCard">
 
@@ -261,6 +253,8 @@ Telegram User
 
 </div>
 
+<!-- MAIN -->
+
 <div class="container">
 
 <div class="card">
@@ -309,27 +303,9 @@ id="progressText">
 
 </div>
 
-<div class="stats">
-
-<div class="statbox">
-<h3 id="adsCount">
-0
-</h3>
-<p>Ads Watched</p>
-</div>
-
-<div class="statbox">
-<h3>
-0.03
-</h3>
-<p>USDT / Ad</p>
-</div>
-
-</div>
-
 <div class="rules">
 
-✅ Withdraw Rules:
+✅ Withdraw Rules
 
 <br><br>
 
@@ -338,13 +314,13 @@ id="progressText">
 
 <br>
 
-• Minimum referrals:
-10
+• Need:
+10 referrals
 
 <br>
 
-• Watch at least:
-500 ads
+• Watch:
+500 ads minimum
 
 </div>
 
@@ -434,9 +410,6 @@ data.refs || 0;
 document.getElementById("profileAds").innerText =
 data.adsWatched || 0;
 
-document.getElementById("adsCount").innerText =
-data.adsWatched || 0;
-
 document.getElementById("profileName").innerText =
 firstName;
 
@@ -452,10 +425,14 @@ const ads =
 data.adsWatched || 0;
 
 const percent =
-Math.min((ads / 500) * 100,100);
+Math.min(
+(ads / 500) * 100,
+100
+);
 
 document.getElementById("progressBar")
-.style.width = percent + "%";
+.style.width =
+percent + "%";
 
 document.getElementById("progressText")
 .innerText =
@@ -485,9 +462,13 @@ btn.disabled = true;
 btn.innerText =
 "Loading Ad...";
 
-if(typeof show_10892289 !== "function"){
+/* SDK CHECK */
 
-alert("Ads not ready");
+if(
+typeof show_10892289 === "undefined"
+){
+
+alert("Ads SDK failed");
 
 btn.disabled = false;
 
@@ -498,7 +479,11 @@ return;
 
 }
 
+/* SHOW AD */
+
 await show_10892289();
+
+/* SAVE REWARD */
 
 const res =
 await fetch(
@@ -508,7 +493,7 @@ method:"POST",
 
 headers:{
 "Content-Type":"application/json",
-"authorization":alpha boss
+"authorization":SECRET_KEY
 },
 
 body:JSON.stringify({
@@ -523,39 +508,16 @@ await res.json();
 
 if(data.success){
 
-document.getElementById("usdt").innerText =
-Number(data.balance).toFixed(2);
-
-document.getElementById("profileBalance").innerText =
-Number(data.balance).toFixed(2);
-
-document.getElementById("adsCount").innerText =
-data.adsWatched;
-
-document.getElementById("profileAds").innerText =
-data.adsWatched;
-
-/* UPDATE PROGRESS */
-
-const percent =
-Math.min(
-(data.adsWatched / 500) * 100,
-100
-);
-
-document.getElementById("progressBar")
-.style.width =
-percent + "%";
-
-document.getElementById("progressText")
-.innerText =
-`${data.adsWatched} / 500 Ads Completed`;
-
 alert("+0.03 USDT Added!");
+
+loadProfile();
 
 }else{
 
-alert(data.message || "Reward failed");
+alert(
+data.message ||
+"Reward failed"
+);
 
 }
 
@@ -563,7 +525,7 @@ alert(data.message || "Reward failed");
 
 console.log(err);
 
-alert("Ad closed or failed");
+alert("Ad failed or closed");
 
 }
 
@@ -579,7 +541,9 @@ btn.innerText =
 async function withdrawNow(){
 
 const amount =
-prompt("Enter withdraw amount");
+prompt(
+"Enter withdraw amount"
+);
 
 if(!amount) return;
 

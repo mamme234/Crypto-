@@ -284,7 +284,7 @@ Watch Ad & Earn
 
 <button
 class="watch withdrawBtn"
-onclick="withdraw()">
+onclick="withdrawNow()">
 
 Withdraw
 
@@ -331,7 +331,7 @@ id="progressText">
 
 ✅ Withdraw Rules:
 
-<br>
+<br><br>
 
 • Minimum withdraw:
 5 USDT
@@ -354,10 +354,13 @@ id="progressText">
 
 <script>
 
-/* ================= BACKEND ================= */
+/* ================= CONFIG ================= */
 
 const BACKEND =
 "https://crypto-4bbj.onrender.com";
+
+const SECRET_KEY =
+"META_9xK2_secure_2026";
 
 /* ================= USER ================= */
 
@@ -396,7 +399,7 @@ firstName.charAt(0).toUpperCase();
 
 }
 
-/* ================= UI ================= */
+/* ================= TOP UI ================= */
 
 document.getElementById("uid").innerText =
 userId;
@@ -504,7 +507,8 @@ await fetch(
 method:"POST",
 
 headers:{
-"Content-Type":"application/json"
+"Content-Type":"application/json",
+"authorization":alpha boss
 },
 
 body:JSON.stringify({
@@ -559,7 +563,7 @@ alert(data.message || "Reward failed");
 
 console.log(err);
 
-alert("❌ Ad failed");
+alert("Ad closed or failed");
 
 }
 
@@ -572,7 +576,7 @@ btn.innerText =
 
 /* ================= WITHDRAW ================= */
 
-async function withdraw(){
+async function withdrawNow(){
 
 const amount =
 prompt("Enter withdraw amount");
@@ -625,4 +629,4 @@ alert("Withdraw failed");
 </script>
 
 </body>
-</html>
+  </html>

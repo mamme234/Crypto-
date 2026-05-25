@@ -2,39 +2,281 @@
 <html lang="en">
 
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-
 <title>Meta Pro Earn</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-<script
-src="//libtl.com/sdk.js"
+<script src="//libtl.com/sdk.js"
 data-zone="10892289"
 data-sdk="show_10892289">
 </script>
 
 <style>
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-}
-
 body{
+margin:0;
 font-family:Arial;
-background:linear-gradient(to bottom,#0f172a,#020617);
+background:#0f172a;
 color:white;
-min-height:100vh;
+text-align:center;
 }
 
-/* ================= TOPBAR ================= */
+.card{
+margin:20px;
+padding:20px;
+background:#1e293b;
+border-radius:20px;
+}
 
-.topbar{
-background:#111827;
+.balance{
+font-size:40px;
+color:#22c55e;
+margin:10px 0;
+}
+
+button{
+width:100%;
+padding:15px;
+margin-top:10px;
+border:none;
+border-radius:15px;
+font-weight:bold;
+font-size:16px;
+cursor:pointer;
+}
+
+.ad{background:#22c55e;color:white;}
+.daily{background:#2563eb;color:white;}
+.spin{background:#9333ea;color:white;}
+.withdraw{background:#dc2626;color:white;}
+
+.small{
+font-size:13px;
+color:#94a3b8;
+margin-top:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h2 id="name">User</h2>
+
+<div class="balance">$<span id="balance">0.00</span></div>
+
+<button class="ad" onclick="watchAd()" id="adBtn">
+Watch Ad & Earn
+</button>
+
+<button class="daily" onclick="dailyBonus()">
+Daily Reward
+</button>
+
+<button class="spin" onclick="spinWheel()">
+Spin & Win
+</button>
+
+<button class="withdraw" onclick="withdrawNow()">
+Withdraw
+</button>
+
+<div class="small">
+Earn 0.03 USDT per ad
+</div>
+
+</div>
+
+<script>
+
+// ================= BACKEND =================
+
+const BACKEND =
+"https://crypto-4bbj.onrender.com";
+
+// ================= USER =================
+
+let userId = "guest";
+let firstName = "User";
+
+// ================= TELEGRAM =================
+
+if(window.Telegram){
+
+Telegram.WebApp.ready();
+
+const tg =
+Telegram.WebApp.initDataUnsafe.user;
+
+if(tg){
+
+userId = String(tg.id);
+firstName = tg.first_name || "User";
+
+document.getElementById("name").innerText =
+firstName;
+
+}
+
+}
+
+// ================= LOAD PROFILE =================
+
+async function load(){
+
+try{
+
+const res = await fetch(
+`${BACKEND}/profile/${userId}/user`
+);
+
+const data = await res.json();
+
+if(!data.success) return;
+
+document.getElementById("balance").innerText =
+Number(data.user.usdt || 0).toFixed(2);
+
+}catch(err){
+console.log(err);
+}
+
+}
+
+load();
+
+// ================= WATCH AD =================
+
+async function watchAd(){
+
+const btn =
+document.getElementById("adBtn");
+
+try{
+
+btn.disabled = true;
+btn.innerText = "Loading Ad...";
+
+// SHOW AD
+
+const adResult =
+await show_10892289();
+
+// ONLY REWARD IF AD OPENED SUCCESSFULLY
+
+if(!adResult){
+alert("Ad not completed");
+btn.disabled = false;
+btn.innerText = "Watch Ad & Earn";
+return;
+}
+
+// SEND REWARD
+
+const res = await fetch(`${BACKEND}/ads`,{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({ userId })
+});
+
+const data = await res.json();
+
+if(data.success){
+
+document.getElementById("balance").innerText =
+Number(data.usdt).toFixed(2);
+
+alert("+0.03 USDT Added!");
+
+}else{
+alert("Server error");
+}
+
+}catch(err){
+console.log(err);
+alert("Ad failed");
+}
+
+btn.disabled = false;
+btn.innerText = "Watch Ad & Earn";
+
+}
+
+// ================= DAILY =================
+
+async function dailyBonus(){
+
+await fetch(`${BACKEND}/daily`,{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({ userId })
+});
+
+load();
+
+alert("Daily reward checked");
+}
+
+// ================= SPIN =================
+
+async function spinWheel(){
+
+await fetch(`${BACKEND}/spin`,{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({ userId })
+});
+
+load();
+
+alert("Spin done");
+}
+
+// ================= WITHDRAW =================
+
+async function withdrawNow(){
+
+let wallet = prompt("Enter Wallet");
+if(!wallet) return;
+
+let amount = prompt("Enter Amount");
+if(!amount) return;
+
+const res = await fetch(`${BACKEND}/withdraw`,{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+userId,
+wallet,
+amount:Number(amount)
+})
+});
+
+const data = await res.json();
+
+alert(data.message || "Sent");
+
+load();
+
+}
+
+</script>
+
+</body>
+</html>background:#111827;
 padding:15px;
 display:flex;
 align-items:center;

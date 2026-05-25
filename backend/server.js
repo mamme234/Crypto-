@@ -9,15 +9,9 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 const MONGO_URL = process.env.MONGO_URL;
 const ADMIN_ID = Number(process.env.ADMIN_ID);
 const SECRET_KEY = process.env.SECRET_KEY;
-const BOT_USERNAME = process.env.BOT_USERNAME;
 
 const WEB_APP_URL = "https://myapp1-khaki.vercel.app/";
-
-const CHATS = [
-  "@gangs234",
-  "-1003984859530",
-  "-1001965046046"
-];
+const GROUP_ID = "@gangs234";
 
 const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 const app = express();
@@ -29,69 +23,39 @@ app.use(express.json());
 
 mongoose.connect(MONGO_URL)
 .then(()=>console.log("MongoDB Connected"))
-.catch(err=>console.log("DB ERROR:", err));
-
-/* ================= USER MODEL ================= */
+.catch(err=>console.log(err));
 
 const User = mongoose.model("User", new mongoose.Schema({
-
-  userId: { type: String, unique: true },
-
+  userId: String,
   balance: { type: Number, default: 0 },
-
   refs: { type: Number, default: 0 },
-
   adsWatched: { type: Number, default: 0 },
-
   lastAd: { type: Number, default: 0 },
-
-  referredBy: { type: String, default: null },
-
   wallet: { type: String, default: "" }
-
 }));
 
-/* ================= WITHDRAW ================= */
-
 const Withdraw = mongoose.model("Withdraw", new mongoose.Schema({
-
   userId: String,
   amount: Number,
   status: { type: String, default: "pending" },
-  createdAt: { type: Date, default: Date.now }
-
+  date: { type: Date, default: Date.now }
 }));
 
-/* ================= SAFE USER ================= */
+/* ================= GET USER ================= */
 
 async function getUser(userId){
-
   let user = await User.findOne({ userId });
-
   if(!user){
     user = await User.create({ userId });
   }
-
   return user;
-
-}
-
-/* ================= REF LINK ================= */
-
-function getRefLink(userId){
-
-  return `https://t.me/${BOT_USERNAME}?start=ref_${userId}`;
-
 }
 
 /* ================= PROFILE ================= */
 
 app.get("/profile/:id", async (req,res)=>{
-
   const user = await getUser(req.params.id);
-
   res.json(user);
-
 });
 
 /* ================= ADS ================= */
@@ -105,15 +69,13 @@ app.post("/ads", async (req,res)=>{
   const user = await getUser(req.body.userId);
 
   const now = Date.now();
-
   if(now - user.lastAd < 30000){
     return res.json({ success:false, message:"Cooldown" });
   }
 
+  user.balance += 0.03;
   user.adsWatched += 1;
   user.lastAd = now;
-
-  user.balance += 0.03;
 
   await user.save();
 
@@ -122,7 +84,6 @@ app.post("/ads", async (req,res)=>{
     balance:user.balance,
     adsWatched:user.adsWatched
   });
-
 });
 
 /* ================= WITHDRAW ================= */
@@ -133,20 +94,21 @@ app.post("/withdraw", async (req,res)=>{
 
   const user = await getUser(userId);
 
-  if(amount < 5){
-    return res.json({ success:false, message:"Min 5 USDT" });
-  }
-
-  if(user.refs < 10){
-    return res.json({ success:false, message:"Need 10 refs" });
+  // RULES
+  if(user.balance < amount){
+    return res.json({ success:false, message:"Low balance" });
   }
 
   if(user.adsWatched < 500){
     return res.json({ success:false, message:"Need 500 ads" });
   }
 
-  if(user.balance < amount){
-    return res.json({ success:false, message:"Low balance" });
+  if(user.refs < 10){
+    return res.json({ success:false, message:"Need 10 refs" });
+  }
+
+  if(amount < 5){
+    return res.json({ success:false, message:"Min 5 USDT" });
   }
 
   user.balance -= amount;
@@ -157,100 +119,54 @@ app.post("/withdraw", async (req,res)=>{
     amount
   });
 
-  bot.sendMessage(ADMIN_ID,"💸 WITHDRAW REQUEST",{
-    reply_markup:{
-      inline_keyboard:[
-        [
-          { text:"✅ Approve", callback_data:`ap_${w._id}` },
-          { text:"❌ Reject", callback_data:`re_${w._id}` }
+  bot.sendMessage(
+    ADMIN_ID,
+    `💸 Withdraw Request`,
+    {
+      reply_markup:{
+        inline_keyboard:[
+          [
+            { text:"Approve", callback_data:`ap_${w._id}` },
+            { text:"Reject", callback_data:`re_${w._id}` }
+          ]
         ]
-      ]
+      }
     }
-  });
+  );
 
-  res.json({ success:true });
-
+  res.json({ success:true, message:"Sent to admin" });
 });
-
-/* ================= POST SYSTEM ================= */
-
-async function sendGroupPost(){
-
-  const text = "🚀 START EARNING NOW";
-
-  const keyboard = {
-    reply_markup:{
-      inline_keyboard:[
-        [
-          { text:"🚀 Start App", web_app:{ url:WEB_APP_URL } }
-        ]
-      ]
-    }
-  };
-
-  for(const chat of CHATS){
-
-    try{
-      await bot.sendMessage(chat, text, keyboard);
-      console.log("POSTED TO:", chat);
-    }catch(err){
-      console.log("POST FAILED:", chat, err.message);
-    }
-
-  }
-
-}
 
 /* ================= START ================= */
 
-bot.onText(/\/start(?: (.+))?/, async (msg, match)=>{
+bot.onText(/\/start/, async (msg)=>{
 
   const id = String(msg.chat.id);
-  const param = match?.[1];
-
   const user = await getUser(id);
 
-  /* REF SYSTEM FIX */
-  if(param && param.startsWith("ref_")){
-
-    const refId = param.replace("ref_","");
-
-    if(refId !== id){
-
-      const refUser = await getUser(refId);
-
-      if(!user.referredBy){
-
-        user.referredBy = refId;
-
-        refUser.refs += 1;
-        refUser.balance += 0.1;
-
-        await user.save();
-        await refUser.save();
-
-      }
-
-    }
-
-  }
-
-  bot.sendMessage(id,"🔥 META PRO EARN",{
-    reply_markup:{
-      inline_keyboard:[
-        [
-          { text:"🚀 Open App", web_app:{ url:WEB_APP_URL } }
-        ],
-        [
-          { text:"💰 Balance", callback_data:"bal" },
-          { text:"👥 Ref", callback_data:"ref" }
-        ],
-        [
-          { text:"🔗 My Link", callback_data:"link" }
+  bot.sendMessage(
+    id,
+    `🔥 META PRO EARN`,
+    {
+      reply_markup:{
+        inline_keyboard:[
+          [
+            {
+              text:"🚀 Open App",
+              web_app:{ url:WEB_APP_URL }
+            }
+          ],
+          [
+            { text:"💰 Balance", callback_data:"bal" },
+            { text:"👥 Ref", callback_data:"ref" }
+          ],
+          [
+            { text:"💸 Withdraw", callback_data:"wd" }
+          ]
         ]
-      ]
+      }
     }
-  });
+  );
 
   sendGroupPost();
 
@@ -277,20 +193,94 @@ bot.on("callback_query", async (q)=>{
     });
   }
 
-  if(q.data === "link"){
-    return bot.sendMessage(id, getRefLink(id));
+  if(q.data === "wd"){
+
+    if(user.balance < 5 || user.refs < 10 || user.adsWatched < 500){
+      return bot.answerCallbackQuery(q.id,{
+        text:"❌ Not eligible (5 USDT + 10 refs + 500 ads)",
+        show_alert:true
+      });
+    }
+
+    return bot.sendMessage(id,"Send wallet address");
+
+  }
+
+  /* ADMIN ACTIONS */
+
+  if(q.data.startsWith("ap_") || q.data.startsWith("re_")){
+    if(q.from.id !== ADMIN_ID) return;
+
+    const id = q.data.split("_")[1];
+    const w = await Withdraw.findById(id);
+
+    if(!w) return;
+
+    if(q.data.startsWith("ap_")){
+      w.status = "approved";
+      await w.save();
+      bot.sendMessage(w.userId,"✅ Approved");
+    } else {
+      w.status = "rejected";
+      await w.save();
+      bot.sendMessage(w.userId,"❌ Rejected");
+    }
+
   }
 
 });
 
-/* ================= TEST POST ================= */
+/* ================= GROUP POST ================= */
 
-bot.onText(/\/posttest/, async ()=>{
-  await sendGroupPost();
-});
+async function sendGroupPost(){
+
+  try{
+
+    await bot.sendMessage(
+      GROUP_ID,
+      "🚀 Start Earning Now",
+      {
+        reply_markup:{
+          inline_keyboard:[
+            [
+              {
+                text:"🚀 Start App",
+                web_app:{ url:WEB_APP_URL }
+              }
+            ]
+          ]
+        }
+      }
+    );
+
+  }catch(e){}
+
+}
+
+/* ================= DAILY ADMIN POST ================= */
+
+setInterval(async ()=>{
+
+  const users = await User.countDocuments();
+  const w = await Withdraw.countDocuments();
+
+  bot.sendMessage(
+    ADMIN_ID,
+    "📊 Daily Stats",
+    {
+      reply_markup:{
+        inline_keyboard:[
+          [{ text:`👥 Users: ${users}`, callback_data:"x" }],
+          [{ text:`💸 Withdraw: ${w}`, callback_data:"x" }]
+        ]
+      }
+    }
+  );
+
+}, 24 * 60 * 60 * 1000);
 
 /* ================= SERVER ================= */
 
 app.listen(process.env.PORT || 3000, ()=>{
-  console.log("🚀 FULL FIXED SERVER RUNNING");
+  console.log("Server running");
 });

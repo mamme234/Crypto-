@@ -144,6 +144,10 @@ margin-top:10px;
 background:linear-gradient(45deg,#3b82f6,#2563eb);
 }
 
+.supportBtn{
+background:linear-gradient(45deg,#06b6d4,#0891b2);
+}
+
 .info{
 margin-top:15px;
 font-size:14px;
@@ -267,6 +271,8 @@ Your Balance
 $<span id="usdt">0.00</span>
 </div>
 
+<!-- WATCH AD -->
+
 <button
 class="watch"
 id="watchBtn"
@@ -276,6 +282,8 @@ Watch Ad & Earn
 
 </button>
 
+<!-- WITHDRAW -->
+
 <button
 class="watch withdrawBtn"
 onclick="withdrawNow()">
@@ -283,6 +291,22 @@ onclick="withdrawNow()">
 Withdraw
 
 </button>
+
+<!-- SUPPORT -->
+
+<a
+href="https://t.me/Studybuddy_2025Bot_helperBot"
+target="_blank"
+style="text-decoration:none;">
+
+<button
+class="watch supportBtn">
+
+📞 Support
+
+</button>
+
+</a>
 
 <div class="info">
 Earn 0.03 USDT per ad
@@ -336,7 +360,7 @@ const BACKEND =
 "https://crypto-4bbj.onrender.com";
 
 const SECRET_KEY =
-"alpha boss";
+"META_9xK2_secure_2026";
 
 /* ================= USER ================= */
 
@@ -462,8 +486,6 @@ btn.disabled = true;
 btn.innerText =
 "Loading Ad...";
 
-/* SDK CHECK */
-
 if(
 typeof show_10892289 === "undefined"
 ){
@@ -479,11 +501,7 @@ return;
 
 }
 
-/* SHOW AD */
-
 await show_10892289();
-
-/* SAVE REWARD */
 
 const res =
 await fetch(

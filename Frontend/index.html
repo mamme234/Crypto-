@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>MetaPro Earn • REAL REFERRAL SYSTEM</title>
+  <title>MetaPro Earn • Watch & Earn USDT</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <!-- ADS SDK (external ad network) -->
@@ -19,7 +19,7 @@
     }
 
     body {
-      font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       background: radial-gradient(circle at 10% 30%, #0a0f1f, #020617);
       color: #ffffff;
       min-height: 100vh;
@@ -267,14 +267,6 @@
       font-size: 12px;
       display: inline-block;
     }
-
-    .ref-notice {
-      background: #f39c1220;
-      border-radius: 20px;
-      padding: 8px;
-      font-size: 12px;
-      margin-top: 12px;
-    }
   </style>
 </head>
 
@@ -283,7 +275,7 @@
     <div class="avatar" id="avatar">M</div>
     <div class="userinfo">
       <div class="name" id="tgname">MetaPro User</div>
-      <div class="uid">🆔 <span id="uid">loading...</span></div>
+      <div class="uid">ID: <span id="uid">loading...</span></div>
     </div>
   </div>
 
@@ -293,7 +285,7 @@
       <div>
         <h2 id="profileName">Crypto Hunter</h2>
         <p id="profileUsername" style="opacity:0.6; font-size:13px;">@username</p>
-        <div class="badge-success">✨ REAL REF SYSTEM • 0.10 USDT PER FRIEND</div>
+        <div class="badge-success">Referral Active • Earn 0.10 USDT/Friend</div>
       </div>
     </div>
     <div class="statsRow">
@@ -303,55 +295,52 @@
       </div>
       <div class="statBox">
         <h3 id="profileRefs">0</h3>
-        <p>👥 Referrals</p>
+        <p>Referrals</p>
       </div>
       <div class="statBox">
         <h3 id="profileAds">0</h3>
-        <p>📺 Ads</p>
+        <p>Ads</p>
       </div>
     </div>
   </div>
 
   <div class="container">
     <div class="earn-card">
-      <div class="balance-title">💰 YOUR EARNING POWER</div>
+      <div class="balance-title">YOUR BALANCE</div>
       <div class="balance">$<span id="usdt">0.00</span></div>
 
       <button class="watch" id="watchBtn">
         <span>📺</span> <span id="watchBtnText">Watch Ad (15s earn 0.03 USDT)</span>
       </button>
-      <div id="timerStatus" class="timer-status">⏱️ Ready • 15 sec required for reward</div>
+      <div id="timerStatus" class="timer-status">Ready • 15 sec required for reward</div>
 
-      <button class="watch withdrawBtn" id="withdrawBtn">💸 Withdraw Funds</button>
-      <button class="watch refBtn" id="openRefBtn">👥 GET YOUR REFERRAL LINK • Earn 0.10 USDT</button>
+      <button class="watch withdrawBtn" id="withdrawBtn">Withdraw Funds</button>
+      <button class="watch refBtn" id="openRefBtn">Get Referral Link • Earn 0.10 USDT</button>
 
-      <!-- REFERRAL PANEL - REAL WORKING LINK WITH @Studybuddy_2025Bot -->
+      <!-- REFERRAL PANEL -->
       <div id="refPanel" style="margin-top: 20px; display: none;">
         <div class="ref-link-box">
-          <input type="text" id="refLinkInput" readonly value="generating...">
-          <button class="copy-btn" id="copyRefBtn">📋 Copy Link</button>
+          <input type="text" id="refLinkInput" readonly value="Click 'Get Referral Link' to generate">
+          <button class="copy-btn" id="copyRefBtn">Copy Link</button>
         </div>
-        <div class="ref-notice">
-          🔥 <strong>YOUR REAL REFERRAL LINK</strong> 🔥<br>
-          Share this link with friends →当他们通过你的链接第一次打开Bot并观看广告时，<br>
-          <span style="color:#f39c12; font-weight:bold;">你立即获得 0.10 USDT！朋友获得 0.03 USDT/广告</span>
-        </div>
-        <div class="rules" style="margin-top: 8px; text-align: center; font-size: 11px;">
-          ✅ 链接格式: https://t.me/Studybuddy_2025Bot?start=ref_YOURCODE<br>
-          ✅ 每次成功邀请自动奖励，实时更新！
+        <div class="rules" style="margin-top: 12px; text-align: center;">
+          <strong>Referral Bonus: 0.10 USDT per friend</strong><br>
+          Share your unique link. When friends join and watch their first ad, you get 0.10 USDT instantly!
         </div>
       </div>
 
       <div class="progress">
         <div class="progressBar" id="progressBar"></div>
       </div>
-      <div id="progressText" style="font-size: 13px; opacity: 0.8;">📊 0 / 500 Ads • 0 / 10 Referrals needed</div>
+      <div id="progressText" style="font-size: 13px; opacity: 0.8;">0 / 500 Ads • 0 / 10 Referrals needed</div>
 
       <div class="rules">
-        🔥 <strong>WITHDRAWAL RULES (REAL SYSTEM)</strong><br>
-        • 💵 Min: <strong>5 USDT</strong> &nbsp;|&nbsp; 👥 Need <strong>10 Referrals</strong> &nbsp;|&nbsp; 🎯 Need <strong>500 completed ads (15 sec each)</strong><br>
-        • 💰 Reward per ad: <strong>0.03 USDT</strong> &nbsp;|&nbsp; 🤝 Referral reward: <strong>0.10 USDT / active friend</strong><br>
-        • ✅ <strong>REF SYSTEM 100% WORKING:</strong> Your personal link with @Studybuddy_2025Bot tracks every new user. Automatic credit when referral watches first ad.
+        <strong>WITHDRAWAL RULES</strong><br>
+        • Minimum: <strong>5 USDT</strong><br>
+        • Need: <strong>10 Referrals</strong><br>
+        • Need: <strong>500 completed ads (15 sec each)</strong><br>
+        • Reward per ad: <strong>0.03 USDT</strong><br>
+        • Referral reward: <strong>0.10 USDT per active referral</strong>
       </div>
     </div>
   </div>
@@ -360,14 +349,14 @@
     // ================= CONFIGURATION =================
     const BACKEND = "https://crypto-4bbj.onrender.com";
     const SECRET_KEY = "META_9xK2_secure_2026";
-    const BOT_USERNAME = "Studybuddy_2025Bot";  // YOUR REAL BOT
+    const BOT_USERNAME = "Studybuddy_2025Bot";
     
     // GLOBALS
     let userId = "guest";
     let tgName = "Telegram User";
     let firstName = "MetaPro";
     let avatarLetter = "M";
-    let myReferralCode = "";      // unique referral code from backend
+    let myReferralCode = "";
     let isWatching = false;
     let adTimerInterval = null;
     let secondsLeft = 0;
@@ -381,7 +370,7 @@
     const copyRefBtn = document.getElementById("copyRefBtn");
     const openRefBtn = document.getElementById("openRefBtn");
     
-    // ================= TELEGRAM INIT + REFERRAL DETECTION =================
+    // ================= TELEGRAM INIT =================
     if (window.Telegram && Telegram.WebApp) {
       Telegram.WebApp.ready();
       Telegram.WebApp.expand();
@@ -393,13 +382,14 @@
         avatarLetter = firstName.charAt(0).toUpperCase();
       }
     }
+    
     if (userId === "guest") {
       userId = "guest_" + Math.floor(Math.random() * 1000000);
       firstName = "Explorer";
       avatarLetter = "E";
     }
     
-    // UPDATE UI BASICS
+    // Update UI
     document.getElementById("uid").innerText = userId;
     document.getElementById("tgname").innerText = tgName;
     document.getElementById("avatar").innerText = avatarLetter;
@@ -407,63 +397,34 @@
     document.getElementById("profileName").innerText = firstName;
     document.getElementById("profileUsername").innerText = tgName;
     
-    // ========== REFERRAL LOGIC - DETECT REAL REF FROM BOT START PARAM ==========
-    // Supports both ?start=ref_CODE and startapp=ref_CODE
+    // ========== REFERRAL DETECTION ==========
     function getReferrerId() {
       try {
-        // 1) Telegram WebApp start_param (most important for real bot)
         if (Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.start_param) {
           let startParam = Telegram.WebApp.initDataUnsafe.start_param;
-          console.log("[REF] start_param from Telegram:", startParam);
           if (startParam && startParam.startsWith("ref_")) {
             let code = startParam.replace("ref_", "");
             if (code && code !== "undefined" && code.length > 0) return code;
           }
-          if (startParam && startParam.match(/^\d+$/)) {
-            return startParam;
-          }
         }
-        // 2) Also check URL query parameters (for web preview)
         const urlParams = new URLSearchParams(window.location.search);
         let ref = urlParams.get("ref") || urlParams.get("start");
         if (ref) {
           if (ref.startsWith("ref_")) ref = ref.replace("ref_", "");
           if (ref && ref !== "undefined") return ref;
         }
-        // 3) Check hash fragment
-        const hash = window.location.hash.substring(1);
-        if (hash) {
-          let hashParams = new URLSearchParams(hash);
-          ref = hashParams.get("ref") || hashParams.get("start");
-          if (ref) {
-            if (ref.startsWith("ref_")) ref = ref.replace("ref_", "");
-            return ref;
-          }
-        }
-      } catch(e) { console.warn("Ref detection error:", e); }
+      } catch(e) { console.warn(e); }
       return null;
     }
     
     const referrerId = getReferrerId();
-    console.log("[REF SYSTEM] Detected referrer ID:", referrerId);
     
-    // ========== REGISTER / LOGIN USER WITH REAL REFERRAL SUPPORT ==========
+    // ========== REGISTER USER WITH REFERRAL ==========
     async function registerOrLoginUser() {
       try {
-        const payload = { 
-          userId, 
-          tgName, 
-          firstName,
-          botUsername: BOT_USERNAME
-        };
-        if (referrerId && referrerId !== userId && referrerId !== "null" && referrerId !== "undefined") {
+        const payload = { userId, tgName, firstName };
+        if (referrerId && referrerId !== userId && referrerId !== "null") {
           payload.referredBy = referrerId;
-          console.log("[REF] User will be attached to referrer:", referrerId);
-          // Show UI feedback
-          timerStatusDiv.innerHTML = "🎯 Referral detected! You were invited by another user.";
-          setTimeout(() => {
-            if (!isWatching) timerStatusDiv.innerHTML = "⏱️ Ready • 15 sec required for reward";
-          }, 3000);
         }
         const res = await fetch(`${BACKEND}/register`, {
           method: "POST",
@@ -473,10 +434,9 @@
         const data = await res.json();
         if (data.success) {
           myReferralCode = data.referralCode || userId;
-          // If this user was referred and backend gave reward to referrer
           if (data.rewardGiven && referrerId) {
-            timerStatusDiv.innerHTML = "🎉 Referral bonus credited! +0.10 USDT to your referrer!";
-            setTimeout(() => { if(!isWatching) timerStatusDiv.innerHTML = "⏱️ Ready • 15 sec ad"; }, 3500);
+            timerStatusDiv.innerHTML = "Referral bonus credited! +0.10 USDT to referrer!";
+            setTimeout(() => { if(!isWatching) timerStatusDiv.innerHTML = "Ready • 15 sec required"; }, 3000);
           }
           return true;
         }
@@ -484,7 +444,7 @@
       } catch(e) { console.error("register error", e); return false; }
     }
     
-    // ========== FETCH PROFILE (includes referrals count, ads) ==========
+    // ========== LOAD PROFILE ==========
     async function loadProfile() {
       try {
         const res = await fetch(`${BACKEND}/profile/${userId}`);
@@ -499,21 +459,20 @@
         const refs = data.refs || 0;
         const percentAds = Math.min((adsWatched / 500) * 100, 100);
         document.getElementById("progressBar").style.width = percentAds + "%";
-        document.getElementById("progressText").innerHTML = `📊 ${adsWatched}/500 Ads • 👥 ${refs}/10 Referrals needed for withdrawal`;
+        document.getElementById("progressText").innerHTML = `${adsWatched} / 500 Ads • ${refs} / 10 Referrals needed`;
         
-        // Generate REAL working referral link using your bot
-        if (myReferralCode) {
-          // REAL DEEP LINK: https://t.me/Studybuddy_2025Bot?start=ref_CODE
+        // Generate referral link if we have the code
+        if (myReferralCode && myReferralCode !== "") {
           const deepLink = `https://t.me/${BOT_USERNAME}?start=ref_${myReferralCode}`;
-          if (refLinkInput) refLinkInput.value = deepLink;
-        } else {
-          if (refLinkInput) refLinkInput.value = "generating link...";
+          if (refLinkInput && refLinkInput.value !== deepLink) {
+            refLinkInput.value = deepLink;
+          }
         }
         return data;
       } catch(err) { console.error("profile load err", err); return null; }
     }
     
-    // ========== REWARD AFTER 15 SECONDS (FULL AD) ==========
+    // ========== REWARD AFTER 15 SECONDS ==========
     async function sendRewardAfterFullWatch() {
       try {
         const res = await fetch(`${BACKEND}/ads`, {
@@ -525,30 +484,29 @@
         if (data.success) {
           await loadProfile();
           if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.notificationOccurred("success");
-          timerStatusDiv.innerHTML = "✅ +0.03 USDT credited! Keep watching!";
-          setTimeout(() => { if (!isWatching) timerStatusDiv.innerHTML = "⏱️ Ready • 15 sec required for reward"; }, 2500);
+          timerStatusDiv.innerHTML = "+0.03 USDT credited!";
+          setTimeout(() => { if (!isWatching) timerStatusDiv.innerHTML = "Ready • 15 sec required"; }, 2000);
         } else {
-          timerStatusDiv.innerHTML = "⚠️ " + (data.message || "reward error");
-          setTimeout(() => { if (!isWatching) timerStatusDiv.innerHTML = "⏱️ Ready • 15 sec ad"; }, 2000);
+          timerStatusDiv.innerHTML = "Error: " + (data.message || "try again");
+          setTimeout(() => { if (!isWatching) timerStatusDiv.innerHTML = "Ready • 15 sec required"; }, 2000);
         }
       } catch(err) {
-        timerStatusDiv.innerHTML = "❌ Network error, reward not sent";
-        setTimeout(() => { if (!isWatching) timerStatusDiv.innerHTML = "⏱️ Ready • 15 sec required"; }, 2000);
+        timerStatusDiv.innerHTML = "Network error";
+        setTimeout(() => { if (!isWatching) timerStatusDiv.innerHTML = "Ready • 15 sec required"; }, 2000);
       }
     }
     
-    // ========== AD WATCH WITH 15 SECONDS HARD TIMER ==========
+    // ========== AD WATCH WITH 15 SECOND TIMER ==========
     async function startAdFlow() {
       if (isWatching) {
-        timerStatusDiv.innerHTML = "⏳ Finish current ad first!";
+        timerStatusDiv.innerHTML = "Finish current ad first!";
         return;
       }
       isWatching = true;
       watchBtn.disabled = true;
       secondsLeft = 15;
-      watchBtnTextSpan.innerHTML = `⏳ Watching (${secondsLeft}s)`;
-      timerStatusDiv.classList.add("timer-active");
-      timerStatusDiv.innerHTML = `🎬 AD IS PLAYING • ${secondsLeft} seconds left... Complete to earn!`;
+      watchBtnTextSpan.innerHTML = `Watching (${secondsLeft}s)`;
+      timerStatusDiv.innerHTML = `AD PLAYING • ${secondsLeft}s left... Complete to earn!`;
       
       adTimerInterval = setInterval(() => {
         if (secondsLeft <= 1) {
@@ -557,12 +515,11 @@
           finishAdAndReward();
         } else {
           secondsLeft--;
-          watchBtnTextSpan.innerHTML = `⏳ Watching (${secondsLeft}s)`;
-          timerStatusDiv.innerHTML = `🎬 MUST WATCH ${secondsLeft}s more → reward after full ad`;
+          watchBtnTextSpan.innerHTML = `Watching (${secondsLeft}s)`;
+          timerStatusDiv.innerHTML = `Watch ${secondsLeft}s more → reward after full ad`;
         }
       }, 1000);
       
-      // Call external ad SDK (if available)
       try {
         if (typeof show_10892289 !== "undefined") {
           show_10892289().catch(e => console.warn("SDK warning", e));
@@ -573,18 +530,16 @@
     async function finishAdAndReward() {
       if (adTimerInterval) clearInterval(adTimerInterval);
       if (secondsLeft === 0) {
-        timerStatusDiv.innerHTML = "🏆 Full ad watched! Awarding 0.03 USDT...";
-        timerStatusDiv.classList.remove("timer-active");
+        timerStatusDiv.innerHTML = "Full ad watched! Awarding 0.03 USDT...";
         await sendRewardAfterFullWatch();
       } else {
-        timerStatusDiv.innerHTML = "❌ Ad interrupted! Full 15 seconds required. No reward.";
-        timerStatusDiv.classList.remove("timer-active");
+        timerStatusDiv.innerHTML = "Ad interrupted! Full 15 seconds required. No reward.";
       }
       isWatching = false;
       watchBtn.disabled = false;
-      watchBtnTextSpan.innerHTML = `📺 Watch Ad (15s earn 0.03 USDT)`;
+      watchBtnTextSpan.innerHTML = `Watch Ad (15s earn 0.03 USDT)`;
       if (!isWatching && !timerStatusDiv.innerHTML.includes("Awarding")) {
-        setTimeout(() => { timerStatusDiv.innerHTML = "⏱️ Ready • 15 sec required for reward"; }, 2000);
+        setTimeout(() => { timerStatusDiv.innerHTML = "Ready • 15 sec required"; }, 2000);
       }
     }
     
@@ -594,9 +549,8 @@
         adTimerInterval = null;
         isWatching = false;
         watchBtn.disabled = false;
-        watchBtnTextSpan.innerHTML = `📺 Watch Ad (15s earn 0.03 USDT)`;
-        timerStatusDiv.innerHTML = "🚫 Ad aborted! You left the app. Full 15 sec required next time.";
-        timerStatusDiv.classList.remove("timer-active");
+        watchBtnTextSpan.innerHTML = `Watch Ad (15s earn 0.03 USDT)`;
+        timerStatusDiv.innerHTML = "Ad aborted! Full 15 sec required next time.";
       }
     }
     document.addEventListener("visibilitychange", handleVisibilityLoss);
@@ -604,7 +558,7 @@
     window.watchAd = startAdFlow;
     watchBtn.onclick = () => window.watchAd();
     
-    // ========== WITHDRAW (UPDATED CHECK REFS & ADS) ==========
+    // ========== WITHDRAW ==========
     window.withdrawNow = async function() {
       const profile = await loadProfile();
       if (!profile) { alert("Cannot load profile"); return; }
@@ -612,11 +566,11 @@
       const refs = profile.refs || 0;
       const ads = profile.adsWatched || 0;
       
-      if (balance < 5) { alert(`❌ Min withdrawal 5 USDT. Balance: ${balance.toFixed(2)} USDT`); return; }
-      if (refs < 10) { alert(`❌ Need 10 referrals to withdraw. Current: ${refs} referrals. Invite friends!`); return; }
-      if (ads < 500) { alert(`❌ Need 500 completed ads (15 sec each). Progress: ${ads}/500`); return; }
+      if (balance < 5) { alert(`Min withdrawal 5 USDT. Balance: ${balance.toFixed(2)} USDT`); return; }
+      if (refs < 10) { alert(`Need 10 referrals to withdraw. Current: ${refs} referrals. Invite friends!`); return; }
+      if (ads < 500) { alert(`Need 500 completed ads. Progress: ${ads}/500`); return; }
       
-      let amount = prompt(`💰 Enter amount (min 5, max ${balance.toFixed(2)} USDT):`, "5");
+      let amount = prompt(`Enter amount (min 5, max ${balance.toFixed(2)} USDT):`, "5");
       if (!amount) return;
       let num = parseFloat(amount);
       if (isNaN(num) || num < 5) { alert("Minimum 5 USDT"); return; }
@@ -629,27 +583,40 @@
           body: JSON.stringify({ userId, amount: num })
         });
         const data = await res.json();
-        if (data.success) alert(`✅ Withdrawal request sent: ${num} USDT. Check Telegram bot.`);
-        else alert(`❌ Withdraw failed: ${data.message}`);
+        if (data.success) alert(`Withdrawal request sent: ${num} USDT. Check Telegram bot.`);
+        else alert(`Withdraw failed: ${data.message}`);
         loadProfile();
       } catch(e) { alert("Network error"); }
     };
     document.getElementById("withdrawBtn").onclick = () => window.withdrawNow();
     
-    // ========== REFERRAL PANEL UI & COPY - REAL BOT LINK ==========
-    openRefBtn.addEventListener("click", () => {
+    // ========== REFERRAL PANEL - GENERATE LINK ON DEMAND ==========
+    openRefBtn.addEventListener("click", async () => {
       if (refPanel.style.display === "none" || refPanel.style.display === "") {
         refPanel.style.display = "block";
-        if (myReferralCode) {
+        
+        // If we don't have a referral code yet, fetch profile to get it
+        if (!myReferralCode || myReferralCode === "") {
+          refLinkInput.value = "Generating your link...";
+          const profile = await loadProfile();
+          if (myReferralCode && myReferralCode !== "") {
+            const deepLink = `https://t.me/${BOT_USERNAME}?start=ref_${myReferralCode}`;
+            refLinkInput.value = deepLink;
+          } else {
+            refLinkInput.value = "Please wait, loading...";
+            setTimeout(async () => {
+              await loadProfile();
+              if (myReferralCode && myReferralCode !== "") {
+                refLinkInput.value = `https://t.me/${BOT_USERNAME}?start=ref_${myReferralCode}`;
+              } else {
+                refLinkInput.value = `https://t.me/${BOT_USERNAME}?start=ref_${userId}`;
+                myReferralCode = userId;
+              }
+            }, 1000);
+          }
+        } else {
           const deepLink = `https://t.me/${BOT_USERNAME}?start=ref_${myReferralCode}`;
           refLinkInput.value = deepLink;
-        } else {
-          refLinkInput.value = "loading referral code...";
-          setTimeout(() => {
-            if (myReferralCode) {
-              refLinkInput.value = `https://t.me/${BOT_USERNAME}?start=ref_${myReferralCode}`;
-            }
-          }, 800);
         }
       } else {
         refPanel.style.display = "none";
@@ -657,27 +624,27 @@
     });
     
     copyRefBtn.addEventListener("click", async () => {
-      if (refLinkInput.value && refLinkInput.value !== "loading..." && refLinkInput.value !== "generating..." && refLinkInput.value.includes("t.me")) {
-        try {
-          await navigator.clipboard.writeText(refLinkInput.value);
-          alert("✅ Referral link copied!\n\nShare this link with friends:\n" + refLinkInput.value + "\n\n当他们通过链接加入并观看广告，您将获得 0.10 USDT/人！");
-          if (Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.impactOccurred("light");
-        } catch(e) { 
-          alert("请手动复制链接: " + refLinkInput.value);
-        }
-      } else { 
-        alert("Generating referral link, please wait a moment..."); 
+      let linkToCopy = refLinkInput.value;
+      if (!linkToCopy || linkToCopy === "Generating your link..." || linkToCopy === "Please wait, loading..." || linkToCopy === "Click 'Get Referral Link' to generate") {
+        alert("Please wait for your referral link to generate, then click Copy.");
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(linkToCopy);
+        alert("Referral link copied!\n\nShare this link with friends. When they join and watch an ad, you get 0.10 USDT!");
+        if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.impactOccurred("light");
+      } catch(e) {
+        alert("Copy manually: " + linkToCopy);
       }
     });
     
-    // ========== INITIALIZATION ==========
+    // ========== INIT ==========
     (async function init() {
       await registerOrLoginUser();
       await loadProfile();
-      // Auto refresh every 6 seconds
       setInterval(loadProfile, 6000);
     })();
     
   </script>
 </body>
-  </html>
+        </html>

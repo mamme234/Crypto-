@@ -4,10 +4,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>MetaPro Earn • Watch & Earn USDT</title>
+  <title>MetaPro Earn • Watch & Earn USDT + Referrals</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <!-- ADS SDK (required for actual ads, but we simulate video timer for UX) -->
+  
+  <!-- ADS SDK (external ad network) -->
   <script src="//libtl.com/sdk.js" data-zone="10892289" data-sdk="show_10892289"></script>
 
   <style>
@@ -20,19 +20,18 @@
 
     body {
       font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background: radial-gradient(circle at 10% 30%, #0B1120, #0A0F1C);
+      background: radial-gradient(circle at 10% 30%, #0a0f1f, #05070f);
       color: #ffffff;
       min-height: 100vh;
-      overflow-x: hidden;
     }
 
-    /* GLASS MORPHISM + NEON */
+    /* premium glass + neon */
     .glass-card {
-      background: rgba(15, 25, 45, 0.55);
+      background: rgba(15, 25, 45, 0.6);
       backdrop-filter: blur(14px);
       border-radius: 2rem;
-      border: 1px solid rgba(66, 220, 140, 0.25);
-      box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.5), 0 0 0 0.5px rgba(34, 197, 94, 0.2) inset;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.6);
     }
 
     .topbar {
@@ -40,22 +39,22 @@
       align-items: center;
       gap: 14px;
       padding: 18px 22px;
-      background: rgba(8, 12, 24, 0.7);
+      background: rgba(8, 12, 24, 0.85);
       backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(34, 197, 94, 0.3);
+      border-bottom: 1px solid #22c55e40;
     }
 
     .avatar {
       width: 52px;
       height: 52px;
       background: linear-gradient(145deg, #22c55e, #0e9f4e);
-      border-radius: 28px;
+      border-radius: 30px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 24px;
       font-weight: 800;
-      box-shadow: 0 6px 12px rgba(34, 197, 94, 0.3);
+      box-shadow: 0 6px 14px #22c55e40;
     }
 
     .userinfo {
@@ -65,8 +64,7 @@
     .name {
       font-size: 18px;
       font-weight: 700;
-      letter-spacing: -0.2px;
-      background: linear-gradient(135deg, #FFF, #b9ffd0);
+      background: linear-gradient(135deg, #fff, #b9ffd0);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
@@ -75,17 +73,17 @@
     .uid {
       font-size: 12px;
       opacity: 0.7;
-      margin-top: 4px;
       font-family: monospace;
+      margin-top: 3px;
     }
 
     .profileCard {
       margin: 20px 18px;
       padding: 20px 18px;
-      background: rgba(12, 20, 35, 0.65);
+      background: rgba(10, 18, 32, 0.7);
       backdrop-filter: blur(14px);
       border-radius: 32px;
-      border: 1px solid rgba(34, 197, 94, 0.3);
+      border: 1px solid rgba(34, 197, 94, 0.35);
     }
 
     .profileFlex {
@@ -111,7 +109,6 @@
     .statsRow {
       display: flex;
       gap: 12px;
-      margin-top: 8px;
     }
 
     .statBox {
@@ -122,19 +119,17 @@
       border-radius: 20px;
       text-align: center;
       transition: all 0.2s;
-      border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .statBox h3 {
       font-size: 22px;
       font-weight: 800;
-      color: #22e07b;
+      color: #2eeb7b;
     }
 
     .statBox p {
       font-size: 11px;
       opacity: 0.7;
-      letter-spacing: 0.5px;
     }
 
     .container {
@@ -142,20 +137,19 @@
     }
 
     .earn-card {
-      background: rgba(10, 18, 32, 0.7);
+      background: rgba(8, 16, 28, 0.75);
       backdrop-filter: blur(16px);
       border-radius: 36px;
       padding: 28px 20px;
       text-align: center;
-      border: 1px solid rgba(34, 197, 94, 0.4);
-      box-shadow: 0 25px 40px -15px black;
+      border: 1px solid rgba(34, 197, 94, 0.45);
+      margin-bottom: 16px;
     }
 
     .balance-title {
       font-size: 18px;
       font-weight: 500;
-      letter-spacing: 1px;
-      color: #b9e6cf;
+      color: #c0f0d0;
     }
 
     .balance {
@@ -166,10 +160,8 @@
       background-clip: text;
       color: transparent;
       margin: 12px 0;
-      text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
 
-    /* animated watch button */
     .watch {
       width: 100%;
       padding: 18px;
@@ -182,7 +174,7 @@
       cursor: pointer;
       margin-top: 12px;
       transition: all 0.2s ease;
-      box-shadow: 0 8px 18px rgba(34, 197, 94, 0.3);
+      box-shadow: 0 8px 18px #22c55e40;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -190,63 +182,56 @@
     }
 
     .watch:active {
-      transform: scale(0.96);
+      transform: scale(0.97);
     }
 
     .watch:disabled {
       opacity: 0.65;
-      transform: scale(0.98);
       cursor: not-allowed;
-      background: linear-gradient(95deg, #3a6e4b, #328a4e);
-    }
-
-    .timer-preview {
-      background: rgba(0, 0, 0, 0.6);
-      border-radius: 60px;
-      padding: 8px 16px;
-      font-size: 14px;
-      font-weight: 500;
-      display: inline-block;
-      margin: 12px auto 0;
-      backdrop-filter: blur(4px);
-      font-family: monospace;
+      transform: scale(0.98);
     }
 
     .withdrawBtn {
       background: linear-gradient(95deg, #2563eb, #3b82f6);
-      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.3);
+      box-shadow: 0 8px 18px #2563eb40;
     }
 
-    .supportBtn {
-      background: linear-gradient(95deg, #1e6f8f, #0088cc);
+    .refBtn {
+      background: linear-gradient(95deg, #e67e22, #f39c12);
+      box-shadow: 0 8px 18px #e67e2240;
     }
 
-    .progress-section {
-      margin: 24px 0 18px;
+    .timer-status {
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 60px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      display: inline-block;
+      margin-top: 12px;
+      backdrop-filter: blur(4px);
     }
 
     .progress {
-      background: rgba(0, 0, 0, 0.45);
+      background: rgba(0, 0, 0, 0.5);
       border-radius: 40px;
-      height: 12px;
+      height: 10px;
       overflow: hidden;
-      margin: 12px 0 8px;
+      margin: 18px 0 8px;
     }
 
     .progressBar {
       height: 100%;
       width: 0%;
       background: linear-gradient(90deg, #22e67b, #1fa34f);
-      border-radius: 40px;
-      transition: width 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      transition: width 0.4s ease;
     }
 
     .rules {
-      margin-top: 28px;
+      margin-top: 24px;
       text-align: left;
       font-size: 12.5px;
-      line-height: 1.65;
-      background: rgba(0, 0, 0, 0.35);
+      background: rgba(0, 0, 0, 0.4);
       padding: 18px;
       border-radius: 28px;
       backdrop-filter: blur(4px);
@@ -256,33 +241,44 @@
       color: #2ecc71;
     }
 
-    .badge {
-      background: #22c55e20;
-      border-radius: 40px;
-      padding: 4px 12px;
+    .ref-link-box {
+      background: #0f172a;
+      border-radius: 24px;
+      padding: 14px;
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid #f39c1240;
+    }
+
+    .ref-link-box input {
+      background: #1e293b;
+      border: none;
+      padding: 12px;
+      border-radius: 28px;
+      flex: 1;
+      color: white;
       font-size: 12px;
-      display: inline-block;
-      margin-top: 6px;
+      outline: none;
     }
 
-    @keyframes pulse {
-      0% {
-        opacity: 1;
-      }
-
-      50% {
-        opacity: 0.7;
-      }
-
-      100% {
-        opacity: 1;
-      }
+    .copy-btn {
+      background: #f39c12;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 30px;
+      font-weight: bold;
+      color: #0f172a;
+      cursor: pointer;
     }
 
-    .timer-active {
-      animation: pulse 1s infinite;
-      background: #f59e0b;
-      color: black;
+    .badge-success {
+      background: #22c55e30;
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 12px;
     }
   </style>
 </head>
@@ -291,8 +287,8 @@
   <div class="topbar">
     <div class="avatar" id="avatar">M</div>
     <div class="userinfo">
-      <div class="name" id="tgname">Meta Miner</div>
-      <div class="uid">🆔 <span id="uid">guest_001</span></div>
+      <div class="name" id="tgname">MetaPro User</div>
+      <div class="uid">🆔 <span id="uid">loading...</span></div>
     </div>
   </div>
 
@@ -300,9 +296,9 @@
     <div class="profileFlex">
       <div class="profileAvatar" id="profileAvatar">M</div>
       <div>
-        <h2 id="profileName" style="font-size: 20px;">Explorer</h2>
-        <p id="profileUsername" style="opacity:0.6; font-size:13px;">@metaearner</p>
-        <div class="badge">⭐ EARNER</div>
+        <h2 id="profileName">Crypto Hunter</h2>
+        <p id="profileUsername" style="opacity:0.6; font-size:13px;">@username</p>
+        <div class="badge-success">✨ Referral Rewards ACTIVE</div>
       </div>
     </div>
     <div class="statsRow">
@@ -316,66 +312,63 @@
       </div>
       <div class="statBox">
         <h3 id="profileAds">0</h3>
-        <p>📺 Ads Watched</p>
+        <p>📺 Ads</p>
       </div>
     </div>
   </div>
 
   <div class="container">
     <div class="earn-card">
-      <div class="balance-title">💰 AVAILABLE BALANCE</div>
+      <div class="balance-title">💰 YOUR EARNING POWER</div>
       <div class="balance">$<span id="usdt">0.00</span></div>
 
-      <!-- WATCH AD BUTTON WITH TIMER STATE -->
       <button class="watch" id="watchBtn">
-        <span>📺</span> <span id="watchBtnText">Watch Ad & Earn 0.03 USDT</span>
+        <span>📺</span> <span id="watchBtnText">Watch Ad (15s earn 0.03 USDT)</span>
       </button>
+      <div id="timerStatus" class="timer-status">⏱️ Ready • 15 sec required for reward</div>
 
-      <!-- dynamic timer indicator -->
-      <div id="timerStatus" class="timer-preview">⏱️ Ready • 15 sec reward ad</div>
+      <button class="watch withdrawBtn" id="withdrawBtn">💸 Withdraw Funds</button>
+      <button class="watch refBtn" id="openRefBtn">👥 REFERRAL SYSTEM • Invite & Earn 0.10 USDT</button>
 
-      <button class="watch withdrawBtn" id="withdrawBtn">
-        💸 Withdraw Funds
-      </button>
-
-      <a href="https://t.me/Studybuddy_2025Bot_helperBot" target="_blank" style="text-decoration: none;">
-        <button class="watch supportBtn">
-          📞 Support Center
-        </button>
-      </a>
-
-      <div class="progress-section">
-        <div class="progress">
-          <div class="progressBar" id="progressBar"></div>
+      <!-- REFERRAL SECTION (dynamic & working) -->
+      <div id="refPanel" style="margin-top: 20px; display: none;">
+        <div class="ref-link-box">
+          <input type="text" id="refLinkInput" readonly value="loading...">
+          <button class="copy-btn" id="copyRefBtn">📋 Copy</button>
         </div>
-        <div class="info" id="progressText" style="font-size: 13px; opacity: 0.8;">📊 0 / 500 Ads to unlock min withdraw</div>
+        <div class="rules" style="margin-top: 12px; text-align: center;">
+          🎁 <strong>Referral reward: 0.10 USDT per friend</strong> 🎁<br>
+          Your friends get 0.03 USDT per ad, you earn 0.10 USDT when they join via your link!<br>
+          <span style="color:#f39c12;">👇 Share link & get paid instantly when they watch first ad</span>
+        </div>
       </div>
 
+      <div class="progress">
+        <div class="progressBar" id="progressBar"></div>
+      </div>
+      <div id="progressText" style="font-size: 13px; opacity: 0.8;">📊 0 / 500 Ads • 0 / 10 Referrals needed for withdrawal</div>
+
       <div class="rules">
-        ⚡ <strong>Withdrawal rules (honest earning)</strong><br>
-        • 💵 Minimum: <strong>5 USDT</strong><br>
-        • 👥 Referrals needed: <strong>10 active friends</strong><br>
-        • 🎯 Watch <strong>500 completed ads (15 sec each)</strong><br>
-        • 🎁 Reward: <strong>0.03 USDT per full ad view</strong><br>
-        • 🤝 Referral reward: <strong>0.10 USDT per referral</strong><br>
-        • 🔐 Only fully watched ads (15 seconds) are rewarded!
+        🔥 <strong>WITHDRAWAL RULES (FIXED & TRANSPARENT)</strong><br>
+        • 💵 Min: <strong>5 USDT</strong> &nbsp;|&nbsp; 👥 Need <strong>10 Referrals</strong> &nbsp;|&nbsp; 🎯 Need <strong>500 completed ads (15 sec each)</strong><br>
+        • 💰 Reward per ad: <strong>0.03 USDT</strong> &nbsp;|&nbsp; 🤝 Referral reward: <strong>0.10 USDT / active friend</strong><br>
+        • ✅ <strong>REF SYSTEM 100% WORKING:</strong> Your unique link tracks every new user. Automatic credit when they watch first ad.
       </div>
     </div>
   </div>
 
   <script>
-    // ---------- CONFIG ----------
+    // ================= CONFIGURATION =================
     const BACKEND = "https://crypto-4bbj.onrender.com";
     const SECRET_KEY = "META_9xK2_secure_2026";
     
-    // ---------- GLOBALS ----------
+    // GLOBALS
     let userId = "guest";
     let tgName = "Telegram User";
-    let firstName = "CryptoStar";
+    let firstName = "MetaPro";
     let avatarLetter = "M";
-    
-    // AD TIMER STATE
-    let isWatching = false;      // prevents multiple clicks
+    let myReferralCode = "";      // unique referral code from backend
+    let isWatching = false;
     let adTimerInterval = null;
     let secondsLeft = 0;
     
@@ -383,8 +376,12 @@
     const watchBtn = document.getElementById("watchBtn");
     const watchBtnTextSpan = document.getElementById("watchBtnText");
     const timerStatusDiv = document.getElementById("timerStatus");
+    const refPanel = document.getElementById("refPanel");
+    const refLinkInput = document.getElementById("refLinkInput");
+    const copyRefBtn = document.getElementById("copyRefBtn");
+    const openRefBtn = document.getElementById("openRefBtn");
     
-    // ---------- TELEGRAM INIT ----------
+    // ================= TELEGRAM INIT + REFERRAL DETECTION =================
     if (window.Telegram && Telegram.WebApp) {
       Telegram.WebApp.ready();
       Telegram.WebApp.expand();
@@ -392,19 +389,17 @@
       if (tgUser) {
         userId = String(tgUser.id);
         tgName = tgUser.username ? "@" + tgUser.username : "@user_" + userId;
-        firstName = tgUser.first_name || "CryptoStar";
+        firstName = tgUser.first_name || "CryptoHunter";
         avatarLetter = firstName.charAt(0).toUpperCase();
       }
     }
-    
-    // fallback if guest
     if (userId === "guest") {
-      userId = "guest_" + Math.floor(Math.random() * 100000);
+      userId = "guest_" + Math.floor(Math.random() * 1000000);
       firstName = "Explorer";
       avatarLetter = "E";
     }
     
-    // update UI with user info
+    // UPDATE UI BASICS
     document.getElementById("uid").innerText = userId;
     document.getElementById("tgname").innerText = tgName;
     document.getElementById("avatar").innerText = avatarLetter;
@@ -412,7 +407,55 @@
     document.getElementById("profileName").innerText = firstName;
     document.getElementById("profileUsername").innerText = tgName;
     
-    // ---------- BACKEND LOAD PROFILE ----------
+    // ========== REFERRAL LOGIC (DETECT REF FROM URL / BOT START) ==========
+    // In Telegram WebApp, referral param can be passed via startapp (startapp=ref_XXXXX)
+    // We also emulate detection from initDataUnsafe or query string (for web)
+    function getReferrerId() {
+      try {
+        // 1) From Telegram WebApp start_param
+        if (Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.start_param) {
+          let startParam = Telegram.WebApp.initDataUnsafe.start_param;
+          if (startParam && startParam.startsWith("ref_")) {
+            return startParam.replace("ref_", "");
+          }
+        }
+        // 2) From URL hash or query param (for fallback)
+        const urlParams = new URLSearchParams(window.location.search);
+        let ref = urlParams.get("ref");
+        if (ref) return ref;
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        ref = hashParams.get("ref");
+        if (ref) return ref;
+      } catch(e) { console.warn(e); }
+      return null;
+    }
+    
+    const referrerId = getReferrerId();
+    
+    // ========== REGISTER / LOGIN USER WITH REFERRAL SUPPORT ==========
+    async function registerOrLoginUser() {
+      try {
+        const payload = { userId, tgName, firstName };
+        if (referrerId) payload.referredBy = referrerId;
+        const res = await fetch(`${BACKEND}/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "authorization": SECRET_KEY },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          myReferralCode = data.referralCode || userId;
+          if (data.rewardGiven && referrerId) {
+            timerStatusDiv.innerHTML = "🎉 Referral bonus credited! +0.10 USDT to your referrer!";
+            setTimeout(() => { if(!isWatching) timerStatusDiv.innerHTML = "⏱️ Ready • 15 sec ad"; }, 3000);
+          }
+          return true;
+        }
+        return false;
+      } catch(e) { console.error("register error", e); return false; }
+    }
+    
+    // ========== FETCH PROFILE (with referrals & ads) ==========
     async function loadProfile() {
       try {
         const res = await fetch(`${BACKEND}/profile/${userId}`);
@@ -423,246 +466,179 @@
         document.getElementById("profileRefs").innerText = data.refs || 0;
         document.getElementById("profileAds").innerText = data.adsWatched || 0;
         
-        const ads = data.adsWatched || 0;
-        const percent = Math.min((ads / 500) * 100, 100);
-        document.getElementById("progressBar").style.width = percent + "%";
-        document.getElementById("progressText").innerHTML = `📊 ${ads} / 500 Ads completed • ${percent.toFixed(0)}% to milestone`;
+        const adsWatched = data.adsWatched || 0;
+        const refs = data.refs || 0;
+        const percentAds = Math.min((adsWatched / 500) * 100, 100);
+        document.getElementById("progressBar").style.width = percentAds + "%";
+        document.getElementById("progressText").innerHTML = `📊 ${adsWatched}/500 Ads • 👥 ${refs}/10 Referrals needed for withdrawal`;
+        
+        // generate referral link (deep link to bot with startapp ref)
+        const botUsername = "Studybuddy_2025Bot_helperBot"; // your bot username
+        const deepLink = `https://t.me/${botUsername}?startapp=ref_${myReferralCode}`;
+        if (refLinkInput) refLinkInput.value = deepLink;
         return data;
-      } catch (err) {
-        console.error("Profile fetch error", err);
-        return null;
-      }
+      } catch(err) { console.error("profile load err", err); return null; }
     }
     
-    // ---------- REWARD (only after full 15 sec) ----------
+    // ========== REWARD AFTER 15 SECONDS (FULL AD) ==========
     async function sendRewardAfterFullWatch() {
       try {
         const res = await fetch(`${BACKEND}/ads`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "authorization": SECRET_KEY
-          },
+          headers: { "Content-Type": "application/json", "authorization": SECRET_KEY },
           body: JSON.stringify({ userId })
         });
         const data = await res.json();
         if (data.success) {
           await loadProfile();
-          // Show success with small haptic feedback if supported
-          if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
-            Telegram.WebApp.HapticFeedback.notificationOccurred("success");
-          }
-          timerStatusDiv.innerHTML = "✅ +0.03 USDT earned! Watch another ad →";
-          setTimeout(() => {
-            if (!isWatching) timerStatusDiv.innerHTML = "⏱️ Ready • 15 sec reward ad";
-          }, 2500);
+          if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.notificationOccurred("success");
+          timerStatusDiv.innerHTML = "✅ +0.03 USDT credited! Keep watching!";
+          setTimeout(() => { if (!isWatching) timerStatusDiv.innerHTML = "⏱️ Ready • 15 sec required for reward"; }, 2500);
         } else {
-          timerStatusDiv.innerHTML = "⚠️ Reward error: " + (data.message || "try again");
-          setTimeout(() => {
-            if (!isWatching) timerStatusDiv.innerHTML = "⏱️ Ready • 15 sec reward ad";
-          }, 2000);
+          timerStatusDiv.innerHTML = "⚠️ " + (data.message || "reward error");
+          setTimeout(() => { if (!isWatching) timerStatusDiv.innerHTML = "⏱️ Ready • 15 sec ad"; }, 2000);
         }
-      } catch (err) {
-        console.error("reward API error", err);
-        timerStatusDiv.innerHTML = "❌ Network error, no reward";
-        setTimeout(() => {
-          if (!isWatching) timerStatusDiv.innerHTML = "⏱️ Ready • 15 sec reward ad";
-        }, 2000);
+      } catch(err) {
+        timerStatusDiv.innerHTML = "❌ Network error, reward not sent";
+        setTimeout(() => { if (!isWatching) timerStatusDiv.innerHTML = "⏱️ Ready • 15 sec required"; }, 2000);
       }
     }
     
-    // ---------- SIMULATE / TRIGGER EXTERNAL AD SDK + 15 sec timer ----------
-    // This function handles the mandatory 15-second countdown.
-    // If SDK "show_10892289" exists, we call it and wait for full timer
-    // if not, we still enforce the 15 seconds countdown to ensure user is engaged.
+    // ========== AD WATCH WITH 15 SECONDS HARD TIMER ==========
     async function startAdFlow() {
-      if (isWatching) {
-        timerStatusDiv.innerHTML = "⏳ Please wait, ad in progress...";
-        return;
-      }
-      
-      isWatching = true;
-      watchBtn.disabled = true;
-      secondsLeft = 15;
-      updateTimerUI();
-      
-      // Change button appearance
-      watchBtnTextSpan.innerHTML = `⏳ Watching Ad (${secondsLeft}s)`;
-      timerStatusDiv.classList.add("timer-active");
-      timerStatusDiv.innerHTML = `🎬 AD PLAYING • ${secondsLeft} seconds remaining... Do not close!`;
-      
-      // Start countdown timer (strict)
-      adTimerInterval = setInterval(() => {
-        if (secondsLeft <= 1) {
-          // Timer finished: 15 seconds elapsed
-          clearInterval(adTimerInterval);
-          adTimerInterval = null;
-          // IMPORTANT: reward only after full 15 seconds
-          finishAdAndReward();
-        } else {
-          secondsLeft--;
-          updateTimerUI();
-          if (watchBtnTextSpan) watchBtnTextSpan.innerHTML = `⏳ Watching Ad (${secondsLeft}s)`;
-          timerStatusDiv.innerHTML = `🎬 WATCHING • ${secondsLeft} seconds left → finish to earn`;
-        }
-      }, 1000);
-      
-      // Try to show the actual ad SDK (if exists, it's an extra layer)
-      // The user MUST still wait 15 seconds; we don't reward early even if SDK finishes early.
-      // But we don't want to block reward if SDK fails, timer handles it.
-      try {
-        if (typeof show_10892289 !== "undefined") {
-          // Launch external ad unit, but reward is still gated by timer.
-          // We don't await because it might resolve early — reward is timer-based.
-          show_10892289().catch(e => console.warn("Ad SDK warning:", e));
-        } else {
-          console.warn("Ad SDK not loaded, but timer simulation active");
-          timerStatusDiv.innerHTML += " (Demo ad mode)";
-        }
-      } catch (adErr) {
-        console.error("Ad SDK error:", adErr);
-        // timer continues, reward still given after 15 sec
-      }
-    }
-    
-    function updateTimerUI() {
-      if (secondsLeft > 0) {
-        watchBtnTextSpan.innerHTML = `⏳ Watching Ad (${secondsLeft}s)`;
-      }
-    }
-    
-    async function finishAdAndReward() {
-      // clean timer
-      if (adTimerInterval) {
-        clearInterval(adTimerInterval);
-        adTimerInterval = null;
-      }
-      
-      // reward only if the timer naturally ended (secondsLeft === 0 or ended)
-      // double-check that we fully completed
-      if (secondsLeft === 0) {
-        // SUCCESS: user completed 15 seconds
-        timerStatusDiv.innerHTML = "🏆 Ad completed! Awarding 0.03 USDT...";
-        timerStatusDiv.classList.remove("timer-active");
-        await sendRewardAfterFullWatch();
-      } else {
-        // This case shouldn't happen, but fallback: no reward
-        timerStatusDiv.innerHTML = "⚠️ Ad interrupted, no reward. Try again.";
-        timerStatusDiv.classList.remove("timer-active");
-      }
-      
-      // reset UI and enable button
-      isWatching = false;
-      watchBtn.disabled = false;
-      watchBtnTextSpan.innerHTML = `📺 Watch Ad & Earn 0.03 USDT`;
-      if (!isWatching && timerStatusDiv.innerHTML.includes("Awarding") === false) {
-        setTimeout(() => {
-          if (!isWatching) timerStatusDiv.innerHTML = "⏱️ Ready • 15 sec reward ad";
-        }, 2000);
-      } else {
-        timerStatusDiv.innerHTML = "✅ Ready for next ad!";
-        setTimeout(() => {
-          if (!isWatching) timerStatusDiv.innerHTML = "⏱️ Ready • 15 sec reward ad";
-        }, 2500);
-      }
-    }
-    
-    // If user tries to close/minimize - but we still enforce, we also add page visibility handling
-    function handleVisibilityChange() {
-      if (document.hidden && isWatching) {
-        // user left tab/app during ad
-        if (adTimerInterval) {
-          // Penalty: cancel reward and reset timer
-          clearInterval(adTimerInterval);
-          adTimerInterval = null;
-          isWatching = false;
-          watchBtn.disabled = false;
-          watchBtnTextSpan.innerHTML = `📺 Watch Ad & Earn 0.03 USDT`;
-          timerStatusDiv.innerHTML = "❌ Ad interrupted! You left the app. Full 15 sec required.";
-          timerStatusDiv.classList.remove("timer-active");
-          setTimeout(() => {
-            if (!isWatching) timerStatusDiv.innerHTML = "⏱️ Ready • stay focused for 15 sec";
-          }, 3000);
-        }
-      }
-    }
-    
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    
-    // WATCH AD ENTRY POINT (with 15 sec enforced)
-    window.watchAd = async function() {
       if (isWatching) {
         timerStatusDiv.innerHTML = "⏳ Finish current ad first!";
         return;
       }
-      await startAdFlow();
-    };
+      isWatching = true;
+      watchBtn.disabled = true;
+      secondsLeft = 15;
+      watchBtnTextSpan.innerHTML = `⏳ Watching (${secondsLeft}s)`;
+      timerStatusDiv.classList.add("timer-active");
+      timerStatusDiv.innerHTML = `🎬 AD IS PLAYING • ${secondsLeft} seconds left... Complete to earn!`;
+      
+      adTimerInterval = setInterval(() => {
+        if (secondsLeft <= 1) {
+          clearInterval(adTimerInterval);
+          adTimerInterval = null;
+          finishAdAndReward();
+        } else {
+          secondsLeft--;
+          watchBtnTextSpan.innerHTML = `⏳ Watching (${secondsLeft}s)`;
+          timerStatusDiv.innerHTML = `🎬 MUST WATCH ${secondsLeft}s more → reward after full ad`;
+        }
+      }, 1000);
+      
+      // Call external ad SDK (if available)
+      try {
+        if (typeof show_10892289 !== "undefined") {
+          show_10892289().catch(e => console.warn("SDK warning", e));
+        }
+      } catch(e) { console.warn("Ad SDK error", e); }
+    }
     
-    // attach event listener
+    async function finishAdAndReward() {
+      if (adTimerInterval) clearInterval(adTimerInterval);
+      if (secondsLeft === 0) {
+        timerStatusDiv.innerHTML = "🏆 Full ad watched! Awarding 0.03 USDT...";
+        timerStatusDiv.classList.remove("timer-active");
+        await sendRewardAfterFullWatch();
+      } else {
+        timerStatusDiv.innerHTML = "❌ Ad interrupted! Full 15 seconds required. No reward.";
+        timerStatusDiv.classList.remove("timer-active");
+      }
+      isWatching = false;
+      watchBtn.disabled = false;
+      watchBtnTextSpan.innerHTML = `📺 Watch Ad (15s earn 0.03 USDT)`;
+      if (!isWatching && !timerStatusDiv.innerHTML.includes("Awarding")) {
+        setTimeout(() => { timerStatusDiv.innerHTML = "⏱️ Ready • 15 sec required for reward"; }, 2000);
+      }
+    }
+    
+    function handleVisibilityLoss() {
+      if (document.hidden && isWatching && adTimerInterval) {
+        clearInterval(adTimerInterval);
+        adTimerInterval = null;
+        isWatching = false;
+        watchBtn.disabled = false;
+        watchBtnTextSpan.innerHTML = `📺 Watch Ad (15s earn 0.03 USDT)`;
+        timerStatusDiv.innerHTML = "🚫 Ad aborted! You left the app. Full 15 sec required next time.";
+        timerStatusDiv.classList.remove("timer-active");
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibilityLoss);
+    
+    window.watchAd = startAdFlow;
     watchBtn.onclick = () => window.watchAd();
     
-    // ---------- WITHDRAW (enhanced with checks) ----------
+    // ========== WITHDRAW (UPDATED CHECK REFS & ADS) ==========
     window.withdrawNow = async function() {
-      // first get latest profile for accurate checks
       const profile = await loadProfile();
-      if (!profile) {
-        alert("Cannot fetch profile. Check internet.");
-        return;
-      }
+      if (!profile) { alert("Cannot load profile"); return; }
       const balance = profile.balance || 0;
       const refs = profile.refs || 0;
-      const adsWatched = profile.adsWatched || 0;
+      const ads = profile.adsWatched || 0;
       
-      let errorMsg = null;
-      if (balance < 5) errorMsg = `❌ Minimum withdrawal is 5 USDT. Your balance: ${balance.toFixed(2)} USDT`;
-      else if (refs < 10) errorMsg = `❌ You need 10 referrals to withdraw. Current: ${refs} referrals. Invite friends!`;
-      else if (adsWatched < 500) errorMsg = `❌ You must watch 500 full ads (15 sec each). Current: ${adsWatched}/500 ads.`;
+      if (balance < 5) { alert(`❌ Min withdrawal 5 USDT. Balance: ${balance.toFixed(2)} USDT`); return; }
+      if (refs < 10) { alert(`❌ Need 10 referrals to withdraw. Current: ${refs} referrals. Invite friends!`); return; }
+      if (ads < 500) { alert(`❌ Need 500 completed ads (15 sec each). Progress: ${ads}/500`); return; }
       
-      if (errorMsg) {
-        alert(errorMsg);
-        return;
-      }
-      
-      const amount = prompt(`💰 Withdrawal amount (Min: 5 USDT | Max: ${balance.toFixed(2)} USDT):`, "5");
+      let amount = prompt(`💰 Enter amount (min 5, max ${balance.toFixed(2)} USDT):`, "5");
       if (!amount) return;
-      const numAmount = parseFloat(amount);
-      if (isNaN(numAmount) || numAmount < 5) {
-        alert("Minimum is 5 USDT");
-        return;
-      }
-      if (numAmount > balance) {
-        alert(`Insufficient balance. You have ${balance.toFixed(2)} USDT`);
-        return;
-      }
+      let num = parseFloat(amount);
+      if (isNaN(num) || num < 5) { alert("Minimum 5 USDT"); return; }
+      if (num > balance) { alert("Insufficient balance"); return; }
       
       try {
         const res = await fetch(`${BACKEND}/withdraw`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: userId, amount: numAmount })
+          body: JSON.stringify({ userId, amount: num })
         });
         const data = await res.json();
-        if (data.success) {
-          alert(`✅ Withdrawal request sent! ${data.message}\n📌 Amount: ${numAmount} USDT. Check Telegram bot.`);
-          loadProfile();
-        } else {
-          alert(`❌ Withdraw failed: ${data.message}`);
-        }
-      } catch (err) {
-        alert("Network error, please try later.");
-      }
+        if (data.success) alert(`✅ Withdrawal request sent: ${num} USDT. Check Telegram bot.`);
+        else alert(`❌ Withdraw failed: ${data.message}`);
+        loadProfile();
+      } catch(e) { alert("Network error"); }
     };
-    
     document.getElementById("withdrawBtn").onclick = () => window.withdrawNow();
     
-    // Support link remains
-    // Refresh every 8s
-    loadProfile();
-    setInterval(() => loadProfile(), 8000);
+    // ========== REFERRAL PANEL UI & COPY FUNCTIONALITY ==========
+    openRefBtn.addEventListener("click", () => {
+      if (refPanel.style.display === "none" || refPanel.style.display === "") {
+        refPanel.style.display = "block";
+        if (myReferralCode) {
+          const botUsername = "Studybuddy_2025Bot_helperBot";
+          refLinkInput.value = `https://t.me/${botUsername}?startapp=ref_${myReferralCode}`;
+        } else {
+          refLinkInput.value = "loading referral code...";
+          setTimeout(() => loadProfile().then(() => {
+            if (myReferralCode) refLinkInput.value = `https://t.me/Studybuddy_2025Bot_helperBot?startapp=ref_${myReferralCode}`;
+          }), 500);
+        }
+      } else {
+        refPanel.style.display = "none";
+      }
+    });
     
-    // Bonus: add haptic on ad finish
-    window.TelegramWebAppProxy = Telegram.WebApp;
+    copyRefBtn.addEventListener("click", async () => {
+      if (refLinkInput.value && refLinkInput.value !== "loading...") {
+        try {
+          await navigator.clipboard.writeText(refLinkInput.value);
+          alert("✅ Referral link copied!\nShare with friends → they earn 0.03 USDT/ad, you get 0.10 USDT each!");
+          if (Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.impactOccurred("light");
+        } catch(e) { alert("Press and copy manually"); }
+      } else { alert("Generating referral link, please wait..."); }
+    });
+    
+    // ========== INITIALIZATION (REGISTER + LOAD) ==========
+    (async function init() {
+      await registerOrLoginUser();
+      await loadProfile();
+      // show referral panel notification if user has referrals?
+      setInterval(loadProfile, 8000);
+    })();
+    
   </script>
 </body>
-
   </html>

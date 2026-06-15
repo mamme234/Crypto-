@@ -276,24 +276,23 @@
       transform: translate(-50%, -50%);
       background: linear-gradient(135deg, #1aa34a, #0e7a36);
       color: white;
-      padding: 20px 35px;
-      border-radius: 50px;
-      font-size: 22px;
+      padding: 20px 30px;
+      border-radius: 30px;
+      font-size: 20px;
       font-weight: bold;
       text-align: center;
       z-index: 10000;
-      box-shadow: 0 0 50px rgba(34,197,94,0.9);
+      box-shadow: 0 0 50px rgba(34,197,94,0.8);
       border: 2px solid #ffd700;
-      animation: fadeInOut 2.5s ease-in-out;
+      animation: fadeInOut 2s ease-in-out;
       pointer-events: none;
-      white-space: nowrap;
     }
 
     @keyframes fadeInOut {
-      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
       15% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
       30% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-      80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      85% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
       100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); visibility: hidden; }
     }
   </style>
@@ -339,9 +338,9 @@
       <div class="balance">$<span id="usdt">0.00</span></div>
 
       <button class="watch" id="watchBtn">
-        <span>📺</span> <span id="watchBtnText">Watch Ad (17s earn 0.03 USDT)</span>
+        <span>📺</span> <span id="watchBtnText">Watch Ad (15s earn 0.03 USDT)</span>
       </button>
-      <div id="timerStatus" class="timer-status">Ready • 17 sec required for reward</div>
+      <div id="timerStatus" class="timer-status">Ready • 15 sec required for reward</div>
 
       <button class="watch withdrawBtn" id="withdrawBtn">Withdraw Funds</button>
       <button class="watch refBtn" id="openRefBtn">Get Referral Link • Earn 0.10 USDT</button>
@@ -367,7 +366,7 @@
         <strong>WITHDRAWAL RULES</strong><br>
         • Minimum: <strong>5 USDT</strong><br>
         • Need: <strong>10 Referrals</strong><br>
-        • Need: <strong>500 completed ads (17 sec each)</strong><br>
+        • Need: <strong>500 completed ads (15 sec each)</strong><br>
         • Reward per ad: <strong>0.03 USDT</strong><br>
         • Referral reward: <strong>0.10 USDT per active referral</strong>
       </div>
@@ -389,7 +388,6 @@
     let isWatching = false;
     let adTimerInterval = null;
     let secondsLeft = 0;
-    const AD_DURATION = 17; // 17 SECONDS
     
     // DOM elements
     const watchBtn = document.getElementById("watchBtn");
@@ -400,7 +398,7 @@
     const copyRefBtn = document.getElementById("copyRefBtn");
     const openRefBtn = document.getElementById("openRefBtn");
     
-    // Local storage for balance
+    // Local storage for balance when backend fails
     let localBalance = 0;
     let localAdsWatched = 0;
     let localRefs = 0;
@@ -458,14 +456,14 @@
     }
     
     // Show center message
-    function showCenterMessage(message) {
+    function showCenterMessage(message, isSuccess = true) {
       const div = document.createElement('div');
       div.className = 'center-message';
       div.innerHTML = message;
       document.body.appendChild(div);
       setTimeout(() => {
         if (div && div.remove) div.remove();
-      }, 2500);
+      }, 2000);
     }
     
     // Update UI
@@ -568,21 +566,21 @@
       }
     }
     
-    // ========== REWARD AFTER 17 SECONDS - ADDS USDT + SHOWS MESSAGE ==========
+    // ========== REWARD AFTER 15 SECONDS - FIXED ADDS USDT ==========
     async function sendRewardAfterFullWatch() {
-      // ADD USDT TO BALANCE
+      // IMMEDIATELY ADD USDT LOCALLY
       localBalance = localBalance + 0.03;
       localAdsWatched = localAdsWatched + 1;
       updateLocalUI();
       saveLocalData();
       
-      // SHOW CENTER MESSAGE
-      showCenterMessage('✨ +0.03 USDT Earned! ✨');
+      // Show center message
+      showCenterMessage('✨ +0.03 USDT Earned! ✨', true);
       
       // Update timer status
       timerStatusDiv.innerHTML = "+0.03 USDT credited!";
       setTimeout(() => { 
-        if (!isWatching) timerStatusDiv.innerHTML = "Ready • 17 sec required"; 
+        if (!isWatching) timerStatusDiv.innerHTML = "Ready • 15 sec required"; 
       }, 2000);
       
       if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
@@ -598,6 +596,7 @@
         });
         const data = await res.json();
         if (data.success) {
+          // Sync with backend data
           localBalance = data.balance;
           localAdsWatched = data.adsWatched;
           updateLocalUI();
@@ -608,7 +607,7 @@
       }
     }
     
-    // ========== AD WATCH WITH 17 SECOND TIMER ==========
+    // ========== AD WATCH WITH 15 SECOND TIMER ==========
     async function startAdFlow() {
       if (isWatching) {
         timerStatusDiv.innerHTML = "Finish current ad first!";
@@ -616,7 +615,7 @@
       }
       isWatching = true;
       watchBtn.disabled = true;
-      secondsLeft = AD_DURATION;
+      secondsLeft = 15;
       watchBtnTextSpan.innerHTML = `Watching (${secondsLeft}s)`;
       timerStatusDiv.innerHTML = `AD PLAYING • ${secondsLeft}s left... Complete to earn!`;
       
@@ -645,13 +644,13 @@
         timerStatusDiv.innerHTML = "Full ad watched! Awarding 0.03 USDT...";
         await sendRewardAfterFullWatch();
       } else {
-        timerStatusDiv.innerHTML = "Ad interrupted! Full 17 seconds required. No reward.";
+        timerStatusDiv.innerHTML = "Ad interrupted! Full 15 seconds required. No reward.";
       }
       isWatching = false;
       watchBtn.disabled = false;
-      watchBtnTextSpan.innerHTML = `Watch Ad (17s earn 0.03 USDT)`;
+      watchBtnTextSpan.innerHTML = `Watch Ad (15s earn 0.03 USDT)`;
       if (!isWatching && !timerStatusDiv.innerHTML.includes("Awarding")) {
-        setTimeout(() => { timerStatusDiv.innerHTML = "Ready • 17 sec required"; }, 2000);
+        setTimeout(() => { timerStatusDiv.innerHTML = "Ready • 15 sec required"; }, 2000);
       }
     }
     
@@ -661,8 +660,8 @@
         adTimerInterval = null;
         isWatching = false;
         watchBtn.disabled = false;
-        watchBtnTextSpan.innerHTML = `Watch Ad (17s earn 0.03 USDT)`;
-        timerStatusDiv.innerHTML = "Ad aborted! Full 17 sec required next time.";
+        watchBtnTextSpan.innerHTML = `Watch Ad (15s earn 0.03 USDT)`;
+        timerStatusDiv.innerHTML = "Ad aborted! Full 15 sec required next time.";
       }
     }
     document.addEventListener("visibilitychange", handleVisibilityLoss);
@@ -678,23 +677,23 @@
       const ads = localAdsWatched;
       
       if (balance < 5) { 
-        showCenterMessage('❌ Min withdrawal 5 USDT');
+        showCenterMessage('❌ Min withdrawal 5 USDT', false);
         return; 
       }
       if (refs < 10) { 
-        showCenterMessage(`❌ Need 10 referrals. You have ${refs}`);
+        showCenterMessage(`❌ Need 10 referrals. You have ${refs}`, false);
         return; 
       }
       if (ads < 500) { 
-        showCenterMessage(`❌ Need 500 ads. You have ${ads}`);
+        showCenterMessage(`❌ Need 500 ads. You have ${ads}`, false);
         return; 
       }
       
       let amount = prompt(`Enter amount (min 5, max ${balance.toFixed(2)} USDT):`, "5");
       if (!amount) return;
       let num = parseFloat(amount);
-      if (isNaN(num) || num < 5) { showCenterMessage('Minimum 5 USDT'); return; }
-      if (num > balance) { showCenterMessage('Insufficient balance'); return; }
+      if (isNaN(num) || num < 5) { showCenterMessage('Minimum 5 USDT', false); return; }
+      if (num > balance) { showCenterMessage('Insufficient balance', false); return; }
       
       try {
         const res = await fetch(`${BACKEND}/withdraw`, {
@@ -707,14 +706,14 @@
           localBalance = localBalance - num;
           updateLocalUI();
           saveLocalData();
-          showCenterMessage(`✅ Withdrawal: ${num} USDT sent!`);
+          showCenterMessage(`✅ Withdrawal: ${num} USDT sent!`, true);
           timerStatusDiv.innerHTML = `Withdrawal request sent! ${num} USDT pending.`;
-          setTimeout(() => { if (!isWatching) timerStatusDiv.innerHTML = "Ready • 17 sec required"; }, 3000);
+          setTimeout(() => { if (!isWatching) timerStatusDiv.innerHTML = "Ready • 15 sec required"; }, 3000);
         } else {
-          showCenterMessage(`❌ Withdraw failed: ${data.message}`);
+          showCenterMessage(`❌ Withdraw failed: ${data.message}`, false);
         }
       } catch(e) { 
-        showCenterMessage('❌ Network error');
+        showCenterMessage('❌ Network error', false);
       }
     };
     document.getElementById("withdrawBtn").onclick = () => window.withdrawNow();
@@ -742,12 +741,12 @@
     copyRefBtn.addEventListener("click", async () => {
       let linkToCopy = refLinkInput.value;
       if (!linkToCopy || linkToCopy.includes("Generating") || linkToCopy.includes("Click")) {
-        showCenterMessage('Please wait for link to generate');
+        showCenterMessage('Please wait for link to generate', false);
         return;
       }
       try {
         await navigator.clipboard.writeText(linkToCopy);
-        showCenterMessage('✅ Referral link copied!');
+        showCenterMessage('✅ Referral link copied!', true);
       } catch(e) {
         alert("Copy manually: " + linkToCopy);
       }
@@ -762,4 +761,4 @@
     
   </script>
 </body>
-  </html>
+          </html>

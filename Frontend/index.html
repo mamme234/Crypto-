@@ -1,27 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>MetaPro Earn • Watch & Earn USDT</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       background: radial-gradient(circle at 10% 30%, #0a0f1f, #020617);
       color: #ffffff;
       min-height: 100vh;
     }
-
     .topbar {
       display: flex;
       align-items: center;
@@ -31,7 +22,6 @@
       backdrop-filter: blur(12px);
       border-bottom: 1px solid #22c55e40;
     }
-
     .avatar {
       width: 52px;
       height: 52px;
@@ -44,11 +34,7 @@
       font-weight: 800;
       box-shadow: 0 6px 14px #22c55e40;
     }
-
-    .userinfo {
-      flex: 1;
-    }
-
+    .userinfo { flex: 1; }
     .name {
       font-size: 18px;
       font-weight: 700;
@@ -57,14 +43,7 @@
       background-clip: text;
       color: transparent;
     }
-
-    .uid {
-      font-size: 12px;
-      opacity: 0.7;
-      font-family: monospace;
-      margin-top: 3px;
-    }
-
+    .uid { font-size: 12px; opacity: 0.7; font-family: monospace; margin-top: 3px; }
     .profileCard {
       margin: 20px 18px;
       padding: 20px 18px;
@@ -73,14 +52,12 @@
       border-radius: 32px;
       border: 1px solid rgba(34, 197, 94, 0.35);
     }
-
     .profileFlex {
       display: flex;
       align-items: center;
       gap: 18px;
       margin-bottom: 22px;
     }
-
     .profileAvatar {
       width: 70px;
       height: 70px;
@@ -93,12 +70,7 @@
       font-weight: bold;
       box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
     }
-
-    .statsRow {
-      display: flex;
-      gap: 12px;
-    }
-
+    .statsRow { display: flex; gap: 12px; }
     .statBox {
       flex: 1;
       background: rgba(0, 0, 0, 0.5);
@@ -107,22 +79,9 @@
       border-radius: 20px;
       text-align: center;
     }
-
-    .statBox h3 {
-      font-size: 22px;
-      font-weight: 800;
-      color: #2eeb7b;
-    }
-
-    .statBox p {
-      font-size: 11px;
-      opacity: 0.7;
-    }
-
-    .container {
-      padding: 0 18px 30px;
-    }
-
+    .statBox h3 { font-size: 22px; font-weight: 800; color: #2eeb7b; }
+    .statBox p { font-size: 11px; opacity: 0.7; }
+    .container { padding: 0 18px 30px; }
     .earn-card {
       background: rgba(8, 16, 28, 0.75);
       backdrop-filter: blur(16px);
@@ -132,13 +91,7 @@
       border: 1px solid rgba(34, 197, 94, 0.45);
       margin-bottom: 16px;
     }
-
-    .balance-title {
-      font-size: 18px;
-      font-weight: 500;
-      color: #c0f0d0;
-    }
-
+    .balance-title { font-size: 18px; font-weight: 500; color: #c0f0d0; }
     .balance {
       font-size: 58px;
       font-weight: 800;
@@ -148,7 +101,6 @@
       color: transparent;
       margin: 12px 0;
     }
-
     .watch {
       width: 100%;
       padding: 18px;
@@ -167,24 +119,10 @@
       justify-content: center;
       gap: 12px;
     }
-
-    .watch:active {
-      transform: scale(0.97);
-    }
-
-    .watch:disabled {
-      opacity: 0.65;
-      cursor: not-allowed;
-    }
-
-    .withdrawBtn {
-      background: linear-gradient(95deg, #2563eb, #3b82f6);
-    }
-
-    .refBtn {
-      background: linear-gradient(95deg, #e67e22, #f39c12);
-    }
-
+    .watch:active { transform: scale(0.97); }
+    .watch:disabled { opacity: 0.65; cursor: not-allowed; }
+    .withdrawBtn { background: linear-gradient(95deg, #2563eb, #3b82f6); }
+    .refBtn { background: linear-gradient(95deg, #e67e22, #f39c12); }
     .timer-status {
       background: rgba(0, 0, 0, 0.6);
       border-radius: 60px;
@@ -195,7 +133,6 @@
       margin-top: 12px;
       backdrop-filter: blur(4px);
     }
-
     .progress {
       background: rgba(0, 0, 0, 0.5);
       border-radius: 40px;
@@ -203,14 +140,12 @@
       overflow: hidden;
       margin: 18px 0 8px;
     }
-
     .progressBar {
       height: 100%;
       width: 0%;
       background: linear-gradient(90deg, #22e67b, #1fa34f);
       transition: width 0.4s ease;
     }
-
     .rules {
       margin-top: 24px;
       text-align: left;
@@ -219,11 +154,7 @@
       padding: 18px;
       border-radius: 28px;
     }
-
-    .rules strong {
-      color: #2ecc71;
-    }
-
+    .rules strong { color: #2ecc71; }
     .ref-link-box {
       background: #0f172a;
       border-radius: 24px;
@@ -235,7 +166,6 @@
       gap: 12px;
       border: 1px solid #f39c1240;
     }
-
     .ref-link-box input {
       background: #1e293b;
       border: none;
@@ -246,7 +176,6 @@
       font-size: 12px;
       outline: none;
     }
-
     .copy-btn {
       background: #f39c12;
       border: none;
@@ -256,7 +185,6 @@
       color: #0f172a;
       cursor: pointer;
     }
-
     .badge-success {
       background: #22c55e30;
       border-radius: 20px;
@@ -264,7 +192,6 @@
       font-size: 12px;
       display: inline-block;
     }
-
     .toast {
       position: fixed;
       bottom: 30px;
@@ -284,7 +211,6 @@
     }
   </style>
 </head>
-
 <body>
   <div class="topbar">
     <div class="avatar" id="avatar">M</div>
@@ -304,18 +230,9 @@
       </div>
     </div>
     <div class="statsRow">
-      <div class="statBox">
-        <h3 id="profileBalance">0.00</h3>
-        <p>USDT</p>
-      </div>
-      <div class="statBox">
-        <h3 id="profileRefs">0</h3>
-        <p>Referrals</p>
-      </div>
-      <div class="statBox">
-        <h3 id="profileAds">0</h3>
-        <p>Ads</p>
-      </div>
+      <div class="statBox"><h3 id="profileBalance">0.00</h3><p>USDT</p></div>
+      <div class="statBox"><h3 id="profileRefs">0</h3><p>Referrals</p></div>
+      <div class="statBox"><h3 id="profileAds">0</h3><p>Ads</p></div>
     </div>
   </div>
 
@@ -343,9 +260,7 @@
         </div>
       </div>
 
-      <div class="progress">
-        <div class="progressBar" id="progressBar"></div>
-      </div>
+      <div class="progress"><div class="progressBar" id="progressBar"></div></div>
       <div id="progressText" style="font-size: 13px; opacity: 0.8;">0 / 500 Ads • 0 / 10 Referrals needed</div>
 
       <div class="rules">
@@ -362,25 +277,39 @@
   <div id="toast" class="toast" style="opacity:0;">✨ +0.03 USDT earned!</div>
 
   <script>
-    // ================= LOCAL STORAGE BACKEND (NO EXTERNAL SERVER NEEDED) =================
-    const BOT_USERNAME = "MetaProEarnBot";
+    // ================= CONFIGURATION =================
+    // UPDATE THIS WITH YOUR BACKEND URL
+    const BACKEND_URL = "https://your-backend.onrender.com"; // CHANGE THIS!
+    const SECRET_KEY = "META_9xK2_secure_2026";
+    const BOT_USERNAME = "Studybuddy_2025Bot";
     
-    // Get or create user data
-    let tgUser = null;
     let userId = "guest";
     let tgName = "Telegram User";
     let firstName = "MetaPro";
     let avatarLetter = "M";
+    let myReferralCode = "";
+    let isWatching = false;
+    let adTimerInterval = null;
+    let secondsLeft = 0;
     
+    // DOM elements
+    const watchBtn = document.getElementById("watchBtn");
+    const watchBtnTextSpan = document.getElementById("watchBtnText");
+    const timerStatusDiv = document.getElementById("timerStatus");
+    const refPanel = document.getElementById("refPanel");
+    const refLinkInput = document.getElementById("refLinkInput");
+    const copyRefBtn = document.getElementById("copyRefBtn");
+    const openRefBtn = document.getElementById("openRefBtn");
+    
+    // ================= TELEGRAM INIT =================
     if (window.Telegram && Telegram.WebApp) {
       Telegram.WebApp.ready();
       Telegram.WebApp.expand();
-      const user = Telegram.WebApp.initDataUnsafe.user;
-      if (user) {
-        tgUser = user;
-        userId = String(user.id);
-        tgName = user.username ? "@" + user.username : user.first_name || "User";
-        firstName = user.first_name || "CryptoHunter";
+      const tgUser = Telegram.WebApp.initDataUnsafe.user;
+      if (tgUser) {
+        userId = String(tgUser.id);
+        tgName = tgUser.username ? "@" + tgUser.username : "@user_" + userId;
+        firstName = tgUser.first_name || "CryptoHunter";
         avatarLetter = firstName.charAt(0).toUpperCase();
       }
     }
@@ -391,169 +320,128 @@
       avatarLetter = "E";
     }
     
-    // Load user data from localStorage
-    function loadUserData() {
-      const stored = localStorage.getItem(`metapro_user_${userId}`);
-      if (stored) {
-        return JSON.parse(stored);
-      }
-      return {
-        userId: userId,
-        balance: 0,
-        adsWatched: 0,
-        referrals: [],
-        referralCode: userId + "_" + Math.random().toString(36).substr(2, 8),
-        referredBy: null,
-        firstAdCompleted: false
-      };
-    }
+    // Update UI
+    document.getElementById("uid").innerText = userId;
+    document.getElementById("tgname").innerText = tgName;
+    document.getElementById("avatar").innerText = avatarLetter;
+    document.getElementById("profileAvatar").innerText = avatarLetter;
+    document.getElementById("profileName").innerText = firstName;
+    document.getElementById("profileUsername").innerText = tgName;
     
-    function saveUserData(data) {
-      localStorage.setItem(`metapro_user_${userId}`, JSON.stringify(data));
-    }
-    
-    let userData = loadUserData();
-    
-    // Handle referral from URL/start_param
-    function handleReferral() {
-      let referrerCode = null;
+    // ========== REFERRAL DETECTION ==========
+    function getReferrerId() {
       try {
-        if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.start_param) {
-          let start = Telegram.WebApp.initDataUnsafe.start_param;
-          if (start && start.startsWith("ref_")) {
-            referrerCode = start.replace("ref_", "");
+        if (Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.start_param) {
+          let startParam = Telegram.WebApp.initDataUnsafe.start_param;
+          if (startParam && startParam.startsWith("ref_")) {
+            return startParam.replace("ref_", "");
           }
         }
         const urlParams = new URLSearchParams(window.location.search);
         let ref = urlParams.get("ref") || urlParams.get("start");
-        if (ref && !referrerCode) {
-          if (ref.startsWith("ref_")) ref = ref.replace("ref_", "");
-          referrerCode = ref;
-        }
-      } catch(e) {}
-      
-      // If user has no referrer and we have a valid code, apply it
-      if (referrerCode && !userData.referredBy && referrerCode !== userId) {
-        // Find referrer's data
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && key.startsWith("metapro_user_")) {
-            const refData = JSON.parse(localStorage.getItem(key));
-            if (refData.referralCode === referrerCode && refData.userId !== userId) {
-              userData.referredBy = refData.userId;
-              saveUserData(userData);
-              
-              // Add to referrer's referrals list and give bonus when first ad is watched
-              // We'll give bonus on first ad completion
-              break;
-            }
+        if (ref && ref.startsWith("ref_")) return ref.replace("ref_", "");
+        return null;
+      } catch(e) { return null; }
+    }
+    
+    const referrerId = getReferrerId();
+    
+    // ========== API CALLS ==========
+    async function apiCall(endpoint, method = "GET", body = null) {
+      try {
+        const options = {
+          method,
+          headers: { "Content-Type": "application/json" }
+        };
+        if (body) {
+          options.body = JSON.stringify(body);
+          if (endpoint === "/ads") {
+            options.headers["authorization"] = SECRET_KEY;
           }
         }
+        const response = await fetch(`${BACKEND_URL}${endpoint}`, options);
+        return await response.json();
+      } catch (err) {
+        console.error("API Error:", err);
+        return null;
       }
     }
     
-    // Give referral bonus to referrer when new user completes first ad
-    function giveReferralBonusIfNeeded() {
-      if (userData.firstAdCompleted) return; // already gave bonus
-      
-      userData.firstAdCompleted = true;
-      
-      if (userData.referredBy) {
-        // Find referrer and give 0.10 USDT
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && key.startsWith("metapro_user_")) {
-            const refData = JSON.parse(localStorage.getItem(key));
-            if (refData.userId === userData.referredBy) {
-              // Add to referrals list if not already
-              if (!refData.referrals.includes(userId)) {
-                refData.referrals.push(userId);
-                refData.balance = (refData.balance || 0) + 0.10;
-                saveUserData(refData);
-                showToast(`🎉 Referral bonus! Your referrer got +0.10 USDT`);
-              }
-              break;
-            }
-          }
+    // ========== REGISTER USER ==========
+    async function registerUser() {
+      const result = await apiCall("/register", "POST", {
+        userId,
+        tgName,
+        firstName,
+        referredBy: referrerId
+      });
+      if (result && result.success) {
+        myReferralCode = result.referralCode || userId;
+        return true;
+      }
+      return false;
+    }
+    
+    // ========== LOAD PROFILE ==========
+    async function loadProfile() {
+      const data = await apiCall(`/profile/${userId}`);
+      if (data && !data.error) {
+        const balance = Number(data.balance || 0).toFixed(2);
+        document.getElementById("usdt").innerText = balance;
+        document.getElementById("profileBalance").innerText = balance;
+        document.getElementById("profileRefs").innerText = data.refs || 0;
+        document.getElementById("profileAds").innerText = data.adsWatched || 0;
+        
+        const adsWatched = data.adsWatched || 0;
+        const refs = data.refs || 0;
+        const percentAds = Math.min((adsWatched / 500) * 100, 100);
+        document.getElementById("progressBar").style.width = percentAds + "%";
+        document.getElementById("progressText").innerHTML = `${adsWatched} / 500 Ads • ${refs} / 10 Referrals needed`;
+        
+        return data;
+      }
+      return null;
+    }
+    
+    // ========== SEND REWARD ==========
+    async function sendReward() {
+      const result = await apiCall("/ads", "POST", { userId });
+      if (result && result.success) {
+        await loadProfile();
+        showToast(`✨ +0.03 USDT earned! New balance: ${result.balance.toFixed(2)} USDT`);
+        timerStatusDiv.innerHTML = "✅ +0.03 USDT credited!";
+        setTimeout(() => {
+          if (!isWatching) timerStatusDiv.innerHTML = "✅ Ready • 15 sec watch = +0.03 USDT";
+        }, 2000);
+        if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+          Telegram.WebApp.HapticFeedback.notificationOccurred("success");
         }
-      }
-      saveUserData(userData);
-    }
-    
-    // Update UI from userData
-    function updateUI() {
-      document.getElementById("usdt").innerText = userData.balance.toFixed(2);
-      document.getElementById("profileBalance").innerText = userData.balance.toFixed(2);
-      document.getElementById("profileRefs").innerText = userData.referrals.length;
-      document.getElementById("profileAds").innerText = userData.adsWatched;
-      
-      const percentAds = Math.min((userData.adsWatched / 500) * 100, 100);
-      document.getElementById("progressBar").style.width = percentAds + "%";
-      document.getElementById("progressText").innerHTML = `${userData.adsWatched} / 500 Ads • ${userData.referrals.length} / 10 Referrals needed`;
-      
-      // Update referral link
-      const deepLink = `https://t.me/${BOT_USERNAME}?start=ref_${userData.referralCode}`;
-      const refInput = document.getElementById("refLinkInput");
-      if (refInput && refInput.value !== deepLink && refInput.value !== "Click 'Get Referral Link' to generate") {
-        refInput.value = deepLink;
+      } else {
+        timerStatusDiv.innerHTML = "❌ Error: " + (result?.message || "Try again");
+        setTimeout(() => {
+          if (!isWatching) timerStatusDiv.innerHTML = "✅ Ready • 15 sec watch = +0.03 USDT";
+        }, 2000);
       }
     }
     
-    function showToast(message, duration = 2000) {
+    function showToast(message) {
       const toast = document.getElementById("toast");
       toast.innerText = message;
       toast.style.opacity = "1";
-      setTimeout(() => {
-        toast.style.opacity = "0";
-      }, duration);
+      setTimeout(() => { toast.style.opacity = "0"; }, 2000);
     }
     
-    // Ad watching logic
-    let isWatching = false;
-    let adTimerInterval = null;
-    let secondsLeft = 0;
-    
-    const watchBtn = document.getElementById("watchBtn");
-    const watchBtnTextSpan = document.getElementById("watchBtnText");
-    const timerStatusDiv = document.getElementById("timerStatus");
-    
-    function completeAdReward() {
-      // Give reward
-      userData.balance = (userData.balance || 0) + 0.03;
-      userData.adsWatched = (userData.adsWatched || 0) + 1;
-      
-      // First ad? Give referral bonus to referrer
-      const wasFirst = !userData.firstAdCompleted;
-      giveReferralBonusIfNeeded();
-      
-      saveUserData(userData);
-      updateUI();
-      
-      // If this was the first ad, also give +0.10 to this user? No, referral bonus is for referrer only.
-      // But add a welcome bonus? Not needed, just standard.
-      
-      showToast(`✨ +0.03 USDT earned! (Total: ${userData.balance.toFixed(2)} USDT)`);
-      timerStatusDiv.innerHTML = "✅ +0.03 USDT credited!";
-      setTimeout(() => {
-        if (!isWatching) timerStatusDiv.innerHTML = "✅ Ready • 15 sec watch = +0.03 USDT";
-      }, 2000);
-      
-      if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
-        Telegram.WebApp.HapticFeedback.notificationOccurred("success");
-      }
-    }
-    
+    // ========== AD WATCH TIMER ==========
     function startAdFlow() {
       if (isWatching) {
         timerStatusDiv.innerHTML = "⏳ Finish current ad first!";
         return;
       }
-      
       isWatching = true;
       watchBtn.disabled = true;
       secondsLeft = 15;
       watchBtnTextSpan.innerHTML = `📺 Watching (${secondsLeft}s)`;
-      timerStatusDiv.innerHTML = `🎬 AD PLAYING • ${secondsLeft}s left... Complete to earn 0.03 USDT!`;
+      timerStatusDiv.innerHTML = `🎬 AD PLAYING • ${secondsLeft}s left...`;
       
       adTimerInterval = setInterval(() => {
         if (secondsLeft <= 1) {
@@ -563,19 +451,18 @@
         } else {
           secondsLeft--;
           watchBtnTextSpan.innerHTML = `📺 Watching (${secondsLeft}s)`;
-          timerStatusDiv.innerHTML = `⏱️ Watch ${secondsLeft}s more → reward after full ad`;
+          timerStatusDiv.innerHTML = `⏱️ ${secondsLeft}s more → reward after full ad`;
         }
       }, 1000);
-      
-      // Simulate ad impression
-      console.log("[Ad] Impression triggered");
     }
     
-    function finishAdAndReward() {
+    async function finishAdAndReward() {
+      if (adTimerInterval) clearInterval(adTimerInterval);
       if (secondsLeft === 0) {
-        completeAdReward();
+        timerStatusDiv.innerHTML = "💰 Awarding reward...";
+        await sendReward();
       } else {
-        timerStatusDiv.innerHTML = "❌ Ad interrupted! Full 15 seconds required. No reward.";
+        timerStatusDiv.innerHTML = "❌ Ad interrupted! Full 15 seconds required.";
         setTimeout(() => {
           if (!isWatching) timerStatusDiv.innerHTML = "✅ Ready • 15 sec watch = +0.03 USDT";
         }, 2000);
@@ -585,7 +472,7 @@
       watchBtnTextSpan.innerHTML = `📺 Watch Ad (15s earn 0.03 USDT)`;
     }
     
-    function handleVisibilityLoss() {
+    document.addEventListener("visibilitychange", () => {
       if (document.hidden && isWatching && adTimerInterval) {
         clearInterval(adTimerInterval);
         adTimerInterval = null;
@@ -594,67 +481,51 @@
         watchBtnTextSpan.innerHTML = `📺 Watch Ad (15s earn 0.03 USDT)`;
         timerStatusDiv.innerHTML = "⚠️ Ad aborted! Full 15 sec required next time.";
       }
-    }
+    });
     
-    document.addEventListener("visibilitychange", handleVisibilityLoss);
     watchBtn.onclick = startAdFlow;
     
-    // Withdraw function
-    async function withdrawFunds() {
-      const balance = userData.balance;
-      const refs = userData.referrals.length;
-      const ads = userData.adsWatched;
+    // ========== WITHDRAW ==========
+    document.getElementById("withdrawBtn").onclick = async () => {
+      const profile = await loadProfile();
+      if (!profile) { showToast("Cannot load profile"); return; }
       
-      if (balance < 5) {
-        showToast(`❌ Min withdrawal 5 USDT. Your balance: ${balance.toFixed(2)} USDT`);
+      if (profile.balance < 5) {
+        showToast(`❌ Min withdrawal 5 USDT. Balance: ${profile.balance.toFixed(2)} USDT`);
         return;
       }
-      if (refs < 10) {
-        showToast(`❌ Need 10 referrals to withdraw. Current: ${refs} referrals. Invite friends!`);
+      if (profile.refs < 10) {
+        showToast(`❌ Need 10 referrals. You have ${profile.refs}`);
         return;
       }
-      if (ads < 500) {
-        showToast(`❌ Need 500 completed ads. Progress: ${ads}/500`);
+      if (profile.adsWatched < 500) {
+        showToast(`❌ Need 500 ads. You have ${profile.adsWatched}`);
         return;
       }
       
-      let amount = prompt(`Enter amount to withdraw (min 5, max ${balance.toFixed(2)} USDT):`, "5");
+      const amount = prompt(`Enter amount (min 5, max ${profile.balance.toFixed(2)} USDT):`, "5");
       if (!amount) return;
-      let num = parseFloat(amount);
-      if (isNaN(num) || num < 5) {
-        showToast("Minimum withdrawal is 5 USDT");
-        return;
-      }
-      if (num > balance) {
-        showToast("Insufficient balance");
-        return;
-      }
+      const num = parseFloat(amount);
+      if (isNaN(num) || num < 5) { showToast("Minimum 5 USDT"); return; }
+      if (num > profile.balance) { showToast("Insufficient balance"); return; }
       
-      // Process withdrawal (subtract balance)
-      userData.balance = balance - num;
-      saveUserData(userData);
-      updateUI();
+      const wallet = prompt("Enter your USDT (TRC20) wallet address:");
+      if (!wallet) return;
       
-      showToast(`✅ Withdrawal of ${num.toFixed(2)} USDT requested! Check Telegram bot for status.`);
-      if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
-        Telegram.WebApp.HapticFeedback.impactOccurred("medium");
+      const result = await apiCall("/withdraw", "POST", { userId, amount: num, walletAddress: wallet });
+      if (result && result.success) {
+        showToast(`✅ Withdrawal request submitted: ${num} USDT`);
+        await loadProfile();
+      } else {
+        showToast(`❌ Withdraw failed: ${result?.message || "Unknown error"}`);
       }
-      
-      // In a real app, you'd send to backend. Here we just simulate success.
-    }
+    };
     
-    document.getElementById("withdrawBtn").onclick = withdrawFunds;
-    
-    // Referral panel
-    const refPanel = document.getElementById("refPanel");
-    const openRefBtn = document.getElementById("openRefBtn");
-    const copyRefBtn = document.getElementById("copyRefBtn");
-    const refLinkInput = document.getElementById("refLinkInput");
-    
+    // ========== REFERRAL PANEL ==========
     openRefBtn.addEventListener("click", async () => {
       if (refPanel.style.display === "none" || refPanel.style.display === "") {
         refPanel.style.display = "block";
-        const deepLink = `https://t.me/${BOT_USERNAME}?start=ref_${userData.referralCode}`;
+        const deepLink = `https://t.me/${BOT_USERNAME}?start=ref_${userId}`;
         refLinkInput.value = deepLink;
       } else {
         refPanel.style.display = "none";
@@ -662,43 +533,25 @@
     });
     
     copyRefBtn.addEventListener("click", async () => {
-      let linkToCopy = refLinkInput.value;
-      if (!linkToCopy || linkToCopy === "Click 'Get Referral Link' to generate") {
-        showToast("Please open referral panel first to generate link");
+      const link = refLinkInput.value;
+      if (!link || link === "Click 'Get Referral Link' to generate") {
+        showToast("Please open referral panel first");
         return;
       }
       try {
-        await navigator.clipboard.writeText(linkToCopy);
-        showToast("✅ Referral link copied! Share with friends.");
-        if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
-          Telegram.WebApp.HapticFeedback.impactOccurred("light");
-        }
+        await navigator.clipboard.writeText(link);
+        showToast("✅ Referral link copied!");
       } catch(e) {
-        alert("Copy manually: " + linkToCopy);
+        alert("Copy manually: " + link);
       }
     });
     
-    // Update display info
-    document.getElementById("uid").innerText = userId;
-    document.getElementById("tgname").innerText = tgName;
-    document.getElementById("avatar").innerText = avatarLetter;
-    document.getElementById("profileAvatar").innerText = avatarLetter;
-    document.getElementById("profileName").innerText = firstName;
-    document.getElementById("profileUsername").innerText = tgName;
-    
-    // Initialize referral handling and UI
-    handleReferral();
-    updateUI();
-    
-    // Auto-save and auto-refresh balance periodically
-    setInterval(() => {
-      const fresh = loadUserData();
-      if (fresh) {
-        userData = fresh;
-        updateUI();
-      }
-    }, 5000);
+    // ========== INIT ==========
+    (async function init() {
+      await registerUser();
+      await loadProfile();
+      setInterval(loadProfile, 10000);
+    })();
   </script>
 </body>
-
   </html>

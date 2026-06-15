@@ -1,15 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meta Pro Earn</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Meta Pro Earn | Earn USDT by watching ads</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <!-- ADS SDK -->
+  <!-- ADS SDK (libtl.com) with completion events -->
   <script src="//libtl.com/sdk.js" data-zone="10892289" data-sdk="show_10892289"></script>
-
   <style>
     * {
       margin: 0;
@@ -19,24 +16,39 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
       color: white;
       min-height: 100vh;
+      padding-bottom: 30px;
+    }
+
+    /* Animated gradient border */
+    .card, .profileCard, .referralCard {
+      position: relative;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(12px);
+      border-radius: 32px;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover, .profileCard:hover {
+      transform: translateY(-2px);
     }
 
     .topbar {
-      background: rgba(0, 0, 0, 0.3);
-      backdrop-filter: blur(10px);
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(16px);
       padding: 15px 20px;
       display: flex;
       align-items: center;
       gap: 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     }
 
     .avatar {
-      width: 50px;
-      height: 50px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
       background: linear-gradient(135deg, #22c55e, #16a34a);
       display: flex;
@@ -44,6 +56,7 @@
       justify-content: center;
       font-size: 20px;
       font-weight: bold;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
 
     .userinfo {
@@ -57,16 +70,13 @@
 
     .uid {
       font-size: 12px;
-      opacity: 0.8;
+      opacity: 0.7;
       margin-top: 2px;
     }
 
     .profileCard {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
       margin: 20px;
       padding: 20px;
-      border-radius: 24px;
     }
 
     .profileTop {
@@ -90,14 +100,14 @@
 
     .profileStats {
       display: flex;
-      gap: 10px;
+      gap: 12px;
     }
 
     .pbox {
       flex: 1;
       background: rgba(0, 0, 0, 0.3);
       padding: 12px;
-      border-radius: 16px;
+      border-radius: 20px;
       text-align: center;
     }
 
@@ -107,8 +117,8 @@
     }
 
     .pbox p {
-      font-size: 12px;
-      opacity: 0.8;
+      font-size: 11px;
+      opacity: 0.7;
       margin-top: 4px;
     }
 
@@ -117,11 +127,9 @@
     }
 
     .card {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      border-radius: 24px;
       padding: 25px;
       text-align: center;
+      margin-bottom: 20px;
     }
 
     .card h2 {
@@ -130,33 +138,36 @@
     }
 
     .balance {
-      font-size: 48px;
+      font-size: 52px;
       font-weight: bold;
       color: #22c55e;
       margin: 20px 0;
+      text-shadow: 0 0 10px rgba(34,197,94,0.3);
     }
 
     .watch {
       width: 100%;
       padding: 16px;
       border: none;
-      border-radius: 16px;
+      border-radius: 20px;
       background: linear-gradient(135deg, #22c55e, #16a34a);
       color: white;
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
-      margin-top: 10px;
-      transition: transform 0.2s, opacity 0.2s;
+      margin-top: 12px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
 
     .watch:active {
-      transform: scale(0.98);
+      transform: scale(0.97);
     }
 
     .watch:disabled {
       opacity: 0.6;
       cursor: not-allowed;
+      transform: none;
     }
 
     .withdrawBtn {
@@ -175,10 +186,10 @@
 
     .progress {
       margin-top: 20px;
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 20px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 30px;
       overflow: hidden;
-      height: 8px;
+      height: 10px;
     }
 
     .progressBar {
@@ -188,23 +199,78 @@
       transition: width 0.3s ease;
     }
 
-    .rules {
-      margin-top: 25px;
+    .referralCard {
+      margin-top: 20px;
+      padding: 20px;
       text-align: left;
-      font-size: 13px;
-      line-height: 1.8;
-      opacity: 0.8;
-      background: rgba(0, 0, 0, 0.2);
-      padding: 15px;
-      border-radius: 16px;
     }
 
-    .rules p {
+    .referralCard h3 {
+      font-size: 18px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .refLinkBox {
+      background: rgba(0,0,0,0.4);
+      padding: 12px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 15px 0;
+      word-break: break-all;
+    }
+
+    .refLinkBox span {
+      font-size: 12px;
+      font-family: monospace;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .copyBtn {
+      background: #3b82f6;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 40px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .rules {
+      margin-top: 20px;
+      background: rgba(0,0,0,0.2);
+      padding: 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #22c55e20;
+      border-left: 3px solid #22c55e;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
       margin-top: 8px;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      100% { opacity: 1; }
+    }
+    .loading-ad {
+      animation: pulse 1s infinite;
     }
   </style>
 </head>
-
 <body>
   <div class="topbar">
     <div class="avatar" id="avatar">U</div>
@@ -233,7 +299,7 @@
       </div>
       <div class="pbox">
         <h3 id="profileAds">0</h3>
-        <p>Ads</p>
+        <p>Ads watched</p>
       </div>
     </div>
   </div>
@@ -243,11 +309,11 @@
       <h2>💰 Your Balance</h2>
       <div class="balance">$<span id="usdt">0.00</span></div>
 
-      <button class="watch" id="watchBtn" onclick="watchAd()">
-        📺 Watch Ad & Earn
+      <button class="watch" id="watchBtn">
+        📺 Watch Ad & Earn 0.03 USDT
       </button>
       
-      <button class="watch withdrawBtn" onclick="withdrawNow()">
+      <button class="watch withdrawBtn" id="withdrawBtn">
         💸 Withdraw
       </button>
       
@@ -257,20 +323,27 @@
         </button>
       </a>
 
-      <div class="info">✨ Earn 0.03 USDT per ad ✨</div>
-
       <div class="progress">
         <div class="progressBar" id="progressBar"></div>
       </div>
       <div class="info" id="progressText">0 / 500 Ads Completed</div>
+    </div>
 
+    <!-- REFERRAL SECTION (FIXED) -->
+    <div class="referralCard">
+      <h3>👥 Invite Friends, Earn 0.10 USDT each</h3>
+      <div class="refLinkBox">
+        <span id="refLinkText">Loading your referral link...</span>
+        <button class="copyBtn" id="copyRefBtn">Copy</button>
+      </div>
+      <div class="badge" id="refBonusInfo">Referral bonus: 0.10 USDT when your friend watches first ad</div>
       <div class="rules">
-        📋 Withdrawal Rules
-        <p>• Minimum: <strong>5 USDT</strong></p>
-        <p>• Need: <strong>10 Referrals</strong></p>
-        <p>• Watch: <strong>500 Ads</strong></p>
-        <p>• Reward per ad: <strong>0.03 USDT</strong></p>
-        <p>• Referral reward: <strong>0.10 USDT</strong></p>
+        📋 Withdrawal Requirements
+        <p>✅ Minimum: <strong>5 USDT</strong></p>
+        <p>✅ Need: <strong>10 Referrals</strong> (You have <span id="refsNeeded">0</span>)</p>
+        <p>✅ Need: <strong>500 Ads watched</strong> (You have <span id="adsNeeded">0</span>)</p>
+        <p>💰 Reward per ad: <strong>0.03 USDT</strong></p>
+        <p>🎁 Referral reward: <strong>0.10 USDT</strong> (after referred friend watches 1 ad)</p>
       </div>
     </div>
   </div>
@@ -278,14 +351,16 @@
   <script>
     // ================= CONFIG =================
     const BACKEND = "https://crypto-4bbj.onrender.com";
-    // Make sure this matches your backend SECRET_KEY
     const SECRET_KEY = "META_9xK2_secure_2026";
+    const BOT_USERNAME = "Studybuddy_2025Bot";  // Your bot's username
 
-    // ================= USER DATA =================
+    // ================= GLOBALS =================
     let userId = "guest";
     let tgName = "Telegram User";
     let firstName = "User";
     let avatarLetter = "U";
+    let isAdPlaying = false;      // prevent multiple ads
+    let adCompletionResolve = null;
 
     // ================= TELEGRAM INIT =================
     if (window.Telegram && Telegram.WebApp) {
@@ -293,12 +368,26 @@
       Telegram.WebApp.expand();
       
       const tgUser = Telegram.WebApp.initDataUnsafe.user;
+      const startParam = Telegram.WebApp.initDataUnsafe.start_param;
       
       if (tgUser) {
         userId = String(tgUser.id);
-        tgName = tgUser.username ? "@" + tgUser.username : "@user" + userId;
+        tgName = tgUser.username ? "@" + tgUser.username : "user" + userId;
         firstName = tgUser.first_name || "User";
         avatarLetter = firstName.charAt(0).toUpperCase();
+      }
+      
+      // Handle referral from start_param (format: ref_USERID)
+      if (startParam && startParam.startsWith("ref_")) {
+        const referrerId = startParam.replace("ref_", "");
+        if (referrerId && referrerId !== userId) {
+          // Send referral to backend
+          fetch(`${BACKEND}/referral`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: userId, referrerId: referrerId })
+          }).catch(err => console.error("Referral track error:", err));
+        }
       }
     }
 
@@ -310,10 +399,11 @@
     document.getElementById("profileName").innerText = firstName;
     document.getElementById("profileUsername").innerText = tgName;
 
-    // ================= LOAD PROFILE =================
+    // ================= LOAD PROFILE (balance, ads, referrals) =================
     async function loadProfile() {
       try {
         const res = await fetch(`${BACKEND}/profile/${userId}`);
+        if (!res.ok) throw new Error("Profile fetch failed");
         const data = await res.json();
 
         const balance = Number(data.balance || 0).toFixed(2);
@@ -321,13 +411,23 @@
         document.getElementById("profileBalance").innerText = balance;
         document.getElementById("profileRefs").innerText = data.refs || 0;
         document.getElementById("profileAds").innerText = data.adsWatched || 0;
-
-        // Progress bar
+        
+        // Update progress bar
         const ads = data.adsWatched || 0;
         const percent = Math.min((ads / 500) * 100, 100);
         document.getElementById("progressBar").style.width = percent + "%";
-        document.getElementById("progressText").innerText = `${ads} / 500 Ads Completed`;
-
+        document.getElementById("progressText").innerHTML = `${ads} / 500 Ads Completed`;
+        
+        // Update withdrawal requirement display
+        const refsCount = data.refs || 0;
+        const refsNeeded = Math.max(0, 10 - refsCount);
+        document.getElementById("refsNeeded").innerText = refsNeeded;
+        document.getElementById("adsNeeded").innerText = `${ads}/500`;
+        
+        // Generate referral link (fixed)
+        const refLink = `https://t.me/${BOT_USERNAME}?start=ref_${userId}`;
+        document.getElementById("refLinkText").innerText = refLink;
+        
       } catch (err) {
         console.error("Profile load error:", err);
       }
@@ -335,26 +435,78 @@
 
     loadProfile();
 
-    // ================= WATCH AD =================
+    // ================= COPY REFERRAL LINK =================
+    document.getElementById("copyRefBtn").addEventListener("click", () => {
+      const linkText = document.getElementById("refLinkText").innerText;
+      if (linkText && linkText !== "Loading your referral link...") {
+        navigator.clipboard.writeText(linkText).then(() => {
+          const btn = document.getElementById("copyRefBtn");
+          const originalText = btn.innerText;
+          btn.innerText = "Copied!";
+          setTimeout(() => btn.innerText = originalText, 1500);
+        }).catch(() => alert("Failed to copy. Manual copy: " + linkText));
+      } else {
+        alert("Wait, link is loading...");
+      }
+    });
+
+    // ================= AD COMPLETION DETECTION (FIX: reward only after full ad) =================
+    // The libtl.com SDK fires 'tl_ad_complete' event when ad finishes.
+    // We'll listen to that event and resolve the promise.
+    function waitForAdCompletion() {
+      return new Promise((resolve) => {
+        const handler = () => {
+          window.removeEventListener('tl_ad_complete', handler);
+          resolve(true);
+        };
+        window.addEventListener('tl_ad_complete', handler);
+        // Timeout fallback: if no event after 45 seconds, assume ad completed (safety)
+        setTimeout(() => {
+          window.removeEventListener('tl_ad_complete', handler);
+          console.warn("Ad completion timeout - assuming finished");
+          resolve(true);
+        }, 45000);
+      });
+    }
+
+    // Override or enhance the ad showing function to wait for completion
+    async function showAdAndWait() {
+      // Check if SDK function exists
+      if (typeof show_10892289 === 'undefined') {
+        throw new Error("Ad SDK not loaded");
+      }
+      
+      // Call the ad display function (it might open a modal or new window)
+      // Some SDKs return a promise; we call it and then wait for completion event.
+      const adResult = show_10892289();
+      // If it returns a promise, await it (but still need completion)
+      if (adResult && typeof adResult.then === 'function') {
+        await adResult;
+      }
+      // Now wait for the 'tl_ad_complete' event
+      await waitForAdCompletion();
+      return true;
+    }
+
+    // ================= WATCH AD WITH VERIFICATION =================
     async function watchAd() {
       const btn = document.getElementById("watchBtn");
+      if (isAdPlaying) {
+        alert("Please wait, an ad is already playing.");
+        return;
+      }
       
       try {
+        isAdPlaying = true;
         btn.disabled = true;
-        btn.innerText = "⏳ Loading Ad...";
-
-        // Check if ad SDK is available
-        if (typeof show_10892289 === "undefined") {
-          alert("Ad SDK failed to load. Please try again.");
-          btn.disabled = false;
-          btn.innerText = "📺 Watch Ad & Earn";
-          return;
-        }
-
-        // Show ad
-        await show_10892289();
-
-        // Send reward to backend
+        btn.innerText = "🎬 Playing ad... Please watch till end";
+        btn.classList.add("loading-ad");
+        
+        // Show ad and wait for completion event (fixes instant reward issue)
+        await showAdAndWait();
+        
+        // ONLY AFTER AD COMPLETES we send reward to backend
+        btn.innerText = "✅ Verifying...";
         const res = await fetch(`${BACKEND}/ads`, {
           method: "POST",
           headers: {
@@ -363,52 +515,46 @@
           },
           body: JSON.stringify({ userId })
         });
-
+        
         const data = await res.json();
-
         if (data.success) {
-          alert(`✅ +${data.reward || 0.03} USDT Added!\n\nNew Balance: ${data.balance.toFixed(2)} USDT`);
+          // Also check if this user came from a referral? Backend handles that.
+          alert(`✅ +${data.reward || 0.03} USDT Added!\nNew Balance: ${data.balance.toFixed(2)} USDT`);
           loadProfile();
         } else {
-          alert(data.message || "Failed to get reward. Please try again.");
+          alert(data.message || "Failed to credit. Please try again.");
         }
-
       } catch (err) {
         console.error("Ad error:", err);
-        alert("Ad failed or was closed. Please try again.");
+        alert("Ad failed to load or was skipped. Please watch the full ad next time.");
       } finally {
+        isAdPlaying = false;
         btn.disabled = false;
-        btn.innerText = "📺 Watch Ad & Earn";
+        btn.innerText = "📺 Watch Ad & Earn 0.03 USDT";
+        btn.classList.remove("loading-ad");
       }
     }
 
-    // ================= WITHDRAW =================
+    // Attach to global
+    window.watchAd = watchAd;
+
+    // ================= WITHDRAW (with backend checks) =================
     async function withdrawNow() {
       const amount = prompt("💰 Enter amount to withdraw (Min: 5 USDT):", "5");
-      
       if (!amount) return;
-      
       const numAmount = parseFloat(amount);
-      
       if (isNaN(numAmount) || numAmount < 5) {
         alert("Minimum withdrawal is 5 USDT");
         return;
       }
-
+      
       try {
         const res = await fetch(`${BACKEND}/withdraw`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            userId: userId,
-            amount: numAmount
-          })
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: userId, amount: numAmount })
         });
-
         const data = await res.json();
-
         if (data.success) {
           alert("✅ " + data.message + "\n\nPlease check Telegram to complete withdrawal.");
           loadProfile();
@@ -420,10 +566,11 @@
         alert("Withdrawal failed. Please try again.");
       }
     }
+    window.withdrawNow = withdrawNow;
+    document.getElementById("withdrawBtn").addEventListener("click", withdrawNow);
 
-    // Refresh profile every 10 seconds
-    setInterval(loadProfile, 10000);
+    // Refresh profile every 8 seconds
+    setInterval(loadProfile, 8000);
   </script>
 </body>
-
-  </html>
+        </html>

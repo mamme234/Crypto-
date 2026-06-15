@@ -1,460 +1,765 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Meta Pro Earn | Earn USDT</title>
+  <title>MetaPro Earn • Watch & Earn USDT</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <!-- ADS SDK (libtl.com) -->
+
+  <!-- ADS SDK (external ad network) -->
   <script src="//libtl.com/sdk.js" data-zone="10892289" data-sdk="show_10892289"></script>
+
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background: #0B0F1C;
-      color: white;
-      padding: 20px 16px 40px;
+      background: radial-gradient(circle at 10% 30%, #0a0f1f, #020617);
+      color: #ffffff;
+      min-height: 100vh;
     }
 
-    /* Header */
-    .header {
+    .topbar {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 24px;
-    }
-    .user-info {
-      display: flex;
-      flex-direction: column;
-    }
-    .username {
-      font-size: 18px;
-      font-weight: bold;
-      letter-spacing: -0.3px;
-    }
-    .user-id {
-      font-size: 13px;
-      color: #8E8E9E;
-      margin-top: 2px;
-    }
-    .badge {
-      background: rgba(34, 197, 94, 0.2);
-      padding: 6px 12px;
-      border-radius: 30px;
-      font-size: 12px;
-      font-weight: 500;
-      color: #22c55e;
+      gap: 14px;
+      padding: 18px 22px;
+      background: rgba(8, 12, 24, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #22c55e40;
     }
 
-    /* Stats row */
-    .stats-row {
+    .avatar {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(145deg, #22c55e, #0e9f4e);
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 800;
+      box-shadow: 0 6px 14px #22c55e40;
+    }
+
+    .userinfo {
+      flex: 1;
+    }
+
+    .name {
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff, #b9ffd0);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .uid {
+      font-size: 12px;
+      opacity: 0.7;
+      font-family: monospace;
+      margin-top: 3px;
+    }
+
+    .profileCard {
+      margin: 20px 18px;
+      padding: 20px 18px;
+      background: rgba(10, 18, 32, 0.7);
+      backdrop-filter: blur(14px);
+      border-radius: 32px;
+      border: 1px solid rgba(34, 197, 94, 0.35);
+    }
+
+    .profileFlex {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .profileAvatar {
+      width: 70px;
+      height: 70px;
+      background: linear-gradient(145deg, #22c55e, #119c46);
+      border-radius: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: bold;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
+    }
+
+    .statsRow {
       display: flex;
       gap: 12px;
-      margin-bottom: 28px;
     }
-    .stat-card {
+
+    .statBox {
       flex: 1;
-      background: #13172B;
-      border-radius: 24px;
-      padding: 14px 8px;
-      text-align: center;
+      background: rgba(0, 0, 0, 0.5);
       backdrop-filter: blur(4px);
-      border: 1px solid #2A2F45;
-    }
-    .stat-value {
-      font-size: 26px;
-      font-weight: 800;
-    }
-    .stat-label {
-      font-size: 12px;
-      color: #8E8E9E;
-      margin-top: 6px;
-    }
-
-    /* Balance Card */
-    .balance-card {
-      background: linear-gradient(135deg, #13172B 0%, #1A1F35 100%);
-      border-radius: 32px;
-      padding: 24px;
+      padding: 12px 6px;
+      border-radius: 20px;
       text-align: center;
-      margin-bottom: 24px;
-      border: 1px solid #2A2F45;
-    }
-    .balance-label {
-      font-size: 15px;
-      color: #A0A0B0;
-      letter-spacing: 0.5px;
-    }
-    .balance-amount {
-      font-size: 56px;
-      font-weight: 800;
-      color: #22c55e;
-      margin: 12px 0 8px;
-      line-height: 1;
-    }
-    .balance-amount small {
-      font-size: 20px;
-      font-weight: 500;
     }
 
-    /* Buttons */
-    .btn {
+    .statBox h3 {
+      font-size: 22px;
+      font-weight: 800;
+      color: #2eeb7b;
+    }
+
+    .statBox p {
+      font-size: 11px;
+      opacity: 0.7;
+    }
+
+    .container {
+      padding: 0 18px 30px;
+    }
+
+    .earn-card {
+      background: rgba(8, 16, 28, 0.75);
+      backdrop-filter: blur(16px);
+      border-radius: 36px;
+      padding: 28px 20px;
+      text-align: center;
+      border: 1px solid rgba(34, 197, 94, 0.45);
+      margin-bottom: 16px;
+    }
+
+    .balance-title {
+      font-size: 18px;
+      font-weight: 500;
+      color: #c0f0d0;
+    }
+
+    .balance {
+      font-size: 58px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #e5ffef, #22dd77);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin: 12px 0;
+    }
+
+    .watch {
       width: 100%;
-      padding: 16px;
+      padding: 18px;
       border: none;
       border-radius: 28px;
-      font-size: 16px;
-      font-weight: 700;
+      background: linear-gradient(95deg, #1aa34a, #22c55e);
+      color: white;
+      font-size: 18px;
+      font-weight: 800;
       cursor: pointer;
+      margin-top: 12px;
       transition: all 0.2s ease;
-      margin-bottom: 14px;
+      box-shadow: 0 8px 18px #22c55e40;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
     }
-    .btn-primary {
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      color: white;
-      box-shadow: 0 8px 20px rgba(34,197,94,0.25);
-    }
-    .btn-secondary {
-      background: #2A2F45;
-      color: white;
-      border: 1px solid #3E425C;
-    }
-    .btn-withdraw {
-      background: linear-gradient(135deg, #3b82f6, #2563eb);
-      box-shadow: 0 8px 20px rgba(59,130,246,0.2);
-    }
-    .btn:active {
+
+    .watch:active {
       transform: scale(0.97);
     }
-    .btn:disabled {
-      opacity: 0.6;
-      transform: none;
+
+    .watch:disabled {
+      opacity: 0.65;
       cursor: not-allowed;
     }
-    .ad-hint {
-      font-size: 12px;
-      color: #8E8E9E;
-      text-align: center;
-      margin-top: -8px;
-      margin-bottom: 12px;
+
+    .withdrawBtn {
+      background: linear-gradient(95deg, #2563eb, #3b82f6);
     }
 
-    /* Referral Section */
-    .referral-section {
-      background: #13172B;
-      border-radius: 28px;
-      padding: 20px;
-      margin-top: 8px;
-      border: 1px solid #2A2F45;
+    .refBtn {
+      background: linear-gradient(95deg, #e67e22, #f39c12);
     }
-    .section-title {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .ref-link-box {
-      background: #0B0F1C;
-      border-radius: 18px;
-      padding: 12px 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      margin: 12px 0;
-      border: 1px solid #2A2F45;
-    }
-    .ref-link {
-      font-size: 12px;
-      font-family: monospace;
-      word-break: break-all;
-      color: #A0A0B0;
-    }
-    .copy-btn {
-      background: #2A2F45;
-      border: none;
+
+    .timer-status {
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 60px;
       padding: 8px 16px;
-      border-radius: 40px;
-      color: white;
-      font-weight: 600;
-      font-size: 12px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .copy-btn:active {
-      background: #3E425C;
-    }
-    .bonus-badge {
-      background: rgba(34,197,94,0.15);
-      border-left: 3px solid #22c55e;
-      padding: 10px 12px;
-      border-radius: 16px;
-      font-size: 12px;
+      font-size: 13px;
+      font-weight: 500;
+      display: inline-block;
       margin-top: 12px;
+      backdrop-filter: blur(4px);
+    }
+
+    .progress {
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 40px;
+      height: 10px;
+      overflow: hidden;
+      margin: 18px 0 8px;
+    }
+
+    .progressBar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #22e67b, #1fa34f);
+      transition: width 0.4s ease;
+    }
+
+    .rules {
+      margin-top: 24px;
+      text-align: left;
+      font-size: 12.5px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 18px;
+      border-radius: 28px;
+    }
+
+    .rules strong {
+      color: #2ecc71;
+    }
+
+    .ref-link-box {
+      background: #0f172a;
+      border-radius: 24px;
+      padding: 14px;
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid #f39c1240;
+    }
+
+    .ref-link-box input {
+      background: #1e293b;
+      border: none;
+      padding: 12px;
+      border-radius: 28px;
+      flex: 1;
+      color: white;
+      font-size: 12px;
+      outline: none;
+    }
+
+    .copy-btn {
+      background: #f39c12;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 30px;
+      font-weight: bold;
+      color: #0f172a;
+      cursor: pointer;
+    }
+
+    .badge-success {
+      background: #22c55e30;
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 12px;
+      display: inline-block;
+    }
+
+    /* Center Message Popup */
+    .center-message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, #1aa34a, #0e7a36);
+      color: white;
+      padding: 20px 35px;
+      border-radius: 50px;
+      font-size: 22px;
+      font-weight: bold;
+      text-align: center;
+      z-index: 10000;
+      box-shadow: 0 0 50px rgba(34,197,94,0.9);
+      border: 2px solid #ffd700;
+      animation: fadeInOut 2.5s ease-in-out;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+      15% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+      30% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); visibility: hidden; }
     }
   </style>
 </head>
+
 <body>
-
-  <!-- Header -->
-  <div class="header">
-    <div class="user-info">
-      <div class="username" id="displayName">@KING_OF_CRY</div>
-      <div class="user-id" id="displayId">ID: 7154361039</div>
-    </div>
-    <div class="badge">Referral Active • +0.10 USDT</div>
-  </div>
-
-  <!-- Stats row -->
-  <div class="stats-row">
-    <div class="stat-card">
-      <div class="stat-value" id="statBalance">70.52</div>
-      <div class="stat-label">USDT</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value" id="statRefs">3</div>
-      <div class="stat-label">Referrals</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value" id="statAds">24</div>
-      <div class="stat-label">Ads</div>
+  <div class="topbar">
+    <div class="avatar" id="avatar">M</div>
+    <div class="userinfo">
+      <div class="name" id="tgname">MetaPro User</div>
+      <div class="uid">ID: <span id="uid">loading...</span></div>
     </div>
   </div>
 
-  <!-- Balance Card -->
-  <div class="balance-card">
-    <div class="balance-label">YOUR BALANCE</div>
-    <div class="balance-amount">$<span id="mainBalance">70.52</span></div>
+  <div class="profileCard">
+    <div class="profileFlex">
+      <div class="profileAvatar" id="profileAvatar">M</div>
+      <div>
+        <h2 id="profileName">Crypto Hunter</h2>
+        <p id="profileUsername" style="opacity:0.6; font-size:13px;">@username</p>
+        <div class="badge-success">Referral Active • Earn 0.10 USDT/Friend</div>
+      </div>
+    </div>
+    <div class="statsRow">
+      <div class="statBox">
+        <h3 id="profileBalance">0.00</h3>
+        <p>USDT</p>
+      </div>
+      <div class="statBox">
+        <h3 id="profileRefs">0</h3>
+        <p>Referrals</p>
+      </div>
+      <div class="statBox">
+        <h3 id="profileAds">0</h3>
+        <p>Ads</p>
+      </div>
+    </div>
   </div>
 
-  <!-- Watch Ad Button -->
-  <button class="btn btn-primary" id="watchBtn">📺 Watch Ad (15s earn 0.03 USDT)</button>
-  <div class="ad-hint" id="adHint">Ready • 15 sec required for reward</div>
+  <div class="container">
+    <div class="earn-card">
+      <div class="balance-title">YOUR BALANCE</div>
+      <div class="balance">$<span id="usdt">0.00</span></div>
 
-  <!-- Withdraw Button -->
-  <button class="btn btn-withdraw" id="withdrawBtn">💸 Withdraw Funds</button>
+      <button class="watch" id="watchBtn">
+        <span>📺</span> <span id="watchBtnText">Watch Ad (17s earn 0.03 USDT)</span>
+      </button>
+      <div id="timerStatus" class="timer-status">Ready • 17 sec required for reward</div>
 
-  <!-- Referral Section -->
-  <div class="referral-section">
-    <div class="section-title">🔗 Get Referral Link • Earn 0.10 USDT</div>
-    <div class="ref-link-box">
-      <span class="ref-link" id="refLinkText">https://t.me/Studybuddy_2025Bot?start=ref_...</span>
-      <button class="copy-btn" id="copyRefBtn">Copy Link</button>
-    </div>
-    <div class="bonus-badge">
-      🎁 Referral Bonus: 0.10 USDT per friend<br>
-      Share your unique link. When friends join and watch their first ad, you get 0.10 USDT instantly!
+      <button class="watch withdrawBtn" id="withdrawBtn">Withdraw Funds</button>
+      <button class="watch refBtn" id="openRefBtn">Get Referral Link • Earn 0.10 USDT</button>
+
+      <!-- REFERRAL PANEL -->
+      <div id="refPanel" style="margin-top: 20px; display: none;">
+        <div class="ref-link-box">
+          <input type="text" id="refLinkInput" readonly value="Click 'Get Referral Link' to generate">
+          <button class="copy-btn" id="copyRefBtn">Copy Link</button>
+        </div>
+        <div class="rules" style="margin-top: 12px; text-align: center;">
+          <strong>Referral Bonus: 0.10 USDT per friend</strong><br>
+          Share your unique link. When friends join and watch their first ad, you get 0.10 USDT instantly!
+        </div>
+      </div>
+
+      <div class="progress">
+        <div class="progressBar" id="progressBar"></div>
+      </div>
+      <div id="progressText" style="font-size: 13px; opacity: 0.8;">0 / 500 Ads • 0 / 10 Referrals needed</div>
+
+      <div class="rules">
+        <strong>WITHDRAWAL RULES</strong><br>
+        • Minimum: <strong>5 USDT</strong><br>
+        • Need: <strong>10 Referrals</strong><br>
+        • Need: <strong>500 completed ads (17 sec each)</strong><br>
+        • Reward per ad: <strong>0.03 USDT</strong><br>
+        • Referral reward: <strong>0.10 USDT per active referral</strong>
+      </div>
     </div>
   </div>
 
   <script>
-    // ================= CONFIG =================
+    // ================= CONFIGURATION =================
     const BACKEND = "https://crypto-4bbj.onrender.com";
     const SECRET_KEY = "META_9xK2_secure_2026";
     const BOT_USERNAME = "Studybuddy_2025Bot";
-
-    // ================= GLOBALS =================
+    
+    // GLOBALS
     let userId = "guest";
-    let tgName = "@KING_OF_CRY";
-    let firstName = "User";
-    let isAdPlaying = false;
-
+    let tgName = "Telegram User";
+    let firstName = "MetaPro";
+    let avatarLetter = "M";
+    let myReferralCode = "";
+    let isWatching = false;
+    let adTimerInterval = null;
+    let secondsLeft = 0;
+    const AD_DURATION = 17; // 17 SECONDS
+    
+    // DOM elements
+    const watchBtn = document.getElementById("watchBtn");
+    const watchBtnTextSpan = document.getElementById("watchBtnText");
+    const timerStatusDiv = document.getElementById("timerStatus");
+    const refPanel = document.getElementById("refPanel");
+    const refLinkInput = document.getElementById("refLinkInput");
+    const copyRefBtn = document.getElementById("copyRefBtn");
+    const openRefBtn = document.getElementById("openRefBtn");
+    
+    // Local storage for balance
+    let localBalance = 0;
+    let localAdsWatched = 0;
+    let localRefs = 0;
+    
     // ================= TELEGRAM INIT =================
     if (window.Telegram && Telegram.WebApp) {
       Telegram.WebApp.ready();
       Telegram.WebApp.expand();
-      
       const tgUser = Telegram.WebApp.initDataUnsafe.user;
-      const startParam = Telegram.WebApp.initDataUnsafe.start_param;
-      
       if (tgUser) {
         userId = String(tgUser.id);
-        const username = tgUser.username ? "@" + tgUser.username : `user${userId}`;
-        tgName = username;
-        firstName = tgUser.first_name || "User";
+        tgName = tgUser.username ? "@" + tgUser.username : "@user_" + userId;
+        firstName = tgUser.first_name || "CryptoHunter";
+        avatarLetter = firstName.charAt(0).toUpperCase();
       }
+    }
+    
+    if (userId === "guest") {
+      userId = "guest_" + Math.floor(Math.random() * 1000000);
+      firstName = "Explorer";
+      avatarLetter = "E";
+    }
+    
+    // Load local data
+    function loadLocalData() {
+      const saved = localStorage.getItem(`metapro_${userId}`);
+      if (saved) {
+        const data = JSON.parse(saved);
+        localBalance = data.balance || 0;
+        localAdsWatched = data.adsWatched || 0;
+        localRefs = data.refs || 0;
+        myReferralCode = data.referralCode || userId;
+      }
+      updateLocalUI();
+    }
+    
+    function saveLocalData() {
+      localStorage.setItem(`metapro_${userId}`, JSON.stringify({
+        balance: localBalance,
+        adsWatched: localAdsWatched,
+        refs: localRefs,
+        referralCode: myReferralCode
+      }));
+    }
+    
+    function updateLocalUI() {
+      document.getElementById("usdt").innerText = localBalance.toFixed(2);
+      document.getElementById("profileBalance").innerText = localBalance.toFixed(2);
+      document.getElementById("profileRefs").innerText = localRefs;
+      document.getElementById("profileAds").innerText = localAdsWatched;
       
-      // Handle referral from start_param (ref_USERID)
-      if (startParam && startParam.startsWith("ref_")) {
-        const referrerId = startParam.replace("ref_", "");
-        if (referrerId && referrerId !== userId) {
-          fetch(`${BACKEND}/referral`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId: userId, referrerId: referrerId })
-          }).catch(err => console.error("Referral track error:", err));
+      const percentAds = Math.min((localAdsWatched / 500) * 100, 100);
+      document.getElementById("progressBar").style.width = percentAds + "%";
+      document.getElementById("progressText").innerHTML = `${localAdsWatched} / 500 Ads • ${localRefs} / 10 Referrals needed`;
+    }
+    
+    // Show center message
+    function showCenterMessage(message) {
+      const div = document.createElement('div');
+      div.className = 'center-message';
+      div.innerHTML = message;
+      document.body.appendChild(div);
+      setTimeout(() => {
+        if (div && div.remove) div.remove();
+      }, 2500);
+    }
+    
+    // Update UI
+    document.getElementById("uid").innerText = userId;
+    document.getElementById("tgname").innerText = tgName;
+    document.getElementById("avatar").innerText = avatarLetter;
+    document.getElementById("profileAvatar").innerText = avatarLetter;
+    document.getElementById("profileName").innerText = firstName;
+    document.getElementById("profileUsername").innerText = tgName;
+    
+    // ========== REFERRAL DETECTION ==========
+    function getReferrerId() {
+      try {
+        if (Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.start_param) {
+          let startParam = Telegram.WebApp.initDataUnsafe.start_param;
+          if (startParam && startParam.startsWith("ref_")) {
+            let code = startParam.replace("ref_", "");
+            if (code && code !== "undefined" && code.length > 0) return code;
+          }
+        }
+        const urlParams = new URLSearchParams(window.location.search);
+        let ref = urlParams.get("ref") || urlParams.get("start");
+        if (ref) {
+          if (ref.startsWith("ref_")) ref = ref.replace("ref_", "");
+          if (ref && ref !== "undefined") return ref;
+        }
+      } catch(e) { console.warn(e); }
+      return null;
+    }
+    
+    const referrerId = getReferrerId();
+    
+    // Process referral bonus
+    function processReferralBonus() {
+      if (referrerId && referrerId !== userId && localStorage.getItem(`ref_bonus_${userId}`) !== "done") {
+        const referrerData = localStorage.getItem(`metapro_${referrerId}`);
+        if (referrerData) {
+          const refData = JSON.parse(referrerData);
+          refData.balance = (refData.balance || 0) + 0.10;
+          refData.refs = (refData.refs || 0) + 1;
+          localStorage.setItem(`metapro_${referrerId}`, JSON.stringify(refData));
+          localStorage.setItem(`ref_bonus_${userId}`, "done");
         }
       }
     }
-
-    // Update UI with user data
-    document.getElementById("displayName").innerText = tgName;
-    document.getElementById("displayId").innerHTML = `ID: ${userId}`;
-
-    // ================= LOAD PROFILE =================
+    
+    // ========== REGISTER USER WITH REFERRAL ==========
+    async function registerOrLoginUser() {
+      loadLocalData();
+      processReferralBonus();
+      
+      try {
+        const payload = { userId, tgName, firstName };
+        if (referrerId && referrerId !== userId && referrerId !== "null") {
+          payload.referredBy = referrerId;
+        }
+        const res = await fetch(`${BACKEND}/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "authorization": SECRET_KEY },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          myReferralCode = data.referralCode || userId;
+          if (data.balance !== undefined) {
+            localBalance = data.balance;
+            localAdsWatched = data.adsWatched || 0;
+            localRefs = data.refs || 0;
+            updateLocalUI();
+            saveLocalData();
+          }
+          return true;
+        }
+        return false;
+      } catch(e) { 
+        console.error("register error", e);
+        return true;
+      }
+    }
+    
+    // ========== LOAD PROFILE ==========
     async function loadProfile() {
       try {
         const res = await fetch(`${BACKEND}/profile/${userId}`);
-        if (!res.ok) throw new Error("Profile fetch failed");
         const data = await res.json();
-        
-        const balance = Number(data.balance || 0).toFixed(2);
-        const refs = data.refs || 0;
-        const ads = data.adsWatched || 0;
-        
-        document.getElementById("mainBalance").innerText = balance;
-        document.getElementById("statBalance").innerText = balance;
-        document.getElementById("statRefs").innerText = refs;
-        document.getElementById("statAds").innerText = ads;
-        
-        // Update referral link
-        const refLink = `https://t.me/${BOT_USERNAME}?start=ref_${userId}`;
-        document.getElementById("refLinkText").innerText = refLink;
-        
-      } catch (err) {
-        console.error("Profile load error:", err);
+        if (!data.error) {
+          localBalance = Number(data.balance || 0);
+          localRefs = data.refs || 0;
+          localAdsWatched = data.adsWatched || 0;
+          updateLocalUI();
+          saveLocalData();
+        } else {
+          updateLocalUI();
+        }
+        return { balance: localBalance, refs: localRefs, adsWatched: localAdsWatched };
+      } catch(err) { 
+        console.error("profile load err", err);
+        updateLocalUI();
+        return { balance: localBalance, refs: localRefs, adsWatched: localAdsWatched };
       }
     }
-    loadProfile();
-
-    // ================= COPY REFERRAL LINK =================
-    document.getElementById("copyRefBtn").addEventListener("click", () => {
-      const linkText = document.getElementById("refLinkText").innerText;
-      if (linkText && linkText !== "Loading...") {
-        navigator.clipboard.writeText(linkText).then(() => {
-          const btn = document.getElementById("copyRefBtn");
-          const original = btn.innerText;
-          btn.innerText = "Copied!";
-          setTimeout(() => btn.innerText = original, 1500);
-        }).catch(() => alert("Copy manually: " + linkText));
-      }
-    });
-
-    // ================= AD COMPLETION DETECTION (FIX: reward only after full ad) =================
-    function waitForAdCompletion() {
-      return new Promise((resolve) => {
-        const handler = () => {
-          window.removeEventListener('tl_ad_complete', handler);
-          resolve(true);
-        };
-        window.addEventListener('tl_ad_complete', handler);
-        // Safety timeout (45 seconds) in case event never fires
-        setTimeout(() => {
-          window.removeEventListener('tl_ad_complete', handler);
-          console.warn("Ad completion timeout, assuming finished");
-          resolve(true);
-        }, 45000);
-      });
-    }
-
-    async function showAdAndWait() {
-      if (typeof show_10892289 === 'undefined') {
-        throw new Error("Ad SDK not loaded. Please try again.");
-      }
-      // Show the ad (some SDKs return a promise)
-      const result = show_10892289();
-      if (result && typeof result.then === 'function') {
-        await result;
-      }
-      // Wait for the completion event
-      await waitForAdCompletion();
-      return true;
-    }
-
-    // ================= WATCH AD WITH VERIFICATION =================
-    async function watchAd() {
-      const btn = document.getElementById("watchBtn");
-      const hint = document.getElementById("adHint");
+    
+    // ========== REWARD AFTER 17 SECONDS - ADDS USDT + SHOWS MESSAGE ==========
+    async function sendRewardAfterFullWatch() {
+      // ADD USDT TO BALANCE
+      localBalance = localBalance + 0.03;
+      localAdsWatched = localAdsWatched + 1;
+      updateLocalUI();
+      saveLocalData();
       
-      if (isAdPlaying) {
-        alert("Please wait, an ad is already playing.");
-        return;
+      // SHOW CENTER MESSAGE
+      showCenterMessage('✨ +0.03 USDT Earned! ✨');
+      
+      // Update timer status
+      timerStatusDiv.innerHTML = "+0.03 USDT credited!";
+      setTimeout(() => { 
+        if (!isWatching) timerStatusDiv.innerHTML = "Ready • 17 sec required"; 
+      }, 2000);
+      
+      if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+        Telegram.WebApp.HapticFeedback.notificationOccurred("success");
       }
       
+      // Try to sync with backend (don't wait for it)
       try {
-        isAdPlaying = true;
-        btn.disabled = true;
-        btn.innerText = "🎬 Playing ad... Please watch till end";
-        hint.innerText = "⏳ Watching ad — reward after completion";
-        
-        // Show ad and wait for full completion (NO instant credit)
-        await showAdAndWait();
-        
-        // Only after ad finishes → send reward request
-        btn.innerText = "✅ Verifying...";
         const res = await fetch(`${BACKEND}/ads`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "authorization": SECRET_KEY
-          },
+          headers: { "Content-Type": "application/json", "authorization": SECRET_KEY },
           body: JSON.stringify({ userId })
         });
-        
         const data = await res.json();
         if (data.success) {
-          alert(`✅ +${data.reward || 0.03} USDT added!\nNew Balance: ${data.balance.toFixed(2)} USDT`);
-          loadProfile();
-          hint.innerText = "✅ Ad completed! Ready for next ad";
-          setTimeout(() => {
-            hint.innerText = "Ready • 15 sec required for reward";
-          }, 2000);
-        } else {
-          alert(data.message || "Failed to credit. Please try again.");
-          hint.innerText = "⚠️ Error, try again";
+          localBalance = data.balance;
+          localAdsWatched = data.adsWatched;
+          updateLocalUI();
+          saveLocalData();
         }
-      } catch (err) {
-        console.error("Ad error:", err);
-        alert("Ad failed or was closed. You must watch the full 15s ad to earn.");
-        hint.innerText = "Ready • 15 sec required for reward";
-      } finally {
-        isAdPlaying = false;
-        btn.disabled = false;
-        btn.innerText = "📺 Watch Ad (15s earn 0.03 USDT)";
+      } catch(err) {
+        console.error("Backend sync error, but reward already given", err);
       }
     }
-
-    // ================= WITHDRAW =================
-    async function withdrawNow() {
-      const amount = prompt("💰 Enter amount to withdraw (Min: 5 USDT):", "5");
-      if (!amount) return;
-      const numAmount = parseFloat(amount);
-      if (isNaN(numAmount) || numAmount < 5) {
-        alert("Minimum withdrawal is 5 USDT");
+    
+    // ========== AD WATCH WITH 17 SECOND TIMER ==========
+    async function startAdFlow() {
+      if (isWatching) {
+        timerStatusDiv.innerHTML = "Finish current ad first!";
         return;
       }
+      isWatching = true;
+      watchBtn.disabled = true;
+      secondsLeft = AD_DURATION;
+      watchBtnTextSpan.innerHTML = `Watching (${secondsLeft}s)`;
+      timerStatusDiv.innerHTML = `AD PLAYING • ${secondsLeft}s left... Complete to earn!`;
+      
+      adTimerInterval = setInterval(() => {
+        if (secondsLeft <= 1) {
+          clearInterval(adTimerInterval);
+          adTimerInterval = null;
+          finishAdAndReward();
+        } else {
+          secondsLeft--;
+          watchBtnTextSpan.innerHTML = `Watching (${secondsLeft}s)`;
+          timerStatusDiv.innerHTML = `Watch ${secondsLeft}s more → reward after full ad`;
+        }
+      }, 1000);
+      
+      try {
+        if (typeof show_10892289 !== "undefined") {
+          show_10892289().catch(e => console.warn("SDK warning", e));
+        }
+      } catch(e) { console.warn("Ad SDK error", e); }
+    }
+    
+    async function finishAdAndReward() {
+      if (adTimerInterval) clearInterval(adTimerInterval);
+      if (secondsLeft === 0) {
+        timerStatusDiv.innerHTML = "Full ad watched! Awarding 0.03 USDT...";
+        await sendRewardAfterFullWatch();
+      } else {
+        timerStatusDiv.innerHTML = "Ad interrupted! Full 17 seconds required. No reward.";
+      }
+      isWatching = false;
+      watchBtn.disabled = false;
+      watchBtnTextSpan.innerHTML = `Watch Ad (17s earn 0.03 USDT)`;
+      if (!isWatching && !timerStatusDiv.innerHTML.includes("Awarding")) {
+        setTimeout(() => { timerStatusDiv.innerHTML = "Ready • 17 sec required"; }, 2000);
+      }
+    }
+    
+    function handleVisibilityLoss() {
+      if (document.hidden && isWatching && adTimerInterval) {
+        clearInterval(adTimerInterval);
+        adTimerInterval = null;
+        isWatching = false;
+        watchBtn.disabled = false;
+        watchBtnTextSpan.innerHTML = `Watch Ad (17s earn 0.03 USDT)`;
+        timerStatusDiv.innerHTML = "Ad aborted! Full 17 sec required next time.";
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibilityLoss);
+    
+    window.watchAd = startAdFlow;
+    watchBtn.onclick = () => window.watchAd();
+    
+    // ========== WITHDRAW ==========
+    window.withdrawNow = async function() {
+      await loadProfile();
+      const balance = localBalance;
+      const refs = localRefs;
+      const ads = localAdsWatched;
+      
+      if (balance < 5) { 
+        showCenterMessage('❌ Min withdrawal 5 USDT');
+        return; 
+      }
+      if (refs < 10) { 
+        showCenterMessage(`❌ Need 10 referrals. You have ${refs}`);
+        return; 
+      }
+      if (ads < 500) { 
+        showCenterMessage(`❌ Need 500 ads. You have ${ads}`);
+        return; 
+      }
+      
+      let amount = prompt(`Enter amount (min 5, max ${balance.toFixed(2)} USDT):`, "5");
+      if (!amount) return;
+      let num = parseFloat(amount);
+      if (isNaN(num) || num < 5) { showCenterMessage('Minimum 5 USDT'); return; }
+      if (num > balance) { showCenterMessage('Insufficient balance'); return; }
+      
       try {
         const res = await fetch(`${BACKEND}/withdraw`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: userId, amount: numAmount })
+          body: JSON.stringify({ userId, amount: num })
         });
         const data = await res.json();
         if (data.success) {
-          alert("✅ " + data.message + "\n\nPlease check Telegram to complete withdrawal.");
-          loadProfile();
+          localBalance = localBalance - num;
+          updateLocalUI();
+          saveLocalData();
+          showCenterMessage(`✅ Withdrawal: ${num} USDT sent!`);
+          timerStatusDiv.innerHTML = `Withdrawal request sent! ${num} USDT pending.`;
+          setTimeout(() => { if (!isWatching) timerStatusDiv.innerHTML = "Ready • 17 sec required"; }, 3000);
         } else {
-          alert("❌ " + data.message);
+          showCenterMessage(`❌ Withdraw failed: ${data.message}`);
         }
-      } catch (err) {
-        console.error("Withdraw error:", err);
-        alert("Withdrawal failed. Please try again.");
+      } catch(e) { 
+        showCenterMessage('❌ Network error');
       }
-    }
-
-    // Attach event listeners
-    document.getElementById("watchBtn").addEventListener("click", watchAd);
-    document.getElementById("withdrawBtn").addEventListener("click", withdrawNow);
+    };
+    document.getElementById("withdrawBtn").onclick = () => window.withdrawNow();
     
-    // Refresh every 8 seconds
-    setInterval(loadProfile, 8000);
+    // ========== REFERRAL PANEL ==========
+    openRefBtn.addEventListener("click", async () => {
+      if (refPanel.style.display === "none" || refPanel.style.display === "") {
+        refPanel.style.display = "block";
+        if (!myReferralCode || myReferralCode === "") {
+          refLinkInput.value = "Generating your link...";
+          setTimeout(async () => {
+            await loadProfile();
+            const deepLink = `https://t.me/${BOT_USERNAME}?start=ref_${myReferralCode || userId}`;
+            refLinkInput.value = deepLink;
+          }, 500);
+        } else {
+          const deepLink = `https://t.me/${BOT_USERNAME}?start=ref_${myReferralCode}`;
+          refLinkInput.value = deepLink;
+        }
+      } else {
+        refPanel.style.display = "none";
+      }
+    });
+    
+    copyRefBtn.addEventListener("click", async () => {
+      let linkToCopy = refLinkInput.value;
+      if (!linkToCopy || linkToCopy.includes("Generating") || linkToCopy.includes("Click")) {
+        showCenterMessage('Please wait for link to generate');
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(linkToCopy);
+        showCenterMessage('✅ Referral link copied!');
+      } catch(e) {
+        alert("Copy manually: " + linkToCopy);
+      }
+    });
+    
+    // ========== INIT ==========
+    (async function init() {
+      await registerOrLoginUser();
+      await loadProfile();
+      setInterval(loadProfile, 10000);
+    })();
+    
   </script>
 </body>
-</html>
+  </html>

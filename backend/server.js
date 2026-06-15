@@ -56,8 +56,9 @@ const userSchema = new mongoose.Schema({
   walletType: { type: String, default: "" },
   walletAddress: { type: String, default: "" },
   pendingWithdrawal: { type: Number, default: 0 },
+  pendingAmount: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
-  lastPostReceived: { type: Date, default: null } // Track when user last got a post
+  lastPostReceived: { type: Date, default: null }
 });
 
 const User = mongoose.model("User", userSchema);
@@ -83,7 +84,7 @@ const MIN_REFS = 10;
 const MIN_ADS = 500;
 const REF_REWARD = 0.1;
 const AD_REWARD = 0.03;
-const POST_INTERVAL_HOURS = 5; // POST EVERY 5 HOURS
+const POST_INTERVAL_HOURS = 5;
 
 /* ================= HELPER FUNCTIONS ================= */
 
@@ -104,7 +105,7 @@ async function checkJoin(userId) {
   }
 }
 
-/* ================= SEND POST TO SINGLE USER ================= */
+/* ================= SEND POST TO SINGLE USER (PRIVATE CHAT - WEB_APP WORKS) ================= */
 
 async function sendPostToUser(user) {
   try {
@@ -122,7 +123,6 @@ async function sendPostToUser(user) {
 🎯 EARN MORE:
 • Watch Ads: +0.03 USDT each
 • Invite Friends: +0.10 USDT per referral
-• No limits, no hidden fees!
 
 🚀 Ready to earn? Tap the button below!`;
 
@@ -133,11 +133,9 @@ async function sendPostToUser(user) {
           [{ text: "👥 INVITE FRIENDS", url: referralLink }],
           [{ text: "💰 CHECK BALANCE", callback_data: "balance" }]
         ]
-      },
-      parse_mode: "HTML"
+      }
     });
     
-    // Update last post time
     user.lastPostReceived = new Date();
     await user.save();
     
@@ -149,33 +147,91 @@ async function sendPostToUser(user) {
   }
 }
 
+/* ================= SEND TO CHANNEL (NO WEB_APP BUTTONS) ================= */
+
+async function sendToChannel() {
+  try {
+    const totalUsers = await User.countDocuments();
+    const totalBalance = await User.aggregate([{ $group: { _id: null, total: { $sum: "$balance" } } }]);
+    const totalAds = await User.aggregate([{ $group: { _id: null, total: { $sum: "$adsWatched" } } }]);
+    
+    const message = `🔥 META PRO EARN - DAILY UPDATE 🔥
+
+━━━━━━━━━━━━━━━━━━━━
+📊 GLOBAL STATS:
+• Total Users: ${totalUsers}
+• Total Ads Watched: ${totalAds[0]?.total || 0}
+• Total Balance: ${(totalBalance[0]?.total || 0).toFixed(2)} USDT
+━━━━━━━━━━━━━━━━━━━━
+
+💰 EARN RATES:
+• Per Ad: 0.03 USDT
+• Per Referral: 0.10 USDT
+
+🚀 Join @${BOT_USERNAME} and start earning!`;
+
+    // Channel message - NO web_app button, only URL buttons
+    await bot.sendMessage(CHANNEL_ID, message, {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: "💸 START EARNING", url: `https://t.me/${BOT_USERNAME}?start=earn` }],
+          [{ text: "👥 INVITE FRIENDS", url: `https://t.me/${BOT_USERNAME}?start=invite` }]
+        ]
+      }
+    });
+    
+    console.log("✅ Channel message sent");
+  } catch (err) {
+    console.log("Channel message error:", err.message);
+  }
+}
+
+/* ================= SEND TO GROUP (NO WEB_APP BUTTONS) ================= */
+
+async function sendToGroup() {
+  try {
+    const message = `🔥 New earning opportunities available!
+
+💸 Earn USDT by watching ads:
+• 0.03 USDT per ad
+• 0.10 USDT per referral
+
+🚀 Start earning now: @${BOT_USERNAME}`;
+
+    await bot.sendMessage(GROUP_ID, message, {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: "🚀 START EARNING", url: `https://t.me/${BOT_USERNAME}?start=earn` }]
+        ]
+      }
+    });
+    
+    console.log("✅ Group message sent");
+  } catch (err) {
+    console.log("Group message error:", err.message);
+  }
+}
+
 /* ================= SEND POSTS TO ALL USERS (EVERY 5 HOURS) ================= */
 
 async function sendPostsToAllUsers() {
-  console.log(`\n📢 [${new Date().toLocaleString()}] Starting 5-hour broadcast to all users...`);
+  console.log(`\n📢 [${new Date().toLocaleString()}] Starting ${POST_INTERVAL_HOURS}-hour broadcast to all users...`);
   
   try {
-    // Get all users
     const users = await User.find({});
     console.log(`📊 Total users: ${users.length}`);
     
     let sent = 0;
     let failed = 0;
-    let skipped = 0;
     
     for (let i = 0; i < users.length; i++) {
       const user = users[i];
       
-      // Check if user should receive post (every 5 hours)
       const shouldSend = !user.lastPostReceived || 
         (new Date() - user.lastPostReceived) >= (POST_INTERVAL_HOURS * 60 * 60 * 1000);
       
-      if (!shouldSend) {
-        skipped++;
-        continue;
-      }
+      if (!shouldSend) continue;
       
-      // Send post with delay between users to avoid rate limiting
       await new Promise(resolve => setTimeout(resolve, 100));
       
       const success = await sendPostToUser(user);
@@ -186,80 +242,31 @@ async function sendPostsToAllUsers() {
       }
     }
     
-    console.log(`📊 Broadcast complete! Sent: ${sent}, Failed: ${failed}, Skipped (recent): ${skipped}`);
+    console.log(`📊 Broadcast complete! Sent: ${sent}, Failed: ${failed}`);
     
-    // Also send to channel and group
-    await sendToChannelAndGroup();
+    // Send to channel and group (without web_app buttons)
+    await sendToChannel();
+    await sendToGroup();
     
   } catch (err) {
     console.log("Broadcast error:", err);
   }
 }
 
-/* ================= SEND TO CHANNEL & GROUP ================= */
-
-async function sendToChannelAndGroup() {
-  try {
-    const totalUsers = await User.countDocuments();
-    const totalBalance = await User.aggregate([{ $group: { _id: null, total: { $sum: "$balance" } } }]);
-    const totalAds = await User.aggregate([{ $group: { _id: null, total: { $sum: "$adsWatched" } } }]);
-    
-    const channelMessage = `🔥 META PRO EARN - DAILY UPDATE 🔥
-
-━━━━━━━━━━━━━━━━━━━━
-📊 GLOBAL STATS:
-• Total Users: ${totalUsers.toLocaleString()}
-• Total Ads Watched: ${(totalAds[0]?.total || 0).toLocaleString()}
-• Total Balance: ${(totalBalance[0]?.total || 0).toFixed(2)} USDT
-━━━━━━━━━━━━━━━━━━━━
-
-💰 EARN RATES:
-• Per Ad: 0.03 USDT
-• Per Referral: 0.10 USDT
-
-🚀 Open the app and start earning!`;
-
-    await bot.sendMessage(CHANNEL_ID, channelMessage, {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: "💸 START EARNING", url: `https://t.me/${BOT_USERNAME}?start=earn` }],
-          [{ text: "🚀 OPEN MINI APP", web_app: { url: WEB_APP_URL } }]
-        ]
-      }
-    });
-    
-    await bot.sendMessage(GROUP_ID, `🔥 New earning opportunities available! Open the app to earn USDT!`, {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: "🚀 START EARNING", web_app: { url: WEB_APP_URL } }]
-        ]
-      }
-    });
-    
-    console.log("✅ Channel and group messages sent");
-  } catch (err) {
-    console.log("Channel/group message error:", err);
-  }
-}
-
 /* ================= SCHEDULE 5-HOUR POSTS ================= */
 
-// Start the interval - runs every 5 hours
 function startFiveHourBroadcast() {
-  // Run immediately on startup
   setTimeout(() => {
     sendPostsToAllUsers();
-  }, 5000); // Wait 5 seconds after server starts
+  }, 5000);
   
-  // Then schedule every 5 hours
   setInterval(sendPostsToAllUsers, POST_INTERVAL_HOURS * 60 * 60 * 1000);
   
-  console.log(`⏰ 5-hour broadcast scheduled! Next: ${new Date(Date.now() + POST_INTERVAL_HOURS * 60 * 60 * 1000).toLocaleString()}`);
+  console.log(`⏰ ${POST_INTERVAL_HOURS}-hour broadcast scheduled!`);
 }
 
 /* ================= API ENDPOINTS ================= */
 
-// Health check
 app.get("/", (req, res) => {
   res.json({
     status: "🚀 Meta Pro Earn Running",
@@ -269,7 +276,6 @@ app.get("/", (req, res) => {
   });
 });
 
-// Register user (with referral)
 app.post("/register", async (req, res) => {
   try {
     const { userId, tgName, firstName, referredBy } = req.body;
@@ -283,7 +289,6 @@ app.post("/register", async (req, res) => {
         firstName: firstName || "User"
       });
       
-      // Handle referral
       if (referredBy && referredBy !== userId) {
         const referrer = await User.findOne({ userId: referredBy });
         if (referrer && !user.referredBy) {
@@ -308,7 +313,6 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// Get profile
 app.get("/profile/:userId", async (req, res) => {
   try {
     const user = await getUser(req.params.userId);
@@ -325,7 +329,6 @@ app.get("/profile/:userId", async (req, res) => {
   }
 });
 
-// Complete ad watch - GIVE REWARD
 app.post("/ads", async (req, res) => {
   try {
     if (req.headers.authorization !== SECRET_KEY) {
@@ -340,7 +343,6 @@ app.post("/ads", async (req, res) => {
     const user = await getUser(userId);
     const now = Date.now();
 
-    // 30 second cooldown between ads
     if (now - user.lastAdTime < 30000) {
       return res.json({
         success: false,
@@ -348,17 +350,14 @@ app.post("/ads", async (req, res) => {
       });
     }
 
-    // GIVE REWARD
     user.balance += AD_REWARD;
     user.adsWatched += 1;
     user.lastAdTime = now;
     
-    // Check if this is first ad - give referral bonus to referrer
     const isFirstAd = user.adsWatched === 1;
     
     await user.save();
 
-    // Give referral bonus to referrer if this is first ad
     if (isFirstAd && user.referredBy) {
       const referrer = await User.findOne({ userId: user.referredBy });
       if (referrer) {
@@ -366,10 +365,9 @@ app.post("/ads", async (req, res) => {
         referrer.refs += 1;
         await referrer.save();
         
-        // Notify referrer
         try {
           await bot.sendMessage(referrer.userId, `🎉 Your referral ${user.firstName} watched their first ad!\n💰 +${REF_REWARD} USDT added!`);
-        } catch(e) { console.log("Could not notify referrer"); }
+        } catch(e) {}
       }
     }
 
@@ -386,7 +384,6 @@ app.post("/ads", async (req, res) => {
   }
 });
 
-// Request withdrawal
 app.post("/withdraw", async (req, res) => {
   try {
     const { userId, amount, walletAddress } = req.body;
@@ -417,7 +414,6 @@ app.post("/withdraw", async (req, res) => {
       return res.json({ success: false, message: "Wallet address required" });
     }
 
-    // Create withdrawal request
     const withdraw = await Withdrawal.create({
       userId: userId,
       userName: user.username,
@@ -428,15 +424,12 @@ app.post("/withdraw", async (req, res) => {
       status: "pending"
     });
 
-    // Deduct from user balance
     user.balance -= amount;
     await user.save();
 
-    // Send to admin
     const adminMessage = `💸 NEW WITHDRAWAL REQUEST\n\n👤 User: ${user.firstName}\n🆔 ID: ${userId}\n💰 Amount: ${amount} USDT\n📬 Wallet: ${walletAddress}\n\n✅ /approve_${withdraw._id}\n❌ /reject_${withdraw._id}`;
     await bot.sendMessage(ADMIN_ID, adminMessage);
 
-    // Confirm to user
     await bot.sendMessage(userId, `✅ Withdrawal request submitted!\n💰 Amount: ${amount} USDT\n⏳ Status: Pending Approval`);
 
     res.json({ success: true, message: "Withdrawal request submitted" });
@@ -448,7 +441,6 @@ app.post("/withdraw", async (req, res) => {
 
 /* ================= TELEGRAM BOT COMMANDS ================= */
 
-// Start command
 bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
   try {
     const id = String(msg.chat.id);
@@ -456,7 +448,6 @@ bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
     const firstName = msg.from.first_name || "User";
     const param = match ? match[1] : null;
 
-    // Check channel join
     const joined = await checkJoin(id);
     if (!joined) {
       return bot.sendMessage(id, "📢 Please join our channel first to use this bot!", {
@@ -466,7 +457,6 @@ bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
       });
     }
 
-    // Get or create user
     let user = await User.findOne({ userId: id });
     let isNewUser = false;
     
@@ -475,7 +465,6 @@ bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
       isNewUser = true;
     }
 
-    // Process referral
     if (param && param.startsWith("ref_") && isNewUser) {
       const refId = param.replace("ref_", "");
       if (refId !== id && !user.referredBy) {
@@ -485,7 +474,6 @@ bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
       }
     }
 
-    // Send welcome message
     await bot.sendMessage(id, `🔥 WELCOME TO META PRO EARN\n\n👤 ${firstName}\n💰 Balance: ${user.balance.toFixed(2)} USDT\n👥 Referrals: ${user.refs}\n📺 Ads: ${user.adsWatched}`, {
       reply_markup: {
         inline_keyboard: [
@@ -500,7 +488,6 @@ bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
   }
 });
 
-// Callback queries
 bot.on("callback_query", async (query) => {
   const id = String(query.message.chat.id);
   const user = await User.findOne({ userId: id });
@@ -533,76 +520,70 @@ bot.on("callback_query", async (query) => {
   }
 });
 
-// Handle withdrawal amount
 bot.on("message", async (msg) => {
   if (!msg.text || msg.text.startsWith("/")) return;
   
   const id = String(msg.chat.id);
   const user = await User.findOne({ userId: id });
-  if (!user || user.pendingWithdrawal !== 1) return;
+  if (!user) return;
   
-  const amount = parseFloat(msg.text);
-  if (isNaN(amount)) {
-    return bot.sendMessage(id, "❌ Please send a valid number for withdrawal amount.");
+  if (user.pendingWithdrawal === 1) {
+    const amount = parseFloat(msg.text);
+    if (isNaN(amount)) {
+      return bot.sendMessage(id, "❌ Please send a valid number for withdrawal amount.");
+    }
+    
+    if (amount < MIN_WITHDRAW) {
+      return bot.sendMessage(id, `❌ Minimum withdrawal is ${MIN_WITHDRAW} USDT`);
+    }
+    
+    if (amount > user.balance) {
+      return bot.sendMessage(id, `❌ Insufficient balance. You have ${user.balance.toFixed(2)} USDT`);
+    }
+    
+    user.pendingWithdrawal = 2;
+    user.pendingAmount = amount;
+    await user.save();
+    
+    await bot.sendMessage(id, `📬 Amount: ${amount} USDT\n\nNow please send your USDT (TRC20) wallet address.`);
+    return;
   }
   
-  if (amount < MIN_WITHDRAW) {
-    return bot.sendMessage(id, `❌ Minimum withdrawal is ${MIN_WITHDRAW} USDT`);
+  if (user.pendingWithdrawal === 2) {
+    const walletAddress = msg.text.trim();
+    const amount = user.pendingAmount;
+    
+    if (!walletAddress || (!walletAddress.startsWith('T') && !walletAddress.startsWith('0x'))) {
+      return bot.sendMessage(id, "❌ Invalid wallet address. Send a valid USDT (TRC20) address starting with 'T'");
+    }
+    
+    const withdraw = await Withdrawal.create({
+      userId: id,
+      userName: user.username,
+      userFirstName: user.firstName,
+      amount: amount,
+      method: "USDT (TRC20)",
+      address: walletAddress,
+      status: "pending"
+    });
+    
+    user.balance -= amount;
+    user.pendingWithdrawal = 0;
+    user.pendingAmount = 0;
+    await user.save();
+    
+    const adminMessage = `💸 WITHDRAWAL REQUEST\n\n👤 ${user.firstName}\n💰 ${amount} USDT\n📬 ${walletAddress}\n\n/approve_${withdraw._id} | /reject_${withdraw._id}`;
+    await bot.sendMessage(ADMIN_ID, adminMessage);
+    await bot.sendMessage(id, `✅ Withdrawal request submitted!\n💰 ${amount} USDT\n⏳ Pending approval`);
   }
-  
-  if (amount > user.balance) {
-    return bot.sendMessage(id, `❌ Insufficient balance. You have ${user.balance.toFixed(2)} USDT`);
-  }
-  
-  user.pendingWithdrawal = 2;
-  user.pendingAmount = amount;
-  await user.save();
-  
-  await bot.sendMessage(id, `📬 Amount: ${amount} USDT\n\nNow please send your USDT (TRC20) wallet address.`);
 });
 
-// Handle wallet address
-bot.on("message", async (msg) => {
-  if (!msg.text || msg.text.startsWith("/")) return;
-  
-  const id = String(msg.chat.id);
-  const user = await User.findOne({ userId: id });
-  if (!user || user.pendingWithdrawal !== 2) return;
-  
-  const walletAddress = msg.text.trim();
-  const amount = user.pendingAmount;
-  
-  if (!walletAddress || (!walletAddress.startsWith('T') && !walletAddress.startsWith('0x'))) {
-    return bot.sendMessage(id, "❌ Invalid wallet address. Send a valid USDT (TRC20) address starting with 'T'");
-  }
-  
-  const withdraw = await Withdrawal.create({
-    userId: id,
-    userName: user.username,
-    userFirstName: user.firstName,
-    amount: amount,
-    method: "USDT (TRC20)",
-    address: walletAddress,
-    status: "pending"
-  });
-  
-  user.balance -= amount;
-  user.pendingWithdrawal = 0;
-  user.pendingAmount = null;
-  await user.save();
-  
-  const adminMessage = `💸 WITHDRAWAL REQUEST\n\n👤 ${user.firstName}\n💰 ${amount} USDT\n📬 ${walletAddress}\n\n/approve_${withdraw._id} | /reject_${withdraw._id}`;
-  await bot.sendMessage(ADMIN_ID, adminMessage);
-  await bot.sendMessage(id, `✅ Withdrawal request submitted!\n💰 ${amount} USDT\n⏳ Pending approval`);
-});
-
-// Admin: Approve withdrawal
+// Admin commands
 bot.onText(/\/approve_(.+)/, async (msg, match) => {
   if (String(msg.chat.id) !== String(ADMIN_ID)) return;
   
   const withdraw = await Withdrawal.findById(match[1]);
   if (!withdraw) return bot.sendMessage(ADMIN_ID, "Not found");
-  
   if (withdraw.status !== "pending") return bot.sendMessage(ADMIN_ID, `Already ${withdraw.status}`);
   
   withdraw.status = "approved";
@@ -612,13 +593,11 @@ bot.onText(/\/approve_(.+)/, async (msg, match) => {
   await bot.sendMessage(ADMIN_ID, `✅ Approved ${withdraw.amount} USDT to ${withdraw.userFirstName}`);
 });
 
-// Admin: Reject withdrawal
 bot.onText(/\/reject_(.+)/, async (msg, match) => {
   if (String(msg.chat.id) !== String(ADMIN_ID)) return;
   
   const withdraw = await Withdrawal.findById(match[1]);
   if (!withdraw) return bot.sendMessage(ADMIN_ID, "Not found");
-  
   if (withdraw.status !== "pending") return bot.sendMessage(ADMIN_ID, `Already ${withdraw.status}`);
   
   withdraw.status = "rejected";
@@ -634,7 +613,6 @@ bot.onText(/\/reject_(.+)/, async (msg, match) => {
   await bot.sendMessage(ADMIN_ID, `❌ Rejected ${withdraw.amount} USDT to ${withdraw.userFirstName}`);
 });
 
-// Admin: Manual broadcast command
 bot.onText(/\/broadcast (.+)/, async (msg, match) => {
   if (String(msg.chat.id) !== String(ADMIN_ID)) return;
   
@@ -653,7 +631,6 @@ bot.onText(/\/broadcast (.+)/, async (msg, match) => {
   await bot.sendMessage(ADMIN_ID, `✅ Broadcast sent to ${sent} users`);
 });
 
-// Admin: Stats command
 bot.onText(/\/stats/, async (msg) => {
   if (String(msg.chat.id) !== String(ADMIN_ID)) return;
   
@@ -662,12 +639,11 @@ bot.onText(/\/stats/, async (msg) => {
   const totalAds = await User.aggregate([{ $group: { _id: null, total: { $sum: "$adsWatched" } } }]);
   const pendingWithdrawals = await Withdrawal.countDocuments({ status: "pending" });
   
-  await bot.sendMessage(ADMIN_ID, `📊 STATS\n\nUsers: ${totalUsers}\nBalance: ${(totalBalance[0]?.total || 0).toFixed(2)} USDT\nAds: ${totalAds[0]?.total || 0}\nPending: ${pendingWithdrawals}\n\n📡 Broadcast interval: ${POST_INTERVAL_HOURS} hours`);
+  await bot.sendMessage(ADMIN_ID, `📊 STATS\n\nUsers: ${totalUsers}\nBalance: ${(totalBalance[0]?.total || 0).toFixed(2)} USDT\nAds: ${totalAds[0]?.total || 0}\nPending Withdrawals: ${pendingWithdrawals}\n\n⏰ Broadcast: every ${POST_INTERVAL_HOURS} hours`);
 });
 
 /* ================= START SERVER ================= */
 
-// Start the 5-hour broadcast
 startFiveHourBroadcast();
 
 app.listen(PORT, () => {

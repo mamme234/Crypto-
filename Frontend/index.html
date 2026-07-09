@@ -8,6 +8,9 @@
     <!-- Telegram Mini App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
+    <!-- ===== MONETAG ADS SDK ===== -->
+    <script src='//libtl.com/sdk.js' data-zone='10892289' data-sdk='show_10892289'></script>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -611,7 +614,44 @@
             z-index: 10;
         }
 
-        /* Confetti animation */
+        /* Ad Loading Overlay */
+        .ad-loading {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            background: rgba(11, 18, 32, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .ad-loading.show {
+            display: flex;
+        }
+
+        .ad-loading .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid #3B82F6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .ad-loading .text {
+            font-size: 16px;
+            color: rgba(255,255,255,0.7);
+            font-weight: 500;
+        }
+
+        /* Confetti & Coin animations */
         @keyframes confettiFall {
             0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
             100% { transform: translateY(-100px) rotate(720deg) scale(0); opacity: 0; }
@@ -624,6 +664,12 @@
     </style>
 </head>
 <body>
+
+    <!-- ===== AD LOADING OVERLAY ===== -->
+    <div class="ad-loading" id="ad-loading">
+        <div class="spinner"></div>
+        <div class="text">Loading ad...</div>
+    </div>
 
     <!-- ===== PARTICLES ===== -->
     <canvas id="particles-canvas"></canvas>
@@ -699,7 +745,7 @@
             </div>
 
             <div class="grid grid-cols-4 gap-2 mb-4">
-                <button class="glass card-premium rounded-2xl p-3 text-center haptic hover:scale-105 transition" onclick="navigateTo('page-earn')">
+                <button class="glass card-premium rounded-2xl p-3 text-center haptic hover:scale-105 transition" onclick="watchAd()">
                     <div class="text-2xl">🎥</div>
                     <div class="text-[10px] text-white/60 mt-1">Watch Ad</div>
                 </button>
@@ -1122,10 +1168,10 @@
 
     <script>
         // ==================== API URL ====================
-        // *** THIS IS YOUR BACKEND URL ***
         const API_URL = 'https://crypto-4bbj.onrender.com/api';
         
         console.log('🔗 API URL:', API_URL);
+        console.log('📺 Monetag Ads Loaded - Zone: 10892289');
 
         // ==================== PARTICLES ====================
         const canvas = document.getElementById('particles-canvas');
@@ -1210,11 +1256,11 @@
             leaderboard: [],
             user: null,
             wallet: null,
+            isAdLoading: false
         };
 
         // ==================== API HELPERS ====================
         async function apiCall(method, endpoint, data = null) {
-            // Fix: Use full URL with API_URL
             const url = `${API_URL}${endpoint}`;
             console.log(`📡 ${method} ${url}`);
             
@@ -1396,40 +1442,158 @@
             }
         }
 
-        // ==================== ACTIONS ====================
-        async function watchAd() {
-            const btn = document.getElementById('watch-ad-btn');
-            btn.disabled = true;
-            btn.innerHTML = '<span>⏳</span> Watching Ad...';
-
-            try {
-                const response = await apiCall('POST', '/rewards/watch-ad');
-                const reward = response.reward;
-                const multiplier = response.multiplier || 1;
-
-                appState.balance = response.balance;
-                appState.adsToday = (appState.adsToday || 0) + 1;
-                appState.dailyEarned = (appState.dailyEarned || 0) + reward;
-
-                showRewardPopup(reward, '🎉', `${multiplier}x Bonus!`);
-                createFloatingCoins();
-                addActivity('📺', `Watched ad (${multiplier}x)`, `+$${reward.toFixed(2)}`);
-                showToast(`+$${reward.toFixed(2)} USDT earned! 🎉`, 'success');
-                updateUI();
-
-            } catch (error) {
-                console.error('Watch ad error:', error);
-                showToast(error.message || 'Failed to watch ad', 'error');
-            }
-
-            btn.disabled = false;
-            btn.innerHTML = `
-                <span>📺</span>
-                Watch Ad & Earn
-                <span class="reward-amount" id="ad-reward-display">+$0.50</span>
-            `;
+        // ==================== REWARD AD FUNCTIONS ====================
+        
+        // Function to show ad and give reward
+        async function showRewardedAd() {
+            return new Promise((resolve, reject) => {
+                try {
+                    // Show loading overlay
+                    document.getElementById('ad-loading').classList.add('show');
+                    
+                    // Check if show_10892289 function exists (Monetag SDK)
+                    if (typeof show_10892289 === 'function') {
+                        console.log('📺 Showing Monetag rewarded ad...');
+                        
+                        // Call Monetag rewarded interstitial
+                        show_10892289().then(() => {
+                            // User watched the ad successfully
+                            document.getElementById('ad-loading').classList.remove('show');
+                            console.log('✅ Ad completed successfully');
+                            resolve(true);
+                        }).catch((error) => {
+                            // User closed ad or error
+                            document.getElementById('ad-loading').classList.remove('show');
+                            console.log('❌ Ad error or closed:', error);
+                            
+                            // Try fallback - rewarded popup
+                            try {
+                                show_10892289('pop').then(() => {
+                                    resolve(true);
+                                }).catch(() => {
+                                    resolve(false);
+                                });
+                            } catch (e) {
+                                resolve(false);
+                            }
+                        });
+                    } else {
+                        // SDK not loaded - fallback
+                        document.getElementById('ad-loading').classList.remove('show');
+                        console.log('⚠️ Ad SDK not loaded, using fallback');
+                        resolve(false);
+                    }
+                    
+                    // Timeout fallback (30 seconds)
+                    setTimeout(() => {
+                        document.getElementById('ad-loading').classList.remove('show');
+                        console.log('⏰ Ad timeout');
+                        resolve(false);
+                    }, 30000);
+                    
+                } catch (error) {
+                    document.getElementById('ad-loading').classList.remove('show');
+                    console.error('Ad error:', error);
+                    resolve(false);
+                }
+            });
         }
 
+        // ==================== WATCH AD WITH REAL ADS ====================
+        async function watchAd() {
+            // Check if already loading
+            if (appState.isAdLoading) {
+                showToast('Please wait, ad is loading...', 'warning');
+                return;
+            }
+            
+            // Check daily limit
+            if (appState.adsToday >= appState.maxAds) {
+                showToast('Daily ad limit reached! (10 ads/day)', 'warning');
+                return;
+            }
+            
+            // Check cooldown (30 seconds)
+            if (appState.lastAdTime && (Date.now() - appState.lastAdTime) < 30000) {
+                const remaining = Math.ceil((30000 - (Date.now() - appState.lastAdTime)) / 1000);
+                showToast(`Please wait ${remaining}s before next ad`, 'warning');
+                return;
+            }
+            
+            appState.isAdLoading = true;
+            
+            // Disable buttons
+            document.getElementById('watch-ad-btn').disabled = true;
+            document.getElementById('earn-ad-btn').disabled = true;
+            
+            try {
+                // Show real ad
+                const adWatched = await showRewardedAd();
+                
+                if (adWatched) {
+                    // Ad watched successfully - give reward
+                    const reward = 0.50;
+                    appState.balance += reward;
+                    appState.adsToday += 1;
+                    appState.dailyEarned += reward;
+                    appState.lastAdTime = Date.now();
+                    
+                    // Update UI
+                    updateUI();
+                    
+                    // Show reward
+                    showRewardPopup(reward, '🎉', 'Ad Reward Earned!');
+                    createFloatingCoins();
+                    createConfetti();
+                    addActivity('📺', 'Watched ad', `+$${reward.toFixed(2)}`);
+                    showToast(`+$${reward.toFixed(2)} USDT earned! 🎉`, 'success');
+                    
+                    // Update backend
+                    try {
+                        await apiCall('POST', '/rewards/watch-ad', { reward });
+                    } catch (e) {
+                        console.log('Backend update skipped (offline mode)');
+                    }
+                    
+                } else {
+                    showToast('Ad not completed. Please try again.', 'error');
+                }
+                
+            } catch (error) {
+                console.error('Watch ad error:', error);
+                showToast('Failed to load ad. Please try again.', 'error');
+            }
+            
+            appState.isAdLoading = false;
+            
+            // Re-enable buttons
+            document.getElementById('watch-ad-btn').disabled = false;
+            document.getElementById('earn-ad-btn').disabled = false;
+            
+            // Update cooldown display
+            updateCooldownUI();
+        }
+
+        // ==================== COOLDOWN UI ====================
+        function updateCooldownUI() {
+            const cooldownEl = document.getElementById('earn-cooldown');
+            
+            if (appState.lastAdTime) {
+                const elapsed = Date.now() - appState.lastAdTime;
+                const remaining = Math.max(0, 30000 - elapsed);
+                
+                if (remaining > 0) {
+                    const seconds = Math.ceil(remaining / 1000);
+                    cooldownEl.textContent = `${seconds}s`;
+                    setTimeout(updateCooldownUI, 1000);
+                    return;
+                }
+            }
+            
+            cooldownEl.textContent = 'Ready';
+        }
+
+        // ==================== OTHER ACTIONS ====================
         async function claimDailyReward() {
             try {
                 const response = await apiCall('POST', '/rewards/daily');
@@ -1602,6 +1766,8 @@
             document.getElementById('online-users').textContent = Math.floor(1000 + Math.random() * 500);
             document.getElementById('total-users').textContent = Math.floor(10000 + Math.random() * 5000);
             document.getElementById('total-payouts').textContent = `$${Math.floor(40000 + Math.random() * 10000)}`;
+            
+            updateCooldownUI();
         }
 
         function renderCalendar() {
@@ -1984,6 +2150,7 @@
 
         console.log('⚡ Alpha Pro v2.0 - Premium Earn App');
         console.log(`🔗 API URL: ${API_URL}`);
+        console.log('📺 Monetag Ads Zone: 10892289');
         console.log('📱 Connected to Telegram Mini App');
     </script>
 </body>

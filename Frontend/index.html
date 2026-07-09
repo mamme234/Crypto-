@@ -3,20 +3,12 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Premium Earn App</title>
+    <title>Alpha Pro</title>
     
     <!-- Telegram Mini App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Axios for API calls -->
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    
-    <!-- Lottie for animations -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
-    
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -33,10 +25,6 @@
                     animation: {
                         'float': 'float 3s ease-in-out infinite',
                         'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
-                        'spin-slow': 'spin 3s linear infinite',
-                        'slide-up': 'slideUp 0.5s ease-out',
-                        'slide-down': 'slideDown 0.5s ease-out',
-                        'scale-in': 'scaleIn 0.3s ease-out',
                     },
                     keyframes: {
                         float: {
@@ -47,18 +35,6 @@
                             '0%, 100%': { boxShadow: '0 0 20px rgba(59, 130, 246, 0.3)' },
                             '50%': { boxShadow: '0 0 40px rgba(59, 130, 246, 0.6)' },
                         },
-                        slideUp: {
-                            from: { transform: 'translateY(20px)', opacity: 0 },
-                            to: { transform: 'translateY(0)', opacity: 1 },
-                        },
-                        slideDown: {
-                            from: { transform: 'translateY(-20px)', opacity: 0 },
-                            to: { transform: 'translateY(0)', opacity: 1 },
-                        },
-                        scaleIn: {
-                            from: { transform: 'scale(0.9)', opacity: 0 },
-                            to: { transform: 'scale(1)', opacity: 1 },
-                        },
                     },
                 },
             },
@@ -67,7 +43,7 @@
     
     <style>
         * {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -199,6 +175,11 @@
 
         .page.active {
             display: block;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .bottom-nav {
@@ -431,7 +412,6 @@
             to { transform: scale(1); opacity: 1; }
         }
 
-        /* Status Dot */
         .status-dot {
             width: 8px;
             height: 8px;
@@ -441,7 +421,6 @@
         .status-dot.online { background: #22C55E; }
         .status-dot.offline { background: #64748B; }
 
-        /* Badge Premium */
         .badge-premium {
             background: linear-gradient(135deg, #F59E0B, #FACC15);
             color: #0B1220;
@@ -453,7 +432,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Timeline */
         .timeline-item {
             display: flex;
             align-items: center;
@@ -470,7 +448,6 @@
             min-width: 50px;
         }
 
-        /* Toggle */
         .toggle {
             width: 44px;
             height: 24px;
@@ -522,6 +499,119 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+
+        /* Calendar Grid */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.04);
+            transition: all 0.3s ease;
+        }
+
+        .calendar-day.claimed {
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            color: white;
+        }
+        .calendar-day.today {
+            border: 2px solid #3B82F6;
+            background: rgba(59, 130, 246, 0.15);
+        }
+        .calendar-day.future {
+            opacity: 0.3;
+        }
+
+        /* Podium */
+        .podium-item .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            border: 2px solid rgba(255,255,255,0.1);
+            margin: 0 auto;
+        }
+        .podium-item .name {
+            font-size: 11px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.6);
+            margin-top: 4px;
+        }
+        .podium-item .bar {
+            width: 44px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: white;
+            padding: 4px 0;
+            margin-top: 4px;
+        }
+        .podium-item .bar.gold { background: linear-gradient(135deg, #F59E0B, #FACC15); height: 70px; }
+        .podium-item .bar.silver { background: linear-gradient(135deg, #94A3B8, #CBD5E1); height: 55px; }
+        .podium-item .bar.bronze { background: linear-gradient(135deg, #D97706, #F59E0B); height: 40px; }
+        .podium-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+
+        /* Spin Wheel */
+        .wheel-container {
+            position: relative;
+            width: 220px;
+            height: 220px;
+            margin: 0 auto;
+        }
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            border: 4px solid rgba(255,255,255,0.1);
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+        }
+        .wheel-segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: 100% 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: white;
+        }
+        .wheel-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            box-shadow: 0 0 30px rgba(59,130,246,0.3);
+            z-index: 10;
+        }
     </style>
 </head>
 <body>
@@ -531,11 +621,11 @@
 
     <!-- ===== SPLASH SCREEN ===== -->
     <div id="splash-screen">
-        <div class="splash-logo">🚀</div>
+        <div class="splash-logo">⚡</div>
         <div style="margin-top: 24px; font-size: 28px; font-weight: 800; background: linear-gradient(135deg, #3B82F6, #8B5CF6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-            Premium Earn
+            Alpha Pro
         </div>
-        <div style="font-size: 14px; color: rgba(255,255,255,0.4); margin-top: 4px; font-weight: 500;">Telegram Mini App</div>
+        <div style="font-size: 14px; color: rgba(255,255,255,0.4); margin-top: 4px; font-weight: 500;">Premium Earn</div>
         <div class="splash-loader"></div>
         <div class="splash-status" id="splash-status" style="font-size: 14px; color: rgba(255,255,255,0.4); margin-top: 20px; font-weight: 500;">Connecting to Telegram...</div>
     </div>
@@ -746,16 +836,16 @@
 
             <div class="glass card-premium rounded-3xl p-6 mb-4 text-center">
                 <div class="text-sm text-white/40 mb-4">🎯 Spin to Win Rewards</div>
-                <div style="position:relative; width:220px; height:220px; margin:0 auto;">
-                    <div id="wheel-container" style="width:100%; height:100%; border-radius:50%; position:relative; overflow:hidden; border:4px solid rgba(255,255,255,0.1); transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);">
-                        <div style="position:absolute; width:50%; height:50%; transform-origin:100% 100%; transform:rotate(0deg); background:#3B82F6; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:white;">$0.25</div>
-                        <div style="position:absolute; width:50%; height:50%; transform-origin:100% 100%; transform:rotate(60deg); background:#8B5CF6; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:white;">$0.50</div>
-                        <div style="position:absolute; width:50%; height:50%; transform-origin:100% 100%; transform:rotate(120deg); background:#EC4899; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:white;">$1.00</div>
-                        <div style="position:absolute; width:50%; height:50%; transform-origin:100% 100%; transform:rotate(180deg); background:#F59E0B; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:white;">$2.00</div>
-                        <div style="position:absolute; width:50%; height:50%; transform-origin:100% 100%; transform:rotate(240deg); background:#22C55E; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:white;">$5.00</div>
-                        <div style="position:absolute; width:50%; height:50%; transform-origin:100% 100%; transform:rotate(300deg); background:#EF4444; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:white;">FREE</div>
+                <div class="wheel-container">
+                    <div class="wheel" id="wheel" onclick="spinWheel()">
+                        <div class="wheel-segment" style="transform: rotate(0deg); background: #3B82F6;">$0.25</div>
+                        <div class="wheel-segment" style="transform: rotate(60deg); background: #8B5CF6;">$0.50</div>
+                        <div class="wheel-segment" style="transform: rotate(120deg); background: #EC4899;">$1.00</div>
+                        <div class="wheel-segment" style="transform: rotate(180deg); background: #F59E0B;">$2.00</div>
+                        <div class="wheel-segment" style="transform: rotate(240deg); background: #22C55E;">$5.00</div>
+                        <div class="wheel-segment" style="transform: rotate(300deg); background: #EF4444;">FREE</div>
                     </div>
-                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:50px; height:50px; border-radius:50%; background:linear-gradient(135deg, #3B82F6, #8B5CF6); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; box-shadow:0 0 30px rgba(59,130,246,0.3); z-index:10;">SPIN</div>
+                    <div class="wheel-center">SPIN</div>
                 </div>
                 <button class="btn-primary w-full mt-4 py-3 text-sm" onclick="spinWheel()">🎰 Spin Now</button>
                 <div class="flex justify-between mt-3 text-sm">
@@ -821,8 +911,8 @@
                     <span class="text-sm font-semibold text-white/60">📅 Daily Calendar</span>
                     <span class="text-xs text-white/40" id="calendar-day">Day 0 of 30</span>
                 </div>
-                <div class="grid grid-cols-7 gap-1" id="calendar-grid">
-                    <!-- Calendar will be rendered by JS -->
+                <div class="calendar-grid" id="calendar-grid">
+                    <!-- Rendered by JS -->
                 </div>
                 <button class="btn-primary w-full mt-4 py-2 text-sm" onclick="claimDailyReward()">🔥 Claim Daily Reward</button>
             </div>
@@ -1035,9 +1125,8 @@
 
     <script>
         // ==================== CONFIGURATION ====================
-        const API_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:5000/api' 
-            : 'https://crypto-4bbj.onrender.com/api';
+        // *** FIXED: Use your actual backend URL ***
+        const API_URL = 'https://crypto-4bbj.onrender.com/api';
         
         // ==================== PARTICLES ====================
         const canvas = document.getElementById('particles-canvas');
@@ -1126,28 +1215,55 @@
         };
 
         // ==================== API CLIENT ====================
-        const api = axios.create({
-            baseURL: API_URL,
-            timeout: 30000,
-        });
-
-        api.interceptors.request.use(config => {
-            if (token) {
-                config.headers.Authorization = `Bearer ${token}`;
-            }
-            return config;
-        });
-
-        api.interceptors.response.use(
-            response => response,
-            error => {
-                if (error.response?.status === 401) {
-                    // Token expired, re-authenticate
-                    authenticateUser();
+        const api = {
+            async request(method, endpoint, data = null) {
+                const url = `${API_URL}${endpoint}`;
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                };
+                
+                if (token) {
+                    options.headers['Authorization'] = `Bearer ${token}`;
                 }
-                return Promise.reject(error);
+                
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+                
+                try {
+                    const response = await fetch(url, options);
+                    const result = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(result.error || 'Request failed');
+                    }
+                    
+                    return result;
+                } catch (error) {
+                    console.error('API Error:', error);
+                    throw error;
+                }
+            },
+            
+            get(endpoint) {
+                return this.request('GET', endpoint);
+            },
+            
+            post(endpoint, data) {
+                return this.request('POST', endpoint, data);
+            },
+            
+            put(endpoint, data) {
+                return this.request('PUT', endpoint, data);
+            },
+            
+            delete(endpoint) {
+                return this.request('DELETE', endpoint);
             }
-        );
+        };
 
         // ==================== AUTHENTICATION ====================
         async function authenticateUser() {
@@ -1176,17 +1292,17 @@
 
                 const response = await api.post('/auth/telegram', {
                     telegramId: String(userData.id),
-                    username: userData.username,
-                    firstName: userData.first_name,
-                    lastName: userData.last_name,
-                    avatar: userData.photo_url,
+                    username: userData.username || 'user',
+                    firstName: userData.first_name || 'User',
+                    lastName: userData.last_name || '',
+                    avatar: userData.photo_url || '',
                     hash: tg?.initData || '',
                     referralCode: new URLSearchParams(window.location.search).get('start')?.replace('ref_', '') || ''
                 });
 
-                token = response.data.token;
-                appState.user = response.data.user;
-                appState.wallet = response.data.wallet;
+                token = response.token;
+                appState.user = response.user;
+                appState.wallet = response.wallet;
 
                 statusEl.textContent = 'Loading your data...';
 
@@ -1201,7 +1317,7 @@
                     fetchNotifications()
                 ]);
 
-                statusEl.textContent = 'Welcome! 🚀';
+                statusEl.textContent = 'Welcome to Alpha Pro! 🚀';
 
                 setTimeout(() => {
                     document.getElementById('splash-screen').classList.add('hidden');
@@ -1223,10 +1339,10 @@
         async function fetchProfile() {
             try {
                 const response = await api.get('/user/profile');
-                appState.user = response.data.user;
-                appState.wallet = response.data.wallet;
-                appState.achievements = response.data.user.achievements || [];
-                return response.data;
+                appState.user = response.user;
+                appState.wallet = response.wallet;
+                appState.achievements = response.user.achievements || [];
+                return response;
             } catch (error) {
                 console.error('Fetch profile error:', error);
                 return null;
@@ -1236,8 +1352,8 @@
         async function fetchWallet() {
             try {
                 const response = await api.get('/wallet/balance');
-                appState.wallet = response.data;
-                return response.data;
+                appState.wallet = response;
+                return response;
             } catch (error) {
                 console.error('Fetch wallet error:', error);
                 return null;
@@ -1247,8 +1363,8 @@
         async function fetchTransactions(limit = 20) {
             try {
                 const response = await api.get(`/wallet/transactions?limit=${limit}`);
-                appState.transactions = response.data.transactions || [];
-                return response.data;
+                appState.transactions = response.transactions || [];
+                return response;
             } catch (error) {
                 console.error('Fetch transactions error:', error);
                 return null;
@@ -1258,9 +1374,9 @@
         async function fetchReferrals() {
             try {
                 const response = await api.get('/referrals/stats');
-                appState.referrals = response.data.stats.total || 0;
-                appState.referralEarnings = response.data.stats.earnings || 0;
-                return response.data;
+                appState.referrals = response.stats?.total || 0;
+                appState.referralEarnings = response.stats?.earnings || 0;
+                return response;
             } catch (error) {
                 console.error('Fetch referrals error:', error);
                 return null;
@@ -1270,8 +1386,8 @@
         async function fetchTasks() {
             try {
                 const response = await api.get('/tasks');
-                appState.tasks = response.data.tasks || [];
-                return response.data;
+                appState.tasks = response.tasks || [];
+                return response;
             } catch (error) {
                 console.error('Fetch tasks error:', error);
                 return null;
@@ -1281,8 +1397,8 @@
         async function fetchLeaderboard(period = 'daily') {
             try {
                 const response = await api.get(`/leaderboard/${period}?limit=20`);
-                appState.leaderboard = response.data.leaderboard || [];
-                return response.data;
+                appState.leaderboard = response.leaderboard || [];
+                return response;
             } catch (error) {
                 console.error('Fetch leaderboard error:', error);
                 return null;
@@ -1292,7 +1408,7 @@
         async function fetchNotifications() {
             try {
                 const response = await api.get('/user/profile');
-                const notifications = response.data.notifications || [];
+                const notifications = response.notifications || [];
                 appState.notifications = notifications;
                 const unread = notifications.filter(n => !n.read).length;
                 document.getElementById('notification-dot').style.display = unread > 0 ? 'block' : 'none';
@@ -1306,7 +1422,7 @@
         async function getReferralLink() {
             try {
                 const response = await api.get('/referrals/link');
-                return response.data.link;
+                return response.link || '';
             } catch (error) {
                 console.error('Get referral link error:', error);
                 return '';
@@ -1320,26 +1436,23 @@
             btn.innerHTML = '<span>⏳</span> Watching Ad...';
 
             try {
-                // Call ad service
                 const response = await api.post('/rewards/watch-ad');
-                const reward = response.data.reward;
-                const multiplier = response.data.multiplier || 1;
+                const reward = response.reward;
+                const multiplier = response.multiplier || 1;
 
-                appState.balance = response.data.balance;
+                appState.balance = response.balance;
                 appState.adsToday = (appState.adsToday || 0) + 1;
                 appState.dailyEarned = (appState.dailyEarned || 0) + reward;
 
-                // Show reward popup
                 showRewardPopup(reward, '🎉', `${multiplier}x Bonus!`);
                 createFloatingCoins();
                 addActivity('📺', `Watched ad (${multiplier}x)`, `+$${reward.toFixed(2)}`);
                 showToast(`+$${reward.toFixed(2)} USDT earned! 🎉`, 'success');
-
                 updateUI();
 
             } catch (error) {
                 console.error('Watch ad error:', error);
-                showToast(error.response?.data?.error || 'Failed to watch ad', 'error');
+                showToast(error.message || 'Failed to watch ad', 'error');
             }
 
             btn.disabled = false;
@@ -1353,9 +1466,9 @@
         async function claimDailyReward() {
             try {
                 const response = await api.post('/rewards/daily');
-                const reward = response.data.reward;
-                appState.balance = response.data.balance;
-                appState.streak = response.data.streak;
+                const reward = response.reward;
+                appState.balance = response.balance;
+                appState.streak = response.streak;
 
                 showRewardPopup(reward, '🎁', `Day ${appState.streak} Streak!`);
                 createFloatingCoins();
@@ -1365,7 +1478,7 @@
 
             } catch (error) {
                 console.error('Claim daily error:', error);
-                showToast(error.response?.data?.error || 'Failed to claim daily reward', 'warning');
+                showToast(error.message || 'Failed to claim daily reward', 'warning');
             }
         }
 
@@ -1375,15 +1488,15 @@
                 return;
             }
 
-            const wheel = document.getElementById('wheel-container');
+            const wheel = document.getElementById('wheel');
             const spinDegrees = 360 * (5 + Math.random() * 5) + Math.random() * 360;
             wheel.style.transform = `rotate(${spinDegrees}deg)`;
 
             try {
                 const response = await api.post('/rewards/spin');
-                const reward = response.data.reward;
-                appState.balance = response.data.balance;
-                appState.spinsToday = response.data.spinsRemaining + 1;
+                const reward = response.reward;
+                appState.balance = response.balance;
+                appState.spinsToday = response.spinsRemaining + 1;
 
                 if (reward > 0) {
                     showRewardPopup(reward, '🎡', 'Spin Win!');
@@ -1397,16 +1510,15 @@
 
             } catch (error) {
                 console.error('Spin error:', error);
-                showToast(error.response?.data?.error || 'Spin failed', 'error');
+                showToast(error.message || 'Spin failed', 'error');
             }
         }
 
         async function openMysteryBox() {
             try {
                 const response = await api.post('/rewards/mystery');
-                const reward = response.data.reward;
-                appState.balance = response.data.balance;
-                appState.mysteryBoxes = (appState.mysteryBoxes || 1) - 1;
+                const reward = response.reward;
+                appState.balance = response.balance;
 
                 showRewardPopup(reward, '📦', 'Mystery Box Reward!');
                 createFloatingCoins();
@@ -1417,7 +1529,7 @@
 
             } catch (error) {
                 console.error('Mystery box error:', error);
-                showToast(error.response?.data?.error || 'No mystery boxes available', 'warning');
+                showToast(error.message || 'No mystery boxes available', 'warning');
             }
         }
 
@@ -1445,7 +1557,7 @@
 
             } catch (error) {
                 console.error('Withdraw error:', error);
-                showToast(error.response?.data?.error || 'Withdrawal failed', 'error');
+                showToast(error.message || 'Withdrawal failed', 'error');
             }
         }
 
@@ -1454,7 +1566,6 @@
             const user = appState.user || {};
             const wallet = appState.wallet || {};
 
-            // User info
             const name = user.firstName || 'User';
             const username = user.username || 'username';
             document.getElementById('user-name').textContent = name;
@@ -1462,7 +1573,6 @@
             document.getElementById('profile-name').textContent = name;
             document.getElementById('profile-username').textContent = `@${username}`;
 
-            // Avatar
             if (user.avatar) {
                 document.getElementById('user-avatar').src = user.avatar;
                 document.getElementById('user-avatar').style.display = 'block';
@@ -1472,10 +1582,8 @@
                 document.getElementById('profile-avatar-placeholder').style.display = 'none';
             }
 
-            // VIP badge
             document.getElementById('user-vip').style.display = user.isVerified ? 'inline' : 'none';
 
-            // Balance
             const balance = wallet.balance || 0;
             document.getElementById('home-balance').textContent = `$${balance.toFixed(2)}`;
             document.getElementById('wallet-balance').textContent = `$${balance.toFixed(2)}`;
@@ -1484,76 +1592,49 @@
             document.getElementById('wallet-earned').textContent = `$${(wallet.totalEarned || 0).toFixed(2)}`;
             document.getElementById('wallet-withdrawn').textContent = `$${(wallet.totalWithdrawn || 0).toFixed(2)}`;
 
-            // Streak & Level
             document.getElementById('home-streak').textContent = `${user.streak || 0} days`;
             document.getElementById('home-level').textContent = `${user.level || 1} ⭐`;
             document.getElementById('profile-level').textContent = `Lv. ${user.level || 1}`;
             document.getElementById('profile-xp').textContent = `${user.xp || 0} XP`;
 
-            // XP Progress
             const xpPercent = ((user.xp || 0) % 100) / 100 * 100;
             document.getElementById('home-xp-text').textContent = `${Math.round(xpPercent)}%`;
             document.getElementById('home-xp-bar').style.width = `${xpPercent}%`;
 
-            // Ads
             document.getElementById('ads-today').textContent = `${appState.adsToday || 0}/${appState.maxAds}`;
             document.getElementById('earn-ads-today').textContent = `${appState.adsToday || 0} / ${appState.maxAds}`;
             document.getElementById('earn-ads-progress').style.width = `${((appState.adsToday || 0) / appState.maxAds) * 100}%`;
 
-            // Daily Goal
             const dailyProgress = Math.min((appState.dailyEarned || 0) / (appState.dailyGoal || 5) * 100, 100);
             document.getElementById('daily-goal-text').textContent = `$${(appState.dailyEarned || 0).toFixed(2)} / $${(appState.dailyGoal || 5).toFixed(2)}`;
             document.getElementById('daily-goal-progress').style.width = `${dailyProgress}%`;
             document.getElementById('daily-goal-percent').textContent = `${Math.round(dailyProgress)}% completed`;
 
-            // Referrals
             document.getElementById('referral-count').textContent = appState.referrals || 0;
             document.getElementById('referral-earnings').textContent = `$${(appState.referralEarnings || 0).toFixed(2)}`;
             document.getElementById('referral-badge').textContent = appState.referrals || 0;
             document.getElementById('referral-badge').style.display = appState.referrals > 0 ? 'block' : 'none';
 
-            // Spins
             document.getElementById('spins-today').textContent = `${appState.spinsToday || 0} / ${appState.maxSpins}`;
-
-            // Mystery Boxes
             document.getElementById('mystery-box-count').textContent = `${appState.mysteryBoxes || 0} available`;
             document.getElementById('mystery-box-count-2').textContent = `${appState.mysteryBoxes || 0} available`;
-
-            // Achievements
             document.getElementById('achievement-count').textContent = `${appState.achievements?.length || 0}/25`;
             document.getElementById('profile-badges').textContent = appState.achievements?.length || 0;
 
-            // Join Date
             if (user.joinDate) {
                 const date = new Date(user.joinDate);
                 document.getElementById('profile-join-date').textContent = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
             }
 
-            // Calendar
             renderCalendar();
-
-            // Transactions
             renderTransactions();
-
-            // Tasks
             renderTasks();
-
-            // Leaderboard
             renderLeaderboard();
-
-            // Referral History
             renderReferralHistory();
-
-            // Activity Timeline
             renderActivity();
-
-            // Spin History
             renderSpinHistory();
-
-            // Achievements Grid
             renderAchievements();
 
-            // Online Stats
             document.getElementById('online-users').textContent = Math.floor(1000 + Math.random() * 500);
             document.getElementById('total-users').textContent = Math.floor(10000 + Math.random() * 5000);
             document.getElementById('total-payouts').textContent = `$${Math.floor(40000 + Math.random() * 10000)}`;
@@ -1575,37 +1656,6 @@
                 html += `<div class="${classes}">${i}</div>`;
             }
             grid.innerHTML = html;
-
-            // Add styles
-            if (!document.getElementById('calendar-styles')) {
-                const style = document.createElement('style');
-                style.id = 'calendar-styles';
-                style.textContent = `
-                    .calendar-day {
-                        aspect-ratio: 1;
-                        border-radius: 12px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        font-size: 13px;
-                        font-weight: 600;
-                        background: rgba(255,255,255,0.04);
-                        transition: all 0.3s ease;
-                    }
-                    .calendar-day.claimed {
-                        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
-                        color: white;
-                    }
-                    .calendar-day.today {
-                        border: 2px solid #3B82F6;
-                        background: rgba(59,130,246,0.15);
-                    }
-                    .calendar-day.future {
-                        opacity: 0.3;
-                    }
-                `;
-                document.head.appendChild(style);
-            }
         }
 
         function renderTransactions() {
@@ -1683,7 +1733,7 @@
                 updateUI();
             } catch (error) {
                 console.error('Complete task error:', error);
-                showToast(error.response?.data?.error || 'Failed to complete task', 'error');
+                showToast(error.message || 'Failed to complete task', 'error');
             }
         }
 
@@ -1698,23 +1748,22 @@
                 return;
             }
 
-            // Podium (top 3)
             const top3 = entries.slice(0, 3);
             let podiumHtml = '';
             if (top3.length >= 3) {
                 podiumHtml = `
-                    <div class="podium-item text-center">
+                    <div class="podium-item">
                         <div class="avatar" style="background: linear-gradient(135deg, #94A3B8, #CBD5E1);">${top3[1].userId?.firstName?.[0] || '?'}</div>
                         <div class="name">${top3[1].userId?.firstName || 'User'}</div>
                         <div class="bar silver">$${top3[1].earnings?.toFixed(0) || 0}</div>
                     </div>
-                    <div class="podium-item text-center">
+                    <div class="podium-item">
                         <div class="avatar" style="background: linear-gradient(135deg, #F59E0B, #FACC15);">${top3[0].userId?.firstName?.[0] || '?'}</div>
                         <div class="name">${top3[0].userId?.firstName || 'User'}</div>
                         <div class="bar gold">$${top3[0].earnings?.toFixed(0) || 0}</div>
                         <span class="text-xs text-accent font-bold">👑</span>
                     </div>
-                    <div class="podium-item text-center">
+                    <div class="podium-item">
                         <div class="avatar" style="background: linear-gradient(135deg, #D97706, #F59E0B);">${top3[2].userId?.firstName?.[0] || '?'}</div>
                         <div class="name">${top3[2].userId?.firstName || 'User'}</div>
                         <div class="bar bronze">$${top3[2].earnings?.toFixed(0) || 0}</div>
@@ -1723,11 +1772,9 @@
             }
             podium.innerHTML = podiumHtml || '<div class="text-center text-white/40">Not enough players</div>';
 
-            // Rest of leaderboard
             let html = '';
             entries.slice(3, 20).forEach((entry, index) => {
                 const rank = index + 4;
-                const medal = rank <= 10 ? (rank <= 5 ? '🥇' : '🥈') : '👤';
                 html += `
                     <div class="glass card-premium rounded-2xl p-3 flex items-center gap-3">
                         <span class="text-yellow-400 text-sm font-bold">#${rank}</span>
@@ -1743,54 +1790,10 @@
                 `;
             });
             container.innerHTML = html || '<div class="glass card-premium rounded-2xl p-3 text-center text-white/40">No more entries</div>';
-
-            // Add styles for podium if not exists
-            if (!document.getElementById('podium-styles')) {
-                const style = document.createElement('style');
-                style.id = 'podium-styles';
-                style.textContent = `
-                    .podium-item .avatar {
-                        width: 44px;
-                        height: 44px;
-                        border-radius: 50%;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        font-weight: 700;
-                        font-size: 16px;
-                        border: 2px solid rgba(255,255,255,0.1);
-                        margin: 0 auto;
-                    }
-                    .podium-item .name {
-                        font-size: 11px;
-                        font-weight: 500;
-                        color: rgba(255,255,255,0.6);
-                        margin-top: 4px;
-                    }
-                    .podium-item .bar {
-                        width: 44px;
-                        border-radius: 12px 12px 0 0;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        font-size: 11px;
-                        font-weight: 700;
-                        color: white;
-                        padding: 4px 0;
-                        margin-top: 4px;
-                    }
-                    .podium-item .bar.gold { background: linear-gradient(135deg, #F59E0B, #FACC15); height: 70px; }
-                    .podium-item .bar.silver { background: linear-gradient(135deg, #94A3B8, #CBD5E1); height: 55px; }
-                    .podium-item .bar.bronze { background: linear-gradient(135deg, #D97706, #F59E0B); height: 40px; }
-                    .podium-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-                `;
-                document.head.appendChild(style);
-            }
         }
 
         function renderReferralHistory() {
             const container = document.getElementById('referral-history');
-            // This would come from API, using placeholder for now
             container.innerHTML = `
                 <div class="glass card-premium rounded-2xl p-3 text-center text-white/40">
                     ${appState.referrals > 0 ? `${appState.referrals} referrals found` : 'No referrals yet'}
@@ -1800,30 +1803,25 @@
 
         function renderActivity() {
             const container = document.getElementById('activity-timeline');
-            const activities = [
-                { time: 'Just now', icon: '📺', text: 'Watched ad', amount: '+$0.50' },
-                { time: '1h ago', icon: '🎁', text: 'Claimed daily reward', amount: '+$0.50' },
-                { time: '3h ago', icon: '👥', text: 'New referral joined', amount: '+$1.00' },
-            ];
-
-            let html = '';
-            activities.forEach(activity => {
-                html += `
-                    <div class="timeline-item">
-                        <span class="time">${activity.time}</span>
-                        <span>${activity.icon} ${activity.text}</span>
-                        <span class="ml-auto text-success text-sm font-semibold">${activity.amount}</span>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
+            container.innerHTML = `
+                <div class="timeline-item">
+                    <span class="time">Just now</span>
+                    <span>📺 Welcome to Alpha Pro!</span>
+                    <span class="ml-auto text-success text-sm font-semibold">+$0.00</span>
+                </div>
+                <div class="timeline-item">
+                    <span class="time">Start</span>
+                    <span>🚀 Start earning today</span>
+                    <span class="ml-auto text-white/40 text-sm">Watch ads →</span>
+                </div>
+            `;
         }
 
         function renderSpinHistory() {
             const container = document.getElementById('spin-history');
             container.innerHTML = `
                 <div class="glass card-premium rounded-2xl p-3 text-center text-white/40">
-                    ${appState.spinsToday < 3 ? 'Spins available! 🎰' : 'No spins left today'}
+                    ${appState.spinsToday < 3 ? '🎰 Spins available!' : 'No spins left today'}
                 </div>
             `;
         }
@@ -1837,7 +1835,7 @@
                 return;
             }
 
-            const icons = ['🔥', '👑', '🎯', '⭐', '💎', '🏆'];
+            const icons = ['🔥', '👑', '🎯', '⭐', '💎', '🏆', '⚡', '🌟'];
             let html = '';
             achievements.slice(0, 8).forEach((ach, i) => {
                 html += `
@@ -1869,7 +1867,7 @@
             const link = document.getElementById('referral-link').value;
             if (navigator.share) {
                 navigator.share({
-                    title: 'Join me on Premium Earn!',
+                    title: 'Join Alpha Pro!',
                     text: 'Earn USDT rewards with me! Use my referral link:',
                     url: link
                 }).catch(() => {});
@@ -2007,34 +2005,12 @@
             }
         }
 
-        // ==================== ADD CSS ANIMATIONS ====================
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes confetti {
-                0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
-                100% { transform: translateY(-100px) rotate(720deg) scale(0); opacity: 0; }
-            }
-            @keyframes coinFloat {
-                0% { transform: translateY(0) scale(0.5) rotate(0deg); opacity: 1; }
-                100% { transform: translateY(-200px) scale(1.5) rotate(360deg); opacity: 0; }
-            }
-            @keyframes float {
-                0%, 100% { transform: translateY(0px); }
-                50% { transform: translateY(-10px); }
-            }
-            @keyframes slideDown {
-                from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-                to { opacity: 1; transform: translateX(-50%) translateY(0); }
-            }
-            @keyframes scaleIn {
-                from { transform: scale(0.9); opacity: 0; }
-                to { transform: scale(1); opacity: 1; }
-            }
-        `;
-        document.head.appendChild(style);
+        // ==================== NOTIFICATIONS ====================
+        function fetchNotifications() {
+            showToast('📬 No new notifications', 'info');
+        }
 
         // ==================== INIT ====================
-        // Auto-login with Telegram
         document.addEventListener('DOMContentLoaded', () => {
             authenticateUser();
         });
@@ -2054,9 +2030,27 @@
             document.getElementById('total-users').textContent = Math.floor(10000 + Math.random() * 5000);
         }, 5000);
 
-        console.log('🚀 Premium Earn App v2.0 - Production Ready');
-        console.log('📱 Connected to Telegram Mini App');
+        // Add CSS animations
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = `
+            @keyframes confetti {
+                0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+                100% { transform: translateY(-100px) rotate(720deg) scale(0); opacity: 0; }
+            }
+            @keyframes coinFloat {
+                0% { transform: translateY(0) scale(0.5) rotate(0deg); opacity: 1; }
+                100% { transform: translateY(-200px) scale(1.5) rotate(360deg); opacity: 0; }
+            }
+            @keyframes float {
+                0%, 100% { transform: translateY(0px); }
+                50% { transform: translateY(-10px); }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+
+        console.log('⚡ Alpha Pro v2.0 - Premium Earn App');
         console.log(`🔗 API: ${API_URL}`);
+        console.log('📱 Connected to Telegram Mini App');
     </script>
 </body>
     </html>

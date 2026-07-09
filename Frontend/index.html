@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Premium Telegram App</title>
-    <!-- Ad SDK -->
-    <script src='//libtl.com/sdk.js' data-zone='10892289' data-sdk='show_10892289'></script>
+    <title>Alpha pro App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -13,16 +11,30 @@
             theme: {
                 extend: {
                     colors: {
-                        glass: 'rgba(255, 255, 255, 0.08)',
-                        'glass-border': 'rgba(255, 255, 255, 0.15)',
-                        'glass-shadow': 'rgba(0, 0, 0, 0.3)',
+                        // Premium Color Palette
+                        primary: '#3B82F6',
+                        secondary: '#8B5CF6',
+                        success: '#22C55E',
+                        warning: '#F59E0B',
+                        accent: '#FACC15',
+                        bg: '#0B1220',
+                        'bg-card': 'rgba(255,255,255,0.05)',
+                        'bg-glass': 'rgba(255,255,255,0.08)',
                     },
                     animation: {
                         'float': 'float 3s ease-in-out infinite',
                         'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
                         'spin-slow': 'spin 3s linear infinite',
+                        'bounce-slow': 'bounce 2s infinite',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'slide-down': 'slideDown 0.5s ease-out',
+                        'scale-in': 'scaleIn 0.3s ease-out',
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                        'count-up': 'countUp 0.5s ease-out',
                         'confetti': 'confetti 1s ease-out forwards',
-                        'count-up': 'count-up 0.5s ease-out forwards',
+                        'coin-float': 'coinFloat 1.5s ease-out forwards',
+                        'shimmer': 'shimmer 2s infinite',
+                        'pulse-ring': 'pulseRing 2s ease-out infinite',
                     },
                     keyframes: {
                         float: {
@@ -30,12 +42,44 @@
                             '50%': { transform: 'translateY(-10px)' },
                         },
                         'pulse-glow': {
-                            '0%, 100%': { boxShadow: '0 0 20px rgba(99, 102, 241, 0.3)' },
-                            '50%': { boxShadow: '0 0 40px rgba(99, 102, 241, 0.6)' },
+                            '0%, 100%': { boxShadow: '0 0 20px rgba(59, 130, 246, 0.3)' },
+                            '50%': { boxShadow: '0 0 40px rgba(59, 130, 246, 0.6)' },
+                        },
+                        slideUp: {
+                            from: { transform: 'translateY(20px)', opacity: 0 },
+                            to: { transform: 'translateY(0)', opacity: 1 },
+                        },
+                        slideDown: {
+                            from: { transform: 'translateY(-20px)', opacity: 0 },
+                            to: { transform: 'translateY(0)', opacity: 1 },
+                        },
+                        scaleIn: {
+                            from: { transform: 'scale(0.9)', opacity: 0 },
+                            to: { transform: 'scale(1)', opacity: 1 },
+                        },
+                        fadeIn: {
+                            from: { opacity: 0 },
+                            to: { opacity: 1 },
+                        },
+                        countUp: {
+                            from: { transform: 'scale(0.5)', opacity: 0 },
+                            to: { transform: 'scale(1)', opacity: 1 },
                         },
                         confetti: {
-                            '0%': { transform: 'translateY(0) scale(0)', opacity: 1 },
-                            '100%': { transform: 'translateY(-100px) scale(1)', opacity: 0 },
+                            '0%': { transform: 'translateY(0) rotate(0deg) scale(1)', opacity: 1 },
+                            '100%': { transform: 'translateY(-100px) rotate(720deg) scale(0)', opacity: 0 },
+                        },
+                        coinFloat: {
+                            '0%': { transform: 'translateY(0) scale(0.5)', opacity: 1 },
+                            '100%': { transform: 'translateY(-200px) scale(1.5)', opacity: 0 },
+                        },
+                        shimmer: {
+                            '0%': { backgroundPosition: '-200% 0' },
+                            '100%': { backgroundPosition: '200% 0' },
+                        },
+                        pulseRing: {
+                            '0%': { transform: 'scale(0.8)', opacity: 1 },
+                            '100%': { transform: 'scale(1.5)', opacity: 0 },
                         },
                     },
                 },
@@ -50,22 +94,36 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background: #0a0a0f;
+            background: #0B1220;
             color: #ffffff;
             overflow: hidden;
             height: 100vh;
             width: 100vw;
+            user-select: none;
         }
 
-        /* Glassmorphism Base */
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 3px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            border-radius: 10px;
+        }
+
+        /* Glassmorphism */
         .glass {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.06);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
@@ -73,22 +131,17 @@
             background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            border-radius: 10px;
+        .glass-dark {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        /* Particle Canvas */
+        /* Particles Canvas */
         #particles-canvas {
             position: fixed;
             top: 0;
@@ -105,36 +158,87 @@
             z-index: 1;
             height: 100vh;
             width: 100vw;
-            display: flex;
-            flex-direction: column;
             max-width: 480px;
             margin: 0 auto;
-            background: rgba(10, 10, 15, 0.85);
+            background: rgba(11, 18, 32, 0.92);
             backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        /* Page Container */
+        /* Splash Screen */
+        #splash-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: #0B1220;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #splash-screen.hidden {
+            opacity: 0;
+            transform: scale(1.1);
+            pointer-events: none;
+        }
+
+        .splash-logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 32px;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 56px;
+            animation: float 2s ease-in-out infinite;
+            box-shadow: 0 0 60px rgba(59, 130, 246, 0.3);
+        }
+
+        .splash-loader {
+            width: 200px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-top: 40px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .splash-loader::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, #3B82F6, #8B5CF6, transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        .splash-status {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 20px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        /* Pages */
         .page {
             display: none;
             flex: 1;
             overflow-y: auto;
-            padding: 20px 20px 100px;
-            animation: fadeSlide 0.3s ease-out;
+            padding: 0 16px 90px;
+            animation: fadeIn 0.3s ease-out;
         }
 
         .page.active {
             display: block;
-        }
-
-        @keyframes fadeSlide {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         /* Bottom Navigation */
@@ -145,13 +249,14 @@
             transform: translateX(-50%);
             width: 100%;
             max-width: 480px;
-            background: rgba(10, 10, 15, 0.9);
+            background: rgba(11, 18, 32, 0.95);
             backdrop-filter: blur(20px);
             border-top: 1px solid rgba(255, 255, 255, 0.06);
-            padding: 8px 0 env(safe-area-inset-bottom);
+            padding: 6px 0 env(safe-area-inset-bottom);
             display: flex;
             justify-content: space-around;
             z-index: 100;
+            padding-bottom: 8px;
         }
 
         .nav-item {
@@ -159,27 +264,26 @@
             flex-direction: column;
             align-items: center;
             gap: 2px;
-            padding: 6px 12px;
+            padding: 4px 8px;
             border-radius: 16px;
             transition: all 0.3s ease;
             cursor: pointer;
-            position: relative;
             background: transparent;
             border: none;
-            color: rgba(255, 255, 255, 0.4);
-            font-size: 10px;
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 9px;
             font-weight: 500;
-            min-width: 56px;
+            min-width: 44px;
+            position: relative;
         }
 
         .nav-item.active {
-            color: #818cf8;
-            background: rgba(99, 102, 241, 0.12);
+            color: #3B82F6;
         }
 
         .nav-item .icon {
-            font-size: 22px;
-            transition: transform 0.3s ease;
+            font-size: 20px;
+            transition: all 0.3s ease;
         }
 
         .nav-item.active .icon {
@@ -188,9 +292,9 @@
 
         .nav-item .badge {
             position: absolute;
-            top: 2px;
-            right: 4px;
-            background: #ef4444;
+            top: 0;
+            right: 2px;
+            background: #EF4444;
             color: white;
             font-size: 8px;
             font-weight: 700;
@@ -198,41 +302,36 @@
             border-radius: 10px;
             min-width: 16px;
             text-align: center;
+            animation: pulseRing 2s ease-out infinite;
         }
 
-        /* Card Styles */
-        .card {
+        /* Cards */
+        .card-premium {
             border-radius: 24px;
             padding: 20px;
             transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .card-gradient {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15));
+            border: 1px solid rgba(59, 130, 246, 0.1);
         }
 
         .card-glow {
-            box-shadow: 0 0 30px rgba(99, 102, 241, 0.1);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.05);
         }
 
         .card-glow:hover {
-            box-shadow: 0 0 50px rgba(99, 102, 241, 0.2);
-            transform: translateY(-2px);
+            box-shadow: 0 0 50px rgba(59, 130, 246, 0.1);
         }
 
-        /* Gradient Text */
-        .gradient-text {
-            background: linear-gradient(135deg, #818cf8, #a78bfa, #fbbf24);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .gradient-bg {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed, #d946ef);
-        }
-
-        /* Glow Button */
-        .glow-btn {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
             border: none;
-            padding: 14px 32px;
+            padding: 14px 24px;
             border-radius: 16px;
             font-weight: 600;
             color: white;
@@ -240,45 +339,39 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
         }
 
-        .glow-btn::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-            animation: glowSpin 4s linear infinite;
-        }
-
-        @keyframes glowSpin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .glow-btn:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 50px rgba(99, 102, 241, 0.4);
-        }
-
-        .glow-btn:active {
+        .btn-primary:active {
             transform: scale(0.97);
         }
 
-        .glow-btn:disabled {
+        .btn-primary:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none !important;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 14px 24px;
+            border-radius: 16px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:active {
+            transform: scale(0.97);
         }
 
         /* Progress Bar */
         .progress-bar {
             width: 100%;
             height: 6px;
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.06);
             border-radius: 10px;
             overflow: hidden;
             position: relative;
@@ -287,7 +380,7 @@
         .progress-fill {
             height: 100%;
             border-radius: 10px;
-            background: linear-gradient(90deg, #4f46e5, #a78bfa, #fbbf24);
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6, #F59E0B);
             transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
         }
@@ -297,164 +390,96 @@
             position: absolute;
             right: 0;
             top: 0;
-            width: 20px;
+            width: 30px;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3));
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2));
             border-radius: 10px;
         }
 
-        /* Floating Coins */
-        .coin-float {
-            position: fixed;
-            pointer-events: none;
-            font-size: 24px;
-            z-index: 1000;
-            animation: coinFloat 1.5s ease-out forwards;
-        }
-
-        @keyframes coinFloat {
-            0% {
-                opacity: 1;
-                transform: translateY(0) scale(0.5) rotate(0deg);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-150px) scale(1.5) rotate(360deg);
-            }
-        }
-
-        /* Confetti */
-        .confetti-piece {
-            position: fixed;
-            width: 10px;
-            height: 10px;
-            pointer-events: none;
-            z-index: 1000;
-            animation: confettiFall 1.5s ease-out forwards;
-        }
-
-        @keyframes confettiFall {
-            0% {
-                opacity: 1;
-                transform: translateY(0) rotate(0deg) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(200px) rotate(720deg) scale(0);
-            }
-        }
-
-        /* Pulse Animation for Streak */
-        .streak-pulse {
-            animation: streakPulse 2s ease-in-out infinite;
-        }
-
-        @keyframes streakPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        /* 3D Reward Button */
-        .reward-btn-3d {
-            background: linear-gradient(145deg, #4f46e5, #7c3aed);
-            border: none;
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            cursor: pointer;
-            position: relative;
-            box-shadow: 
-                0 20px 40px rgba(79, 70, 229, 0.4),
-                inset 0 -10px 20px rgba(0, 0, 0, 0.2),
-                inset 0 10px 20px rgba(255, 255, 255, 0.1);
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            margin: 0 auto;
-        }
-
-        .reward-btn-3d:active {
-            transform: scale(0.92);
-            box-shadow: 
-                0 10px 20px rgba(79, 70, 229, 0.3),
-                inset 0 -5px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        .reward-btn-3d::after {
-            content: '';
-            position: absolute;
-            top: -5px;
-            left: -5px;
-            right: -5px;
-            bottom: -5px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
-            pointer-events: none;
-        }
-
-        .reward-btn-3d:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        /* Podium */
-        .podium {
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            gap: 20px;
-            padding: 20px 0;
-        }
-
-        .podium-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .podium-item .avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #4f46e5, #a78bfa);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 18px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .podium-item .position {
-            font-size: 12px;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .podium-item .height-1 { height: 80px; }
-        .podium-item .height-2 { height: 60px; }
-        .podium-item .height-3 { height: 40px; }
-
-        /* Wheel */
-        .wheel-container {
-            position: relative;
-            width: 200px;
-            height: 200px;
-            margin: 0 auto;
-        }
-
-        .wheel {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
+        /* Hero Card */
+        .hero-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            border-radius: 28px;
+            padding: 24px;
             position: relative;
             overflow: hidden;
-            border: 4px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .hero-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.1), transparent 70%);
+            border-radius: 50%;
+        }
+
+        .hero-card .amount {
+            font-size: 42px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #ffffff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Watch Ad Button */
+        .watch-ad-btn {
+            width: 100%;
+            padding: 18px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            border: none;
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 40px rgba(59, 130, 246, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .watch-ad-btn:active {
+            transform: scale(0.97);
+        }
+
+        .watch-ad-btn::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent 70%);
+            animation: spin 4s linear infinite;
+        }
+
+        .watch-ad-btn .reward-amount {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 4px 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* 3D Spin Wheel */
+        .wheel-3d {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            position: relative;
+            margin: 0 auto;
             transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            box-shadow: 0 0 60px rgba(59, 130, 246, 0.2);
+            border: 4px solid rgba(255, 255, 255, 0.1);
         }
 
         .wheel-segment {
@@ -465,76 +490,197 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 700;
             color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            cursor: pointer;
         }
 
-        /* Count Up Animation */
-        .count-up {
-            display: inline-block;
+        .wheel-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+            z-index: 10;
+        }
+
+        /* Reward Popup */
+        .reward-popup {
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+        }
+
+        .reward-popup.show {
+            display: flex;
+        }
+
+        .reward-popup-content {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 32px;
+            padding: 40px;
+            text-align: center;
+            max-width: 340px;
+            width: 90%;
+            animation: scaleIn 0.4s ease-out;
+        }
+
+        .reward-popup-content .emoji {
+            font-size: 64px;
+            animation: float 2s ease-in-out infinite;
+        }
+
+        .reward-popup-content .amount {
+            font-size: 36px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FACC15, #F59E0B);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 12px 0 8px;
+        }
+
+        /* Calendar */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.04);
             transition: all 0.3s ease;
         }
 
-        /* Toast Notification */
-        .toast {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 12px 24px;
-            border-radius: 16px;
-            z-index: 9999;
-            font-weight: 500;
-            font-size: 14px;
-            animation: slideDown 0.4s ease-out;
-            max-width: 90%;
-            text-align: center;
-            pointer-events: none;
+        .calendar-day.claimed {
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            color: white;
         }
 
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
+        .calendar-day.today {
+            border: 2px solid #3B82F6;
+            background: rgba(59, 130, 246, 0.15);
         }
 
-        /* Responsive Adjustments */
-        @media (max-width: 480px) {
-            .page {
-                padding: 16px 16px 90px;
-            }
-            .card {
-                padding: 16px;
-                border-radius: 20px;
-            }
-            .reward-btn-3d {
-                width: 100px;
-                height: 100px;
-                font-size: 40px;
-            }
+        .calendar-day.future {
+            opacity: 0.3;
         }
 
-        /* Scrollable Timeline */
-        .timeline {
+        /* Podium */
+        .podium {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 16px;
+            padding: 20px 0;
+        }
+
+        .podium-item {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            align-items: center;
+            gap: 6px;
         }
 
+        .podium-item .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .podium-item .name {
+            font-size: 11px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .podium-item .earnings {
+            font-size: 12px;
+            font-weight: 700;
+            color: #FACC15;
+        }
+
+        .podium-item .height-1 { height: 90px; }
+        .podium-item .height-2 { height: 70px; }
+        .podium-item .height-3 { height: 50px; }
+
+        .podium-item .bar {
+            width: 44px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: white;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        }
+
+        .podium-item .bar.gold { background: linear-gradient(135deg, #F59E0B, #FACC15); }
+        .podium-item .bar.silver { background: linear-gradient(135deg, #94A3B8, #CBD5E1); }
+        .podium-item .bar.bronze { background: linear-gradient(135deg, #D97706, #F59E0B); }
+
+        /* Floating Coins */
+        .coin-float {
+            position: fixed;
+            pointer-events: none;
+            font-size: 28px;
+            z-index: 999;
+            animation: coinFloat 1.5s ease-out forwards;
+        }
+
+        /* Confetti */
+        .confetti-piece {
+            position: fixed;
+            pointer-events: none;
+            z-index: 999;
+            animation: confetti 1.5s ease-out forwards;
+        }
+
+        /* Timeline */
         .timeline-item {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 12px;
+            padding: 12px 16px;
             border-radius: 16px;
             background: rgba(255, 255, 255, 0.03);
-            border-left: 2px solid rgba(99, 102, 241, 0.3);
+            border-left: 2px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .timeline-item:hover {
+            background: rgba(255, 255, 255, 0.06);
         }
 
         .timeline-item .time {
@@ -555,7 +701,7 @@
         }
 
         .toggle.active {
-            background: #4f46e5;
+            background: #3B82F6;
         }
 
         .toggle .thumb {
@@ -573,164 +719,305 @@
             left: 22px;
         }
 
-        /* Haptic feedback simulation */
+        /* Badge */
+        .badge-premium {
+            background: linear-gradient(135deg, #F59E0B, #FACC15);
+            color: #0B1220;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Loading Skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 12px;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .page {
+                padding: 0 12px 80px;
+            }
+            .hero-card .amount {
+                font-size: 32px;
+            }
+            .wheel-3d {
+                width: 180px;
+                height: 180px;
+            }
+            .nav-item {
+                min-width: 36px;
+                font-size: 8px;
+            }
+            .nav-item .icon {
+                font-size: 18px;
+            }
+            .calendar-day {
+                font-size: 11px;
+                border-radius: 8px;
+            }
+            .reward-popup-content {
+                padding: 28px;
+            }
+            .reward-popup-content .amount {
+                font-size: 28px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .hero-card .amount {
+                font-size: 26px;
+            }
+            .podium-item .bar {
+                width: 32px;
+            }
+        }
+
+        /* Scrollable Content */
+        .scrollable {
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Haptic Feedback Simulation */
         .haptic {
             transition: transform 0.05s ease;
         }
-
         .haptic:active {
             transform: scale(0.96);
         }
 
-        /* Ad cooldown overlay */
-        .cooldown-overlay {
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6, #F59E0B);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Status Dot */
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-dot.online { background: #22C55E; }
+        .status-dot.offline { background: #64748B; }
+
+        /* Notifications Bell */
+        .notification-dot {
+            width: 8px;
+            height: 8px;
+            background: #EF4444;
+            border-radius: 50%;
             position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,0.6);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 600;
-            backdrop-filter: blur(4px);
+            top: 0;
+            right: 0;
+            animation: pulseRing 2s ease-out infinite;
         }
     </style>
 </head>
 <body>
 
-    <!-- Particle Background -->
+    <!-- ===== PARTICLES ===== -->
     <canvas id="particles-canvas"></canvas>
 
-    <!-- Toast Container -->
-    <div id="toast-container"></div>
+    <!-- ===== SPLASH SCREEN ===== -->
+    <div id="splash-screen">
+        <div class="splash-logo">🚀</div>
+        <div style="margin-top: 24px; font-size: 28px; font-weight: 800; background: linear-gradient(135deg, #3B82F6, #8B5CF6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            Premium Earn
+        </div>
+        <div style="font-size: 14px; color: rgba(255,255,255,0.4); margin-top: 4px; font-weight: 500;">Telegram Mini App</div>
+        <div class="splash-loader"></div>
+        <div class="splash-status" id="splash-status">Initializing...</div>
+    </div>
 
-    <!-- App Container -->
+    <!-- ===== APP ===== -->
     <div id="app">
 
-        <!-- ==================== HOME PAGE ==================== -->
+        <!-- ===== HOME PAGE ===== -->
         <div id="page-home" class="page active">
-            <!-- Greeting -->
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-xl font-bold border-2 border-white/10">
-                    👤
+            <!-- Header -->
+            <div class="flex items-center gap-3 pt-4 pb-3">
+                <div class="relative">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-sm font-bold border-2 border-white/10">
+                        AJ
+                    </div>
+                    <div class="status-dot online absolute bottom-0 right-0 border-2 border-bg"></div>
                 </div>
                 <div>
-                    <div class="text-sm text-white/40">Welcome back</div>
-                    <div class="text-lg font-bold">Alex Johnson</div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-semibold text-sm">Alex Johnson</span>
+                        <span class="badge-premium">PRO</span>
+                    </div>
+                    <div class="text-xs text-white/40">@alexjohnson</div>
                 </div>
-                <div class="ml-auto flex items-center gap-2">
-                    <span class="text-yellow-400 text-sm">🔥</span>
-                    <span class="text-white/60 text-sm font-semibold" id="streak-count">7</span>
+                <div class="ml-auto flex items-center gap-3">
+                    <div class="relative">
+                        <button class="text-xl text-white/40 hover:text-white/60 transition" onclick="showNotifications()">🔔</button>
+                        <div class="notification-dot"></div>
+                    </div>
+                    <button class="text-xl text-white/40 hover:text-white/60 transition" onclick="navigateTo('page-profile')">⚡</button>
                 </div>
             </div>
 
-            <!-- Balance Card -->
-            <div class="glass card card-glow rounded-3xl p-6 mb-4 relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-2xl"></div>
+            <!-- Hero Card -->
+            <div class="hero-card mb-4">
                 <div class="relative z-10">
-                    <div class="text-white/40 text-sm">Total Balance</div>
-                    <div class="text-4xl font-bold mt-1">
-                        <span id="balance-display">$2,450.50</span>
-                        <span class="text-sm text-white/40 font-normal"> USDT</span>
-                    </div>
-                    <div class="flex items-center gap-4 mt-3">
-                        <div class="flex-1">
-                            <div class="flex justify-between text-xs text-white/40">
-                                <span>Level Progress</span>
-                                <span id="level-progress-text">78%</span>
-                            </div>
-                            <div class="progress-bar mt-1">
-                                <div class="progress-fill" id="level-progress" style="width: 78%"></div>
-                            </div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="text-white/40 text-xs font-medium">💰 Total Balance</div>
+                            <div class="amount" id="home-balance">$2,450.50</div>
                         </div>
-                        <div class="text-xs text-white/40">Lv. <span id="level-number">12</span></div>
+                        <div class="text-right">
+                            <div class="text-xs text-white/40">🔥 Streak</div>
+                            <div class="text-lg font-bold text-accent" id="home-streak">7 days</div>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 mt-3">
+                        <div>
+                            <div class="text-xs text-white/40">Today's Earnings</div>
+                            <div class="text-sm font-semibold text-success" id="home-today">+$2.50</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-white/40">Level</div>
+                            <div class="text-sm font-semibold" id="home-level">12 ⭐</div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="flex justify-between text-xs text-white/40 mb-1">
+                            <span>XP Progress</span>
+                            <span id="home-xp-text">78%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="home-xp-bar" style="width: 78%"></div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Quick Actions -->
-            <div class="grid grid-cols-3 gap-3 mb-4">
-                <button class="glass card rounded-2xl p-4 text-center haptic hover:scale-105 transition" onclick="navigateTo('page-earn')">
-                    <div class="text-2xl mb-1">💰</div>
-                    <div class="text-xs text-white/60">Earn</div>
+            <div class="grid grid-cols-4 gap-2 mb-4">
+                <button class="glass card-premium rounded-2xl p-3 text-center haptic hover:scale-105 transition" onclick="navigateTo('page-earn')">
+                    <div class="text-2xl">🎥</div>
+                    <div class="text-[10px] text-white/60 mt-1">Watch Ad</div>
                 </button>
-                <button class="glass card rounded-2xl p-4 text-center haptic hover:scale-105 transition" onclick="navigateTo('page-referral')">
-                    <div class="text-2xl mb-1">👥</div>
-                    <div class="text-xs text-white/60">Refer</div>
+                <button class="glass card-premium rounded-2xl p-3 text-center haptic hover:scale-105 transition" onclick="claimDailyReward()">
+                    <div class="text-2xl">🎁</div>
+                    <div class="text-[10px] text-white/60 mt-1">Daily</div>
                 </button>
-                <button class="glass card rounded-2xl p-4 text-center haptic hover:scale-105 transition relative" onclick="navigateTo('page-rewards')">
-                    <div class="text-2xl mb-1">🎁</div>
-                    <div class="text-xs text-white/60">Rewards</div>
-                    <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                <button class="glass card-premium rounded-2xl p-3 text-center haptic hover:scale-105 transition" onclick="navigateTo('page-spin')">
+                    <div class="text-2xl">🎡</div>
+                    <div class="text-[10px] text-white/60 mt-1">Spin</div>
+                </button>
+                <button class="glass card-premium rounded-2xl p-3 text-center haptic hover:scale-105 transition" onclick="navigateTo('page-referral')">
+                    <div class="text-2xl">👥</div>
+                    <div class="text-[10px] text-white/60 mt-1">Invite</div>
                 </button>
             </div>
 
-            <!-- Watch Ad Button with Cooldown -->
-            <div class="relative mb-4">
-                <button class="glow-btn w-full flex items-center justify-center gap-3" id="watch-ad-btn" onclick="watchAd()">
-                    <span>📺</span>
-                    <span>Watch Ad & Earn</span>
-                    <span class="text-xs bg-white/10 px-2 py-1 rounded-full" id="ad-reward-amount">+0.50 USDT</span>
-                </button>
-                <div class="cooldown-overlay" id="ad-cooldown-overlay" style="display: none;">
-                    ⏳ <span id="ad-cooldown-timer">0:00</span>
-                </div>
-            </div>
+            <!-- Watch Ad Button -->
+            <button class="watch-ad-btn mb-4" id="watch-ad-btn" onclick="watchAd()">
+                <span>📺</span>
+                Watch Ad & Earn
+                <span class="reward-amount" id="ad-reward-display">+$0.50</span>
+            </button>
 
-            <!-- Live Earnings -->
-            <div class="glass card rounded-2xl p-4 mb-4">
-                <div class="flex justify-between items-center">
-                    <span class="text-white/60 text-sm">Live Earnings</span>
-                    <span class="text-green-400 text-sm flex items-center">
-                        <span class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
-                        +<span id="live-earnings">0.023</span> USDT
-                    </span>
+            <!-- Live Stats -->
+            <div class="grid grid-cols-4 gap-2 mb-4">
+                <div class="glass card-premium rounded-2xl p-3 text-center">
+                    <div class="text-xs text-white/40">Online</div>
+                    <div class="text-sm font-bold text-success" id="online-users">1.2k</div>
                 </div>
-                <div class="text-2xl font-bold mt-1" id="total-earnings">$2,450.50</div>
+                <div class="glass card-premium rounded-2xl p-3 text-center">
+                    <div class="text-xs text-white/40">Payouts</div>
+                    <div class="text-sm font-bold" id="total-payouts">$45.2k</div>
+                </div>
+                <div class="glass card-premium rounded-2xl p-3 text-center">
+                    <div class="text-xs text-white/40">Users</div>
+                    <div class="text-sm font-bold" id="total-users">12.4k</div>
+                </div>
+                <div class="glass card-premium rounded-2xl p-3 text-center">
+                    <div class="text-xs text-white/40">Ads Today</div>
+                    <div class="text-sm font-bold text-accent" id="ads-today">3/10</div>
+                </div>
             </div>
 
             <!-- Recent Activity -->
-            <div class="text-white/60 text-sm font-semibold mb-3">Recent Activity</div>
-            <div class="timeline" id="activity-timeline">
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-sm font-semibold text-white/60">📋 Recent Activity</span>
+                <button class="text-xs text-primary hover:text-secondary transition" onclick="navigateTo('page-wallet')">View All →</button>
+            </div>
+            <div class="space-y-2" id="activity-timeline">
                 <div class="timeline-item">
                     <span class="time">2m ago</span>
                     <span>🎯 Completed daily task</span>
-                    <span class="ml-auto text-green-400 text-sm">+0.50</span>
+                    <span class="ml-auto text-success text-sm font-semibold">+$0.50</span>
                 </div>
                 <div class="timeline-item">
                     <span class="time">1h ago</span>
                     <span>👥 New referral joined</span>
-                    <span class="ml-auto text-green-400 text-sm">+1.00</span>
+                    <span class="ml-auto text-success text-sm font-semibold">+$1.00</span>
                 </div>
                 <div class="timeline-item">
                     <span class="time">3h ago</span>
                     <span>🎁 Claimed daily reward</span>
-                    <span class="ml-auto text-green-400 text-sm">+0.25</span>
+                    <span class="ml-auto text-success text-sm font-semibold">+$0.25</span>
                 </div>
             </div>
         </div>
 
-        <!-- ==================== EARN PAGE ==================== -->
+        <!-- ===== EARN PAGE ===== -->
         <div id="page-earn" class="page">
-            <h2 class="text-2xl font-bold mb-6">💰 Earn</h2>
+            <div class="flex items-center gap-3 pt-4 pb-4">
+                <button class="text-2xl text-white/40 hover:text-white/60 transition" onclick="navigateTo('page-home')">←</button>
+                <h2 class="text-xl font-bold">💸 Earn</h2>
+            </div>
 
-            <!-- 3D Reward Button -->
-            <div class="flex flex-col items-center mb-6">
-                <button class="reward-btn-3d" id="reward-btn-3d" onclick="claimReward()">
-                    🎯
+            <!-- Weekend Boost -->
+            <div class="glass card-premium rounded-2xl p-4 mb-4 bg-gradient-to-r from-primary/20 to-secondary/20 border border-primary/20">
+                <div class="flex items-center gap-3">
+                    <span class="text-3xl">⚡</span>
+                    <div>
+                        <div class="font-semibold">Weekend Boost Active!</div>
+                        <div class="text-sm text-white/60">2x rewards on all earnings</div>
+                    </div>
+                    <span class="ml-auto badge-premium">LIVE</span>
+                </div>
+            </div>
+
+            <!-- Watch Ad -->
+            <div class="glass card-premium rounded-3xl p-6 mb-4 text-center">
+                <button class="watch-ad-btn" id="earn-ad-btn" onclick="watchAd()">
+                    <span>🎯</span>
+                    Tap to Earn
+                    <span class="reward-amount" id="earn-ad-reward">+$0.50</span>
                 </button>
-                <div class="mt-4 text-center">
-                    <div class="text-sm text-white/40">Tap to claim</div>
-                    <div class="text-xl font-bold text-green-400" id="reward-amount-display">+0.50 USDT</div>
+                <div class="flex justify-between mt-4 text-sm">
+                    <span class="text-white/40">Cooldown</span>
+                    <span class="text-accent" id="earn-cooldown">Ready</span>
+                </div>
+                <div class="flex justify-between text-sm mt-2">
+                    <span class="text-white/40">Today's Ads</span>
+                    <span class="font-semibold" id="earn-ads-today">3 / 10</span>
+                </div>
+                <div class="progress-bar mt-2">
+                    <div class="progress-fill" id="earn-ads-progress" style="width: 30%"></div>
                 </div>
             </div>
 
             <!-- Daily Goal -->
-            <div class="glass card rounded-2xl p-4 mb-4">
+            <div class="glass card-premium rounded-2xl p-4 mb-4">
                 <div class="flex justify-between text-sm mb-2">
-                    <span class="text-white/60">Daily Goal</span>
-                    <span class="text-white/80 font-semibold" id="daily-goal-text">$2.00 / $5.00</span>
+                    <span class="text-white/60">🎯 Daily Goal</span>
+                    <span class="font-semibold" id="daily-goal-text">$2.00 / $5.00</span>
                 </div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="daily-goal-progress" style="width: 40%"></div>
@@ -738,286 +1025,419 @@
                 <div class="text-xs text-white/40 mt-2" id="daily-goal-percent">40% completed</div>
             </div>
 
-            <!-- Bonus Events -->
-            <div class="grid grid-cols-2 gap-3 mb-4">
-                <div class="glass card rounded-2xl p-4 text-center" id="bonus-event">
-                    <div class="text-2xl mb-1">⚡</div>
-                    <div class="text-sm font-semibold" id="bonus-multiplier">2x Bonus</div>
-                    <div class="text-xs text-green-400" id="bonus-status">Active</div>
+            <!-- Quick Earn -->
+            <div class="grid grid-cols-2 gap-3">
+                <button class="glass card-premium rounded-2xl p-4 text-center haptic hover:scale-105 transition" onclick="claimDailyReward()">
+                    <div class="text-3xl mb-2">🎁</div>
+                    <div class="text-sm font-semibold">Daily Bonus</div>
+                    <div class="text-xs text-white/40">+$0.50</div>
+                </button>
+                <button class="glass card-premium rounded-2xl p-4 text-center haptic hover:scale-105 transition" onclick="navigateTo('page-spin')">
+                    <div class="text-3xl mb-2">🎡</div>
+                    <div class="text-sm font-semibold">Lucky Spin</div>
+                    <div class="text-xs text-white/40">Win up to $5</div>
+                </button>
+                <button class="glass card-premium rounded-2xl p-4 text-center haptic hover:scale-105 transition" onclick="navigateTo('page-rewards')">
+                    <div class="text-3xl mb-2">📦</div>
+                    <div class="text-sm font-semibold">Mystery Box</div>
+                    <div class="text-xs text-white/40">1 available</div>
+                </button>
+                <button class="glass card-premium rounded-2xl p-4 text-center haptic hover:scale-105 transition" onclick="navigateTo('page-tasks')">
+                    <div class="text-3xl mb-2">📋</div>
+                    <div class="text-sm font-semibold">Tasks</div>
+                    <div class="text-xs text-white/40">3 available</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== SPIN PAGE ===== -->
+        <div id="page-spin" class="page">
+            <div class="flex items-center gap-3 pt-4 pb-4">
+                <button class="text-2xl text-white/40 hover:text-white/60 transition" onclick="navigateTo('page-home')">←</button>
+                <h2 class="text-xl font-bold">🎡 Lucky Spin</h2>
+            </div>
+
+            <!-- Wheel -->
+            <div class="glass card-premium rounded-3xl p-6 mb-4 text-center">
+                <div class="text-sm text-white/40 mb-4">🎯 Spin to Win Rewards</div>
+                <div class="wheel-3d" id="wheel-3d" onclick="spinWheel()">
+                    <div class="wheel-segment" style="transform: rotate(0deg); background: #3B82F6;">$0.25</div>
+                    <div class="wheel-segment" style="transform: rotate(60deg); background: #8B5CF6;">$0.50</div>
+                    <div class="wheel-segment" style="transform: rotate(120deg); background: #EC4899;">$1.00</div>
+                    <div class="wheel-segment" style="transform: rotate(180deg); background: #F59E0B;">$2.00</div>
+                    <div class="wheel-segment" style="transform: rotate(240deg); background: #22C55E;">$5.00</div>
+                    <div class="wheel-segment" style="transform: rotate(300deg); background: #EF4444;">FREE</div>
+                    <div class="wheel-center">SPIN</div>
                 </div>
-                <div class="glass card rounded-2xl p-4 text-center">
-                    <div class="text-2xl mb-1">⏰</div>
-                    <div class="text-sm font-semibold">Cooldown</div>
-                    <div class="text-xs text-yellow-400" id="earn-cooldown-timer">Ready</div>
+                <button class="btn-primary w-full mt-4 py-3 text-sm" onclick="spinWheel()">
+                    🎰 Spin Now
+                </button>
+                <div class="flex justify-between mt-3 text-sm">
+                    <span class="text-white/40">Free Spins Today</span>
+                    <span class="font-semibold" id="spins-today">3 / 3</span>
                 </div>
             </div>
 
-            <!-- Ad Stats -->
-            <div class="glass card rounded-2xl p-4">
-                <div class="flex justify-between text-sm">
-                    <span class="text-white/60">Ads Watched Today</span>
-                    <span class="font-semibold" id="ads-watched-today">3 / 10</span>
+            <!-- Spin History -->
+            <div class="text-sm font-semibold text-white/60 mb-3">📊 Recent Wins</div>
+            <div class="space-y-2" id="spin-history">
+                <div class="glass card-premium rounded-2xl p-3 flex items-center gap-3">
+                    <span class="text-2xl">🎉</span>
+                    <div>
+                        <div class="text-sm font-semibold">Won $1.00</div>
+                        <div class="text-xs text-white/40">2 hours ago</div>
+                    </div>
+                    <span class="ml-auto text-success font-bold">+$1.00</span>
                 </div>
-                <div class="progress-bar mt-2">
-                    <div class="progress-fill" id="ads-progress" style="width: 30%"></div>
+                <div class="glass card-premium rounded-2xl p-3 flex items-center gap-3">
+                    <span class="text-2xl">🎉</span>
+                    <div>
+                        <div class="text-sm font-semibold">Won $0.50</div>
+                        <div class="text-xs text-white/40">5 hours ago</div>
+                    </div>
+                    <span class="ml-auto text-success font-bold">+$0.50</span>
                 </div>
             </div>
         </div>
 
-        <!-- ==================== REFERRAL PAGE ==================== -->
+        <!-- ===== REFERRAL PAGE ===== -->
         <div id="page-referral" class="page">
-            <h2 class="text-2xl font-bold mb-6">👥 Referral</h2>
+            <div class="flex items-center gap-3 pt-4 pb-4">
+                <button class="text-2xl text-white/40 hover:text-white/60 transition" onclick="navigateTo('page-home')">←</button>
+                <h2 class="text-xl font-bold">👥 Referrals</h2>
+            </div>
 
             <!-- Referral Card -->
-            <div class="glass card card-glow rounded-3xl p-6 mb-4 text-center">
-                <div class="text-4xl mb-3">🎁</div>
+            <div class="glass card-premium rounded-3xl p-6 mb-4 text-center">
+                <div class="text-5xl mb-4">🎁</div>
                 <div class="text-lg font-bold">Refer & Earn 10%</div>
-                <div class="text-sm text-white/40 mb-4">Share your referral link and earn rewards</div>
+                <div class="text-sm text-white/40 mb-4">Share your link and earn rewards</div>
                 <div class="flex gap-2">
-                    <input type="text" id="referral-link" value="https://t.me/yourbot?ref=ABC123" class="flex-1 glass-light rounded-xl px-4 py-2 text-sm outline-none" readonly />
-                    <button class="glow-btn px-4 py-2 text-sm" onclick="copyReferral()">📋</button>
-                    <button class="glow-btn px-4 py-2 text-sm" onclick="shareReferral()">📤</button>
+                    <input type="text" id="referral-link" value="https://t.me/your_bot?start=ref_ABC123" class="flex-1 glass-light rounded-xl px-4 py-2 text-sm outline-none" readonly />
+                    <button class="btn-primary px-4 py-2 text-sm" onclick="copyReferral()">📋</button>
+                    <button class="btn-secondary px-4 py-2 text-sm" onclick="shareReferral()">📤</button>
                 </div>
             </div>
 
             <!-- Stats -->
             <div class="grid grid-cols-3 gap-3 mb-4">
-                <div class="glass card rounded-2xl p-4 text-center">
+                <div class="glass card-premium rounded-2xl p-4 text-center">
                     <div class="text-2xl font-bold" id="referral-count">12</div>
                     <div class="text-xs text-white/40">Referrals</div>
                 </div>
-                <div class="glass card rounded-2xl p-4 text-center">
-                    <div class="text-2xl font-bold text-green-400" id="referral-earnings">$24.50</div>
+                <div class="glass card-premium rounded-2xl p-4 text-center">
+                    <div class="text-2xl font-bold text-success" id="referral-earnings">$24.50</div>
                     <div class="text-xs text-white/40">Earned</div>
                 </div>
-                <div class="glass card rounded-2xl p-4 text-center">
+                <div class="glass card-premium rounded-2xl p-4 text-center">
                     <div class="text-2xl font-bold" id="referral-rank">#3</div>
                     <div class="text-xs text-white/40">Rank</div>
                 </div>
             </div>
 
-            <!-- Top Referrers -->
-            <div class="text-white/60 text-sm font-semibold mb-3">Top Referrers</div>
-            <div class="space-y-2" id="top-referrers">
-                <div class="glass card rounded-2xl p-3 flex items-center gap-3">
-                    <span class="text-yellow-400 text-sm font-bold">#1</span>
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 flex items-center justify-center text-xs font-bold">JD</div>
+            <!-- Milestones -->
+            <div class="text-sm font-semibold text-white/60 mb-3">🏅 Milestones</div>
+            <div class="space-y-2 mb-4">
+                <div class="glass card-premium rounded-2xl p-3 flex items-center justify-between">
+                    <span>5 Referrals</span>
+                    <span class="badge-premium">🎯 +$2.00</span>
+                </div>
+                <div class="glass card-premium rounded-2xl p-3 flex items-center justify-between">
+                    <span>10 Referrals</span>
+                    <span class="badge-premium">🏆 +$5.00</span>
+                </div>
+                <div class="glass card-premium rounded-2xl p-3 flex items-center justify-between">
+                    <span>25 Referrals</span>
+                    <span class="badge-premium">👑 +$15.00</span>
+                </div>
+            </div>
+
+            <!-- Referral History -->
+            <div class="text-sm font-semibold text-white/60 mb-3">📋 Referral History</div>
+            <div class="space-y-2" id="referral-history">
+                <div class="glass card-premium rounded-2xl p-3 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 flex items-center justify-center text-xs font-bold">JD</div>
                     <div>
                         <div class="text-sm font-semibold">John Doe</div>
-                        <div class="text-xs text-white/40">24 referrals</div>
+                        <div class="text-xs text-white/40">Joined 2 days ago</div>
                     </div>
-                    <div class="ml-auto text-sm text-green-400">$48.00</div>
+                    <span class="ml-auto text-success text-sm font-semibold">+$1.00</span>
                 </div>
-                <div class="glass card rounded-2xl p-3 flex items-center gap-3">
-                    <span class="text-gray-400 text-sm font-bold">#2</span>
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-gray-400 to-gray-600 flex items-center justify-center text-xs font-bold">JS</div>
+                <div class="glass card-premium rounded-2xl p-3 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-xs font-bold">JS</div>
                     <div>
                         <div class="text-sm font-semibold">Jane Smith</div>
-                        <div class="text-xs text-white/40">18 referrals</div>
+                        <div class="text-xs text-white/40">Joined 5 days ago</div>
                     </div>
-                    <div class="ml-auto text-sm text-green-400">$36.00</div>
-                </div>
-                <div class="glass card rounded-2xl p-3 flex items-center gap-3">
-                    <span class="text-amber-600 text-sm font-bold">#3</span>
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-amber-500 to-amber-700 flex items-center justify-center text-xs font-bold">MR</div>
-                    <div>
-                        <div class="text-sm font-semibold">Mike Ross</div>
-                        <div class="text-xs text-white/40">12 referrals</div>
-                    </div>
-                    <div class="ml-auto text-sm text-green-400">$24.00</div>
+                    <span class="ml-auto text-success text-sm font-semibold">+$0.50</span>
                 </div>
             </div>
         </div>
 
-        <!-- ==================== LEADERBOARD PAGE ==================== -->
-        <div id="page-leaderboard" class="page">
-            <h2 class="text-2xl font-bold mb-6">🏆 Leaderboard</h2>
-
-            <!-- Podium -->
-            <div class="podium mb-6">
-                <div class="podium-item">
-                    <div class="avatar" style="background: linear-gradient(135deg, #d4a373, #b8860b);">JS</div>
-                    <div class="position">🥈 2nd</div>
-                    <div class="height-2 glass card rounded-t-2xl w-16 flex items-center justify-center text-sm font-bold">$1.2k</div>
-                </div>
-                <div class="podium-item">
-                    <div class="avatar" style="background: linear-gradient(135deg, #ffd700, #ffb700);">JD</div>
-                    <div class="position">🥇 1st</div>
-                    <div class="height-1 glass card rounded-t-2xl w-20 flex items-center justify-center text-sm font-bold">$2.4k</div>
-                </div>
-                <div class="podium-item">
-                    <div class="avatar" style="background: linear-gradient(135deg, #cd7f32, #a0522d);">MR</div>
-                    <div class="position">🥉 3rd</div>
-                    <div class="height-3 glass card rounded-t-2xl w-14 flex items-center justify-center text-sm font-bold">$800</div>
-                </div>
-            </div>
-
-            <!-- Tabs -->
-            <div class="flex gap-2 mb-4">
-                <button class="flex-1 glass card rounded-xl py-2 text-sm font-semibold text-white/80" onclick="switchLeaderboardTab(this)">Weekly</button>
-                <button class="flex-1 glass card rounded-xl py-2 text-sm font-semibold text-white/40" onclick="switchLeaderboardTab(this)">Monthly</button>
-                <button class="flex-1 glass card rounded-xl py-2 text-sm font-semibold text-white/40" onclick="switchLeaderboardTab(this)">All Time</button>
-            </div>
-
-            <!-- Rankings -->
-            <div class="space-y-2" id="leaderboard-list">
-                <div class="glass card rounded-2xl p-3 flex items-center gap-3">
-                    <span class="text-yellow-400 text-sm font-bold">#4</span>
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 flex items-center justify-center text-xs font-bold">AL</div>
-                    <div>
-                        <div class="text-sm font-semibold">Alice Lee</div>
-                        <div class="text-xs text-white/40">↑ 2 positions</div>
-                    </div>
-                    <div class="ml-auto text-sm font-semibold">$650</div>
-                </div>
-                <div class="glass card rounded-2xl p-3 flex items-center gap-3">
-                    <span class="text-gray-400 text-sm font-bold">#5</span>
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-xs font-bold">TW</div>
-                    <div>
-                        <div class="text-sm font-semibold">Tom Wilson</div>
-                        <div class="text-xs text-white/40">↓ 1 position</div>
-                    </div>
-                    <div class="ml-auto text-sm font-semibold">$520</div>
-                </div>
-                <div class="glass card rounded-2xl p-3 flex items-center gap-3">
-                    <span class="text-gray-400 text-sm font-bold">#6</span>
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 flex items-center justify-center text-xs font-bold">EP</div>
-                    <div>
-                        <div class="text-sm font-semibold">Emma Parker</div>
-                        <div class="text-xs text-white/40">— no change</div>
-                    </div>
-                    <div class="ml-auto text-sm font-semibold">$480</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ==================== REWARDS PAGE ==================== -->
+        <!-- ===== REWARDS PAGE ===== -->
         <div id="page-rewards" class="page">
-            <h2 class="text-2xl font-bold mb-6">🎁 Rewards</h2>
+            <div class="flex items-center gap-3 pt-4 pb-4">
+                <button class="text-2xl text-white/40 hover:text-white/60 transition" onclick="navigateTo('page-home')">←</button>
+                <h2 class="text-xl font-bold">🎁 Rewards</h2>
+            </div>
 
             <!-- Daily Calendar -->
-            <div class="glass card rounded-3xl p-4 mb-4">
+            <div class="glass card-premium rounded-3xl p-4 mb-4">
                 <div class="flex justify-between items-center mb-3">
-                    <span class="text-white/60 text-sm">Daily Calendar</span>
+                    <span class="text-sm font-semibold text-white/60">📅 Daily Calendar</span>
                     <span class="text-xs text-white/40" id="calendar-day">Day 7 of 30</span>
                 </div>
-                <div class="grid grid-cols-7 gap-1" id="calendar-grid">
-                    <div class="aspect-square rounded-full bg-white/5 flex items-center justify-center text-sm">1</div>
-                    <div class="aspect-square rounded-full bg-white/5 flex items-center justify-center text-sm">2</div>
-                    <div class="aspect-square rounded-full bg-white/5 flex items-center justify-center text-sm">3</div>
-                    <div class="aspect-square rounded-full bg-white/5 flex items-center justify-center text-sm">4</div>
-                    <div class="aspect-square rounded-full bg-white/5 flex items-center justify-center text-sm">5</div>
-                    <div class="aspect-square rounded-full bg-white/5 flex items-center justify-center text-sm">6</div>
-                    <div class="aspect-square rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-sm font-bold">7</div>
+                <div class="calendar-grid" id="calendar-grid">
+                    <div class="calendar-day claimed">1</div>
+                    <div class="calendar-day claimed">2</div>
+                    <div class="calendar-day claimed">3</div>
+                    <div class="calendar-day claimed">4</div>
+                    <div class="calendar-day claimed">5</div>
+                    <div class="calendar-day claimed">6</div>
+                    <div class="calendar-day today">7</div>
+                    <div class="calendar-day future">8</div>
+                    <div class="calendar-day future">9</div>
+                    <div class="calendar-day future">10</div>
+                    <div class="calendar-day future">11</div>
+                    <div class="calendar-day future">12</div>
+                    <div class="calendar-day future">13</div>
+                    <div class="calendar-day future">14</div>
                 </div>
+                <button class="btn-primary w-full mt-4 py-2 text-sm" onclick="claimDailyReward()">
+                    🔥 Claim Daily Reward
+                </button>
             </div>
 
-            <!-- Spin Wheel -->
-            <div class="glass card rounded-3xl p-4 mb-4 text-center">
-                <div class="text-sm text-white/60 mb-3">Spin & Win</div>
-                <div class="wheel-container mx-auto">
-                    <div class="wheel" id="wheel" onclick="spinWheel()">
-                        <div class="wheel-segment" style="transform: rotate(0deg); background: #4f46e5;">1x</div>
-                        <div class="wheel-segment" style="transform: rotate(60deg); background: #7c3aed;">2x</div>
-                        <div class="wheel-segment" style="transform: rotate(120deg); background: #d946ef;">💎</div>
-                        <div class="wheel-segment" style="transform: rotate(180deg); background: #f43f5e;">🔥</div>
-                        <div class="wheel-segment" style="transform: rotate(240deg); background: #f59e0b;">⭐</div>
-                        <div class="wheel-segment" style="transform: rotate(300deg); background: #10b981;">🎯</div>
-                    </div>
-                </div>
-                <button class="glow-btn w-full mt-4 py-3 text-sm" onclick="spinWheel()">🎰 Spin</button>
-            </div>
-
-            <!-- Mystery Box & Achievements -->
+            <!-- Mystery Box -->
             <div class="grid grid-cols-2 gap-3">
-                <button class="glass card rounded-2xl p-4 text-center haptic hover:scale-105 transition" onclick="openMysteryBox()">
-                    <div class="text-3xl mb-2">📦</div>
+                <button class="glass card-premium rounded-2xl p-4 text-center haptic hover:scale-105 transition" onclick="openMysteryBox()">
+                    <div class="text-4xl mb-2">📦</div>
                     <div class="text-sm font-semibold">Mystery Box</div>
                     <div class="text-xs text-white/40" id="mystery-box-count">1 available</div>
                 </button>
-                <button class="glass card rounded-2xl p-4 text-center haptic hover:scale-105 transition" onclick="navigateTo('page-profile')">
-                    <div class="text-3xl mb-2">🏅</div>
+                <button class="glass card-premium rounded-2xl p-4 text-center haptic hover:scale-105 transition" onclick="navigateTo('page-profile')">
+                    <div class="text-4xl mb-2">🏅</div>
                     <div class="text-sm font-semibold">Achievements</div>
                     <div class="text-xs text-white/40" id="achievement-count">12/25</div>
                 </button>
             </div>
         </div>
 
-        <!-- ==================== WALLET PAGE ==================== -->
+        <!-- ===== TASKS PAGE ===== -->
+        <div id="page-tasks" class="page">
+            <div class="flex items-center gap-3 pt-4 pb-4">
+                <button class="text-2xl text-white/40 hover:text-white/60 transition" onclick="navigateTo('page-home')">←</button>
+                <h2 class="text-xl font-bold">📋 Tasks</h2>
+            </div>
+
+            <div class="space-y-3" id="tasks-list">
+                <div class="glass card-premium rounded-2xl p-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-xl">📢</div>
+                        <div class="flex-1">
+                            <div class="font-semibold">Join Telegram Channel</div>
+                            <div class="text-sm text-white/40">Subscribe to our channel</div>
+                            <div class="flex items-center gap-4 mt-2 text-sm">
+                                <span class="text-success">+$0.50</span>
+                                <span class="text-white/40">1,234 completed</span>
+                            </div>
+                        </div>
+                        <button class="btn-primary px-4 py-1 text-xs">Start</button>
+                    </div>
+                </div>
+                <div class="glass card-premium rounded-2xl p-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center text-xl">👥</div>
+                        <div class="flex-1">
+                            <div class="font-semibold">Invite 5 Friends</div>
+                            <div class="text-sm text-white/40">Get 5 referrals</div>
+                            <div class="flex items-center gap-4 mt-2 text-sm">
+                                <span class="text-success">+$2.00</span>
+                                <span class="text-white/40">3/5 completed</span>
+                            </div>
+                        </div>
+                        <button class="btn-secondary px-4 py-1 text-xs">Progress</button>
+                    </div>
+                </div>
+                <div class="glass card-premium rounded-2xl p-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-xl">⭐</div>
+                        <div class="flex-1">
+                            <div class="font-semibold">Watch 10 Ads</div>
+                            <div class="text-sm text-white/40">Watch rewarded ads</div>
+                            <div class="flex items-center gap-4 mt-2 text-sm">
+                                <span class="text-success">+$5.00</span>
+                                <span class="text-white/40">3/10 completed</span>
+                            </div>
+                        </div>
+                        <button class="btn-secondary px-4 py-1 text-xs">Progress</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== LEADERBOARD PAGE ===== -->
+        <div id="page-leaderboard" class="page">
+            <div class="flex items-center gap-3 pt-4 pb-4">
+                <button class="text-2xl text-white/40 hover:text-white/60 transition" onclick="navigateTo('page-home')">←</button>
+                <h2 class="text-xl font-bold">🏆 Leaderboard</h2>
+            </div>
+
+            <!-- Podium -->
+            <div class="podium mb-6">
+                <div class="podium-item">
+                    <div class="avatar" style="background: linear-gradient(135deg, #94A3B8, #CBD5E1);">JS</div>
+                    <div class="name">Jane Smith</div>
+                    <div class="bar silver">$1.2k</div>
+                </div>
+                <div class="podium-item">
+                    <div class="avatar" style="background: linear-gradient(135deg, #F59E0B, #FACC15);">JD</div>
+                    <div class="name">John Doe</div>
+                    <div class="bar gold">$2.4k</div>
+                    <span class="text-xs text-accent font-bold">👑</span>
+                </div>
+                <div class="podium-item">
+                    <div class="avatar" style="background: linear-gradient(135deg, #D97706, #F59E0B);">MR</div>
+                    <div class="name">Mike Ross</div>
+                    <div class="bar bronze">$800</div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex gap-2 mb-4">
+                <button class="flex-1 glass card-premium rounded-xl py-2 text-sm font-semibold text-white/80" onclick="switchLeaderboardTab(this)">Daily</button>
+                <button class="flex-1 glass card-premium rounded-xl py-2 text-sm font-semibold text-white/40" onclick="switchLeaderboardTab(this)">Weekly</button>
+                <button class="flex-1 glass card-premium rounded-xl py-2 text-sm font-semibold text-white/40" onclick="switchLeaderboardTab(this)">Monthly</button>
+            </div>
+
+            <!-- Rankings -->
+            <div class="space-y-2" id="leaderboard-list">
+                <div class="glass card-premium rounded-2xl p-3 flex items-center gap-3">
+                    <span class="text-yellow-400 text-sm font-bold">#4</span>
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 flex items-center justify-center text-xs font-bold">AL</div>
+                    <div>
+                        <div class="text-sm font-semibold">Alice Lee</div>
+                        <div class="text-xs text-white/40">↑ 2 positions</div>
+                    </div>
+                    <div class="ml-auto text-sm font-bold">$650</div>
+                </div>
+                <div class="glass card-premium rounded-2xl p-3 flex items-center gap-3">
+                    <span class="text-gray-400 text-sm font-bold">#5</span>
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-xs font-bold">TW</div>
+                    <div>
+                        <div class="text-sm font-semibold">Tom Wilson</div>
+                        <div class="text-xs text-white/40">↓ 1 position</div>
+                    </div>
+                    <div class="ml-auto text-sm font-bold">$520</div>
+                </div>
+                <div class="glass card-premium rounded-2xl p-3 flex items-center gap-3">
+                    <span class="text-gray-400 text-sm font-bold">#6</span>
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 flex items-center justify-center text-xs font-bold">EP</div>
+                    <div>
+                        <div class="text-sm font-semibold">Emma Parker</div>
+                        <div class="text-xs text-white/40">— no change</div>
+                    </div>
+                    <div class="ml-auto text-sm font-bold">$480</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== WALLET PAGE ===== -->
         <div id="page-wallet" class="page">
-            <h2 class="text-2xl font-bold mb-6">💳 Wallet</h2>
+            <div class="flex items-center gap-3 pt-4 pb-4">
+                <button class="text-2xl text-white/40 hover:text-white/60 transition" onclick="navigateTo('page-home')">←</button>
+                <h2 class="text-xl font-bold">💳 Wallet</h2>
+            </div>
 
             <!-- Balance Card -->
-            <div class="glass card card-glow rounded-3xl p-6 mb-4">
+            <div class="glass card-premium rounded-3xl p-6 mb-4">
                 <div class="text-white/40 text-sm">Total Balance</div>
-                <div class="text-3xl font-bold" id="wallet-balance">$2,450.50</div>
-                <div class="flex gap-4 mt-3">
+                <div class="text-4xl font-bold" id="wallet-balance">$2,450.50</div>
+                <div class="flex gap-4 mt-4">
                     <div class="flex-1 glass-light rounded-xl p-3 text-center">
                         <div class="text-xs text-white/40">Available</div>
                         <div class="font-semibold" id="wallet-available">$2,150.50</div>
                     </div>
                     <div class="flex-1 glass-light rounded-xl p-3 text-center">
-                        <div class="text-xs text-white/40">Locked</div>
-                        <div class="font-semibold" id="wallet-locked">$300.00</div>
+                        <div class="text-xs text-white/40">Pending</div>
+                        <div class="font-semibold" id="wallet-pending">$300.00</div>
+                    </div>
+                </div>
+                <div class="flex gap-3 mt-4">
+                    <div class="flex-1 glass-light rounded-xl p-3 text-center">
+                        <div class="text-xs text-white/40">Total Earned</div>
+                        <div class="font-semibold text-success" id="wallet-earned">$3,200.00</div>
+                    </div>
+                    <div class="flex-1 glass-light rounded-xl p-3 text-center">
+                        <div class="text-xs text-white/40">Withdrawn</div>
+                        <div class="font-semibold" id="wallet-withdrawn">$749.50</div>
                     </div>
                 </div>
             </div>
 
             <!-- Withdraw -->
-            <button class="glow-btn w-full mb-4 flex items-center justify-center gap-2" onclick="withdrawFunds()">
-                <span>💸</span> Withdraw
+            <button class="btn-primary w-full mb-4 flex items-center justify-center gap-2" onclick="showWithdrawModal()">
+                <span>💸</span> Withdraw Funds
                 <span class="text-xs bg-white/10 px-2 py-1 rounded-full">Min $10</span>
             </button>
 
             <!-- Transaction History -->
-            <div class="text-white/60 text-sm font-semibold mb-3">Transaction History</div>
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-sm font-semibold text-white/60">📊 Transaction History</span>
+            </div>
             <div class="space-y-2" id="transaction-history">
-                <div class="glass card rounded-2xl p-3 flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-400">↑</div>
+                <div class="glass card-premium rounded-2xl p-3 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center text-success">↑</div>
                     <div>
                         <div class="text-sm font-semibold">Referral Bonus</div>
                         <div class="text-xs text-white/40">From John Doe</div>
                     </div>
-                    <div class="ml-auto text-sm text-green-400 font-semibold">+$1.00</div>
+                    <div class="ml-auto text-sm text-success font-bold">+$1.00</div>
                 </div>
-                <div class="glass card rounded-2xl p-3 flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400">🎯</div>
+                <div class="glass card-premium rounded-2xl p-3 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">🎯</div>
                     <div>
                         <div class="text-sm font-semibold">Daily Reward</div>
                         <div class="text-xs text-white/40">Day 7 streak</div>
                     </div>
-                    <div class="ml-auto text-sm text-green-400 font-semibold">+$0.50</div>
+                    <div class="ml-auto text-sm text-success font-bold">+$0.50</div>
                 </div>
-                <div class="glass card rounded-2xl p-3 flex items-center gap-3">
+                <div class="glass card-premium rounded-2xl p-3 flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center text-red-400">↓</div>
                     <div>
                         <div class="text-sm font-semibold">Withdrawal</div>
                         <div class="text-xs text-white/40">To Wallet</div>
                     </div>
-                    <div class="ml-auto text-sm text-red-400 font-semibold">-$50.00</div>
+                    <div class="ml-auto text-sm text-red-400 font-bold">-$50.00</div>
                 </div>
             </div>
         </div>
 
-        <!-- ==================== PROFILE PAGE ==================== -->
+        <!-- ===== PROFILE PAGE ===== -->
         <div id="page-profile" class="page">
-            <h2 class="text-2xl font-bold mb-6">👤 Profile</h2>
+            <div class="flex items-center gap-3 pt-4 pb-4">
+                <button class="text-2xl text-white/40 hover:text-white/60 transition" onclick="navigateTo('page-home')">←</button>
+                <h2 class="text-xl font-bold">👤 Profile</h2>
+            </div>
 
             <!-- Profile Card -->
-            <div class="glass card card-glow rounded-3xl p-6 mb-4 text-center">
-                <div class="w-20 h-20 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-3xl font-bold mx-auto border-4 border-white/10">
-                    AJ
+            <div class="glass card-premium rounded-3xl p-6 mb-4 text-center">
+                <div class="relative inline-block">
+                    <div class="w-20 h-20 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-3xl font-bold mx-auto border-4 border-white/10">
+                        AJ
+                    </div>
+                    <div class="status-dot online absolute bottom-1 right-1 border-2 border-bg"></div>
                 </div>
                 <div class="text-xl font-bold mt-3">Alex Johnson</div>
                 <div class="text-sm text-white/40">@alexjohnson</div>
-                <div class="flex justify-center gap-4 mt-3">
+                <div class="flex justify-center gap-6 mt-4">
                     <div class="text-center">
-                        <div class="text-sm font-bold">Lv. <span id="profile-level">12</span></div>
+                        <div class="text-sm font-bold" id="profile-level">Lv. 12</div>
                         <div class="text-xs text-white/40">Level</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-sm font-bold" id="profile-xp">2,450</div>
-                        <div class="text-xs text-white/40">XP</div>
+                        <div class="text-sm font-bold" id="profile-xp">2,450 XP</div>
+                        <div class="text-xs text-white/40">Experience</div>
                     </div>
                     <div class="text-center">
                         <div class="text-sm font-bold" id="profile-badges">12</div>
@@ -1027,76 +1447,68 @@
             </div>
 
             <!-- Achievements -->
-            <div class="text-white/60 text-sm font-semibold mb-3">Achievements</div>
+            <div class="text-sm font-semibold text-white/60 mb-3">🏅 Achievements</div>
             <div class="grid grid-cols-4 gap-2 mb-4">
-                <div class="glass card rounded-2xl p-3 text-center">
-                    <div class="text-2xl">🔥</div>
-                    <div class="text-xs text-white/40">7d</div>
+                <div class="glass card-premium rounded-2xl p-3 text-center">
+                    <div class="text-3xl">🔥</div>
+                    <div class="text-[10px] text-white/40">7d Streak</div>
                 </div>
-                <div class="glass card rounded-2xl p-3 text-center">
-                    <div class="text-2xl">👑</div>
-                    <div class="text-xs text-white/40">Top 10</div>
+                <div class="glass card-premium rounded-2xl p-3 text-center">
+                    <div class="text-3xl">👑</div>
+                    <div class="text-[10px] text-white/40">Top 10</div>
                 </div>
-                <div class="glass card rounded-2xl p-3 text-center">
-                    <div class="text-2xl">🎯</div>
-                    <div class="text-xs text-white/40">100x</div>
+                <div class="glass card-premium rounded-2xl p-3 text-center">
+                    <div class="text-3xl">🎯</div>
+                    <div class="text-[10px] text-white/40">100 Ads</div>
                 </div>
-                <div class="glass card rounded-2xl p-3 text-center">
-                    <div class="text-2xl">⭐</div>
-                    <div class="text-xs text-white/40">VIP</div>
+                <div class="glass card-premium rounded-2xl p-3 text-center">
+                    <div class="text-3xl">⭐</div>
+                    <div class="text-[10px] text-white/40">VIP</div>
                 </div>
             </div>
 
             <!-- Settings -->
-            <div class="text-white/60 text-sm font-semibold mb-3">Settings</div>
+            <div class="text-sm font-semibold text-white/60 mb-3">⚙️ Settings</div>
             <div class="space-y-2">
-                <div class="glass card rounded-2xl p-4 flex items-center justify-between">
-                    <span class="text-sm">Dark Mode</span>
+                <div class="glass card-premium rounded-2xl p-4 flex items-center justify-between">
+                    <span class="text-sm">🌙 Dark Mode</span>
                     <div class="toggle active" onclick="this.classList.toggle('active')">
                         <div class="thumb"></div>
                     </div>
                 </div>
-                <div class="glass card rounded-2xl p-4 flex items-center justify-between">
-                    <span class="text-sm">Haptic Feedback</span>
+                <div class="glass card-premium rounded-2xl p-4 flex items-center justify-between">
+                    <span class="text-sm">📳 Haptic Feedback</span>
                     <div class="toggle active" onclick="this.classList.toggle('active')">
                         <div class="thumb"></div>
                     </div>
                 </div>
-                <div class="glass card rounded-2xl p-4 flex items-center justify-between">
-                    <span class="text-sm">Sound Effects</span>
+                <div class="glass card-premium rounded-2xl p-4 flex items-center justify-between">
+                    <span class="text-sm">🔊 Sound Effects</span>
                     <div class="toggle" onclick="this.classList.toggle('active')">
                         <div class="thumb"></div>
                     </div>
                 </div>
-                <div class="glass card rounded-2xl p-4 flex items-center justify-between">
-                    <span class="text-sm">Join Date</span>
-                    <span class="text-sm text-white/40" id="join-date">Jan 2024</span>
+                <div class="glass card-premium rounded-2xl p-4 flex items-center justify-between">
+                    <span class="text-sm">📅 Join Date</span>
+                    <span class="text-sm text-white/40" id="profile-join-date">Jan 2024</span>
                 </div>
             </div>
         </div>
 
-        <!-- ==================== BOTTOM NAVIGATION ==================== -->
+        <!-- ===== BOTTOM NAVIGATION ===== -->
         <nav class="bottom-nav">
             <button class="nav-item active" data-page="page-home" onclick="navigateTo('page-home')">
                 <span class="icon">🏠</span>
                 <span>Home</span>
             </button>
             <button class="nav-item" data-page="page-earn" onclick="navigateTo('page-earn')">
-                <span class="icon">💰</span>
+                <span class="icon">💸</span>
                 <span>Earn</span>
             </button>
             <button class="nav-item" data-page="page-referral" onclick="navigateTo('page-referral')">
                 <span class="icon">👥</span>
                 <span>Refer</span>
                 <span class="badge">3</span>
-            </button>
-            <button class="nav-item" data-page="page-leaderboard" onclick="navigateTo('page-leaderboard')">
-                <span class="icon">🏆</span>
-                <span>Leader</span>
-            </button>
-            <button class="nav-item" data-page="page-rewards" onclick="navigateTo('page-rewards')">
-                <span class="icon">🎁</span>
-                <span>Rewards</span>
             </button>
             <button class="nav-item" data-page="page-wallet" onclick="navigateTo('page-wallet')">
                 <span class="icon">💳</span>
@@ -1107,6 +1519,29 @@
                 <span>Profile</span>
             </button>
         </nav>
+    </div>
+
+    <!-- ===== REWARD POPUP ===== -->
+    <div class="reward-popup" id="reward-popup">
+        <div class="reward-popup-content">
+            <div class="emoji" id="popup-emoji">🎉</div>
+            <div class="amount" id="popup-amount">+$0.50</div>
+            <div class="text-sm text-white/60" id="popup-label">Reward Claimed!</div>
+            <button class="btn-primary mt-4 px-8 text-sm" onclick="closeRewardPopup()">Awesome!</button>
+        </div>
+    </div>
+
+    <!-- ===== WITHDRAW MODAL ===== -->
+    <div class="reward-popup" id="withdraw-modal">
+        <div class="reward-popup-content">
+            <div class="text-4xl mb-4">💸</div>
+            <div class="text-xl font-bold mb-2">Withdraw Funds</div>
+            <div class="text-sm text-white/60 mb-4">Enter the amount you want to withdraw</div>
+            <input type="number" id="withdraw-amount" placeholder="Enter amount (min $10)" class="w-full glass-light rounded-xl px-4 py-3 text-sm outline-none text-center" />
+            <input type="text" id="withdraw-address" placeholder="Wallet Address" class="w-full glass-light rounded-xl px-4 py-3 text-sm outline-none mt-3 text-center" />
+            <button class="btn-primary w-full mt-4 py-3 text-sm" onclick="submitWithdraw()">💸 Withdraw</button>
+            <button class="btn-secondary w-full mt-2 py-3 text-sm" onclick="closeWithdrawModal()">Cancel</button>
+        </div>
     </div>
 
     <script>
@@ -1127,9 +1562,9 @@
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
                 this.size = Math.random() * 2 + 0.5;
-                this.speedX = (Math.random() - 0.5) * 0.5;
-                this.speedY = (Math.random() - 0.5) * 0.5;
-                this.opacity = Math.random() * 0.5 + 0.2;
+                this.speedX = (Math.random() - 0.5) * 0.3;
+                this.speedY = (Math.random() - 0.5) * 0.3;
+                this.opacity = Math.random() * 0.3 + 0.1;
             }
 
             update() {
@@ -1142,12 +1577,12 @@
             draw() {
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(129, 140, 248, ${this.opacity})`;
+                ctx.fillStyle = `rgba(59, 130, 246, ${this.opacity})`;
                 ctx.fill();
             }
         }
 
-        for (let i = 0; i < 80; i++) {
+        for (let i = 0; i < 60; i++) {
             particles.push(new Particle());
         }
 
@@ -1157,16 +1592,17 @@
                 p.update();
                 p.draw();
             });
+            // Connections
             for (let i = 0; i < particles.length; i++) {
                 for (let j = i + 1; j < particles.length; j++) {
                     const dx = particles[i].x - particles[j].x;
                     const dy = particles[i].y - particles[j].y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < 120) {
+                    if (dist < 100) {
                         ctx.beginPath();
                         ctx.moveTo(particles[i].x, particles[i].y);
                         ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.strokeStyle = `rgba(129, 140, 248, ${0.08 * (1 - dist / 120)})`;
+                        ctx.strokeStyle = `rgba(59, 130, 246, ${0.05 * (1 - dist / 100)})`;
                         ctx.lineWidth = 0.5;
                         ctx.stroke();
                     }
@@ -1176,236 +1612,72 @@
         }
         animateParticles();
 
-        // ==================== APP STATE ====================
-        const state = {
-            balance: 2450.50,
-            streak: 7,
-            level: 12,
-            levelProgress: 78,
-            adsWatchedToday: 3,
-            maxAdsPerDay: 10,
-            dailyGoal: 5.00,
-            dailyEarned: 2.00,
-            referrals: 12,
-            referralEarnings: 24.50,
-            referralRank: 3,
-            totalEarnings: 2450.50,
-            xp: 2450,
-            badges: 12,
-            adCooldown: false,
-            adCooldownEnd: null,
-            bonusMultiplier: 2,
-            bonusActive: true,
-            calendarDay: 7,
-            achievementCount: '12/25',
-            mysteryBoxes: 1,
-            walletBalance: 2450.50,
-            walletAvailable: 2150.50,
-            walletLocked: 300.00,
-            joinDate: 'Jan 2024',
-        };
+        // ==================== SPLASH SCREEN ====================
+        const statusMessages = [
+            'Initializing...',
+            'Connecting to Telegram...',
+            'Loading profile...',
+            'Syncing wallet...',
+            'Almost ready...',
+            'Welcome! 🚀'
+        ];
+
+        let statusIndex = 0;
+        const statusEl = document.getElementById('splash-status');
+
+        const splashInterval = setInterval(() => {
+            statusIndex++;
+            if (statusIndex < statusMessages.length) {
+                statusEl.textContent = statusMessages[statusIndex];
+            }
+        }, 600);
+
+        setTimeout(() => {
+            clearInterval(splashInterval);
+            document.getElementById('splash-screen').classList.add('hidden');
+            // Trigger haptic feedback
+            if (navigator.vibrate) navigator.vibrate(20);
+        }, 4000);
 
         // ==================== NAVIGATION ====================
         function navigateTo(pageId) {
-            // Hide all pages
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            // Show target page
-            const target = document.getElementById(pageId);
-            if (target) target.classList.add('active');
+            document.getElementById(pageId).classList.add('active');
             
-            // Update nav
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.toggle('active', item.dataset.page === pageId);
             });
 
-            // Trigger haptic feedback
-            triggerHaptic();
-        }
-
-        // ==================== HAPTIC FEEDBACK ====================
-        function triggerHaptic() {
-            if (navigator.vibrate) {
-                navigator.vibrate(10);
-            }
-        }
-
-        // ==================== TOAST NOTIFICATIONS ====================
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toast-container');
-            const colors = {
-                success: 'bg-green-500/90',
-                error: 'bg-red-500/90',
-                info: 'bg-blue-500/90',
-                warning: 'bg-yellow-500/90'
-            };
-            
-            const toast = document.createElement('div');
-            toast.className = `toast ${colors[type] || colors.info} text-white`;
-            toast.textContent = message;
-            container.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(-50%) translateY(-20px)';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        // ==================== AD FUNCTIONS ====================
-        async function watchAd() {
-            const btn = document.getElementById('watch-ad-btn');
-            const overlay = document.getElementById('ad-cooldown-overlay');
-            
-            // Check cooldown
-            if (state.adCooldown) {
-                showToast('Please wait for cooldown', 'warning');
-                return;
-            }
-
-            // Check daily limit
-            if (state.adsWatchedToday >= state.maxAdsPerDay) {
-                showToast('Daily ad limit reached!', 'warning');
-                return;
-            }
-
-            btn.disabled = true;
-            showToast('Loading ad...', 'info');
-
-            try {
-                // Show rewarded interstitial ad
-                const result = await show_10892289();
-                
-                // User watched the ad or closed it
-                if (result) {
-                    // Reward the user
-                    const rewardAmount = 0.50 * state.bonusMultiplier;
-                    state.balance += rewardAmount;
-                    state.dailyEarned += rewardAmount;
-                    state.totalEarnings += rewardAmount;
-                    state.adsWatchedToday++;
-                    
-                    // Update UI
-                    updateBalanceUI();
-                    updateDailyGoalUI();
-                    updateAdsWatchedUI();
-                    
-                    // Show reward popup
-                    showRewardPopup(rewardAmount);
-                    
-                    // Floating coins
-                    createFloatingCoins();
-                    
-                    // Add to activity
-                    addActivity('📺', `Watched ad +$${rewardAmount.toFixed(2)}`, `+$${rewardAmount.toFixed(2)}`);
-                    
-                    showToast(`+$${rewardAmount.toFixed(2)} USDT earned!`, 'success');
-                    
-                    // Start cooldown (30 seconds)
-                    startAdCooldown(30);
-                } else {
-                    showToast('Ad not completed. Try again!', 'error');
-                }
-            } catch (error) {
-                console.error('Ad error:', error);
-                showToast('Failed to load ad. Please try again.', 'error');
-                
-                // Try fallback: rewarded popup
-                try {
-                    const result = await show_10892289('pop');
-                    if (result) {
-                        const rewardAmount = 0.50 * state.bonusMultiplier;
-                        state.balance += rewardAmount;
-                        state.dailyEarned += rewardAmount;
-                        state.totalEarnings += rewardAmount;
-                        state.adsWatchedToday++;
-                        
-                        updateBalanceUI();
-                        updateDailyGoalUI();
-                        updateAdsWatchedUI();
-                        showRewardPopup(rewardAmount);
-                        createFloatingCoins();
-                        addActivity('📺', `Watched ad +$${rewardAmount.toFixed(2)}`, `+$${rewardAmount.toFixed(2)}`);
-                        showToast(`+$${rewardAmount.toFixed(2)} USDT earned!`, 'success');
-                        startAdCooldown(30);
-                    }
-                } catch (fallbackError) {
-                    console.error('Fallback ad error:', fallbackError);
-                }
-            } finally {
-                btn.disabled = false;
-            }
-        }
-
-        function startAdCooldown(seconds) {
-            state.adCooldown = true;
-            const btn = document.getElementById('watch-ad-btn');
-            const overlay = document.getElementById('ad-cooldown-overlay');
-            const timerEl = document.getElementById('ad-cooldown-timer');
-            
-            overlay.style.display = 'flex';
-            btn.disabled = true;
-            
-            let remaining = seconds;
-            timerEl.textContent = `0:${String(remaining).padStart(2, '0')}`;
-            
-            const interval = setInterval(() => {
-                remaining--;
-                if (remaining <= 0) {
-                    clearInterval(interval);
-                    overlay.style.display = 'none';
-                    btn.disabled = false;
-                    state.adCooldown = false;
-                    timerEl.textContent = 'Ready';
-                } else {
-                    timerEl.textContent = `0:${String(remaining).padStart(2, '0')}`;
-                }
-            }, 1000);
+            // Haptic feedback
+            if (navigator.vibrate) navigator.vibrate(5);
         }
 
         // ==================== REWARD POPUP ====================
-        function showRewardPopup(amount) {
-            const popup = document.getElementById('reward-popup');
-            if (!popup) {
-                // Create popup if not exists
-                const div = document.createElement('div');
-                div.id = 'reward-popup';
-                div.className = 'fixed inset-0 flex items-center justify-center z-50 pointer-events-none';
-                div.style.display = 'none';
-                div.innerHTML = `
-                    <div class="glass card rounded-3xl p-8 text-center max-w-xs w-full pointer-events-auto animate-bounce">
-                        <div class="text-6xl mb-4">🎉</div>
-                        <div class="text-2xl font-bold gradient-text">+$${amount.toFixed(2)} USDT</div>
-                        <div class="text-sm text-white/40 mt-2">Reward claimed!</div>
-                    </div>
-                `;
-                document.body.appendChild(div);
-            }
-            
-            const popupEl = document.getElementById('reward-popup');
-            const content = popupEl.querySelector('.gradient-text');
-            if (content) content.textContent = `+$${amount.toFixed(2)} USDT`;
-            
-            popupEl.style.display = 'flex';
-            triggerHaptic();
+        function showRewardPopup(amount, emoji = '🎉', label = 'Reward Claimed!') {
+            document.getElementById('popup-emoji').textContent = emoji;
+            document.getElementById('popup-amount').textContent = `+$${amount.toFixed(2)}`;
+            document.getElementById('popup-label').textContent = label;
+            document.getElementById('reward-popup').classList.add('show');
             
             // Confetti
             createConfetti();
-            
-            setTimeout(() => {
-                popupEl.style.display = 'none';
-            }, 2000);
+            if (navigator.vibrate) navigator.vibrate([10, 50, 10]);
+        }
+
+        function closeRewardPopup() {
+            document.getElementById('reward-popup').classList.remove('show');
         }
 
         // ==================== CONFETTI ====================
         function createConfetti() {
-            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800'];
+            const colors = ['#3B82F6', '#8B5CF6', '#F59E0B', '#22C55E', '#EC4899', '#FACC15', '#EF4444'];
             const container = document.body;
             
-            for (let i = 0; i < 30; i++) {
+            for (let i = 0; i < 40; i++) {
                 const piece = document.createElement('div');
                 piece.className = 'confetti-piece';
-                piece.style.left = Math.random() * 100 + '%';
-                piece.style.top = Math.random() * 40 + 30 + '%';
+                piece.style.left = (Math.random() * 80 + 10) + '%';
+                piece.style.top = (Math.random() * 40 + 30) + '%';
                 piece.style.background = colors[Math.floor(Math.random() * colors.length)];
                 piece.style.width = (Math.random() * 8 + 4) + 'px';
                 piece.style.height = (Math.random() * 8 + 4) + 'px';
@@ -1413,134 +1685,209 @@
                 piece.style.animationDuration = (Math.random() * 1 + 1) + 's';
                 piece.style.animationDelay = (Math.random() * 0.5) + 's';
                 container.appendChild(piece);
-                
                 setTimeout(() => piece.remove(), 2500);
             }
         }
 
         // ==================== FLOATING COINS ====================
         function createFloatingCoins() {
+            const emojis = ['🪙', '💰', '✨', '⭐', '💎'];
             const container = document.body;
-            const emojis = ['🪙', '💰', '✨', '⭐'];
             
-            for (let i = 0; i < 8; i++) {
+            for (let i = 0; i < 6; i++) {
                 const coin = document.createElement('div');
                 coin.className = 'coin-float';
                 coin.textContent = emojis[Math.floor(Math.random() * emojis.length)];
                 coin.style.left = (Math.random() * 80 + 10) + '%';
                 coin.style.top = (Math.random() * 40 + 30) + '%';
                 coin.style.fontSize = (Math.random() * 20 + 20) + 'px';
-                coin.style.animationDuration = (Math.random() * 1 + 1) + 's';
                 container.appendChild(coin);
-                
-                setTimeout(() => coin.remove(), 2500);
+                setTimeout(() => coin.remove(), 2000);
             }
         }
 
-        // ==================== UI UPDATE FUNCTIONS ====================
-        function updateBalanceUI() {
-            document.getElementById('balance-display').textContent = `$${state.balance.toFixed(2)}`;
-            document.getElementById('total-earnings').textContent = `$${state.totalEarnings.toFixed(2)}`;
-            document.getElementById('wallet-balance').textContent = `$${state.walletBalance.toFixed(2)}`;
-        }
+        // ==================== WATCH AD ====================
+        let adCooldown = false;
+        let adsWatchedToday = 3;
+        const maxAdsPerDay = 10;
 
-        function updateDailyGoalUI() {
-            const percent = Math.min((state.dailyEarned / state.dailyGoal) * 100, 100);
-            document.getElementById('daily-goal-text').textContent = `$${state.dailyEarned.toFixed(2)} / $${state.dailyGoal.toFixed(2)}`;
-            document.getElementById('daily-goal-progress').style.width = percent + '%';
-            document.getElementById('daily-goal-percent').textContent = Math.round(percent) + '% completed';
-        }
-
-        function updateAdsWatchedUI() {
-            document.getElementById('ads-watched-today').textContent = `${state.adsWatchedToday} / ${state.maxAdsPerDay}`;
-            document.getElementById('ads-progress').style.width = (state.adsWatchedToday / state.maxAdsPerDay * 100) + '%';
-        }
-
-        function addActivity(icon, text, amount) {
-            const timeline = document.getElementById('activity-timeline');
-            const item = document.createElement('div');
-            item.className = 'timeline-item';
-            item.innerHTML = `
-                <span class="time">Just now</span>
-                <span>${icon} ${text}</span>
-                <span class="ml-auto text-green-400 text-sm">${amount}</span>
-            `;
-            timeline.insertBefore(item, timeline.firstChild);
-            
-            // Keep only last 5 items
-            while (timeline.children.length > 5) {
-                timeline.removeChild(timeline.lastChild);
+        function watchAd() {
+            if (adCooldown) {
+                showToast('Please wait for cooldown ⏳', 'warning');
+                return;
             }
-        }
-
-        // ==================== REWARD CLAIM ====================
-        function claimReward() {
-            const btn = document.getElementById('reward-btn-3d');
-            const amount = 0.50 * state.bonusMultiplier;
             
+            if (adsWatchedToday >= maxAdsPerDay) {
+                showToast('Daily ad limit reached! 📊', 'warning');
+                return;
+            }
+
+            // Simulate ad watching
+            const btn = document.getElementById('watch-ad-btn');
             btn.disabled = true;
-            triggerHaptic();
+            btn.innerHTML = '<span>⏳</span> Watching Ad...';
             
-            state.balance += amount;
-            state.dailyEarned += amount;
-            state.totalEarnings += amount;
-            
-            updateBalanceUI();
-            updateDailyGoalUI();
-            showRewardPopup(amount);
-            createFloatingCoins();
-            addActivity('🎯', 'Claimed daily reward', `+$${amount.toFixed(2)}`);
-            
-            // Update earn cooldown
-            const cooldownEl = document.getElementById('earn-cooldown-timer');
-            cooldownEl.textContent = 'Claimed!';
             setTimeout(() => {
-                cooldownEl.textContent = 'Ready';
+                const reward = 0.50;
+                adsWatchedToday++;
+                updateAdUI();
+                
+                // Show reward
+                showRewardPopup(reward, '🎉', 'Ad Reward Earned!');
+                createFloatingCoins();
+                
+                // Update balance
+                updateBalance(reward);
+                
+                // Add activity
+                addActivity('📺', 'Watched ad', `+$${reward.toFixed(2)}`);
+                
+                // Start cooldown
+                startAdCooldown();
+                
                 btn.disabled = false;
-            }, 5000);
+                btn.innerHTML = `
+                    <span>📺</span>
+                    Watch Ad & Earn
+                    <span class="reward-amount" id="ad-reward-display">+$${reward.toFixed(2)}</span>
+                `;
+                
+                showToast(`+$${reward.toFixed(2)} USDT earned! 🎉`, 'success');
+            }, 2000);
+        }
+
+        function startAdCooldown() {
+            adCooldown = true;
+            const btn = document.getElementById('watch-ad-btn');
+            const cooldownEl = document.getElementById('earn-cooldown');
+            let remaining = 30;
+            
+            cooldownEl.textContent = `${remaining}s`;
+            
+            const interval = setInterval(() => {
+                remaining--;
+                if (remaining <= 0) {
+                    clearInterval(interval);
+                    adCooldown = false;
+                    cooldownEl.textContent = 'Ready';
+                    btn.disabled = false;
+                } else {
+                    cooldownEl.textContent = `${remaining}s`;
+                }
+            }, 1000);
+        }
+
+        function updateAdUI() {
+            document.getElementById('ads-today').textContent = `${adsWatchedToday}/${maxAdsPerDay}`;
+            document.getElementById('earn-ads-today').textContent = `${adsWatchedToday} / ${maxAdsPerDay}`;
+            document.getElementById('earn-ads-progress').style.width = `${(adsWatchedToday / maxAdsPerDay) * 100}%`;
+        }
+
+        // ==================== DAILY REWARD ====================
+        let dailyClaimed = false;
+
+        function claimDailyReward() {
+            if (dailyClaimed) {
+                showToast('Daily reward already claimed! ⏰', 'warning');
+                return;
+            }
+            
+            dailyClaimed = true;
+            const reward = 0.50;
+            updateBalance(reward);
+            showRewardPopup(reward, '🎁', 'Daily Reward Claimed!');
+            createFloatingCoins();
+            addActivity('🎁', 'Claimed daily reward', `+$${reward.toFixed(2)}`);
+            showToast('Daily reward claimed! 🎉', 'success');
         }
 
         // ==================== SPIN WHEEL ====================
+        let spinsToday = 3;
         let isSpinning = false;
 
         function spinWheel() {
             if (isSpinning) return;
+            if (spinsToday <= 0) {
+                showToast('No spins left today! ⏰', 'warning');
+                return;
+            }
+            
             isSpinning = true;
+            spinsToday--;
+            document.getElementById('spins-today').textContent = `${spinsToday} / 3`;
             
-            const wheel = document.getElementById('wheel');
-            const segments = 6;
-            const spinDegrees = 360 * (5 + Math.random() * 5) + Math.random() * 60;
-            
-            triggerHaptic();
+            const wheel = document.getElementById('wheel-3d');
+            const spinDegrees = 360 * (5 + Math.random() * 5) + Math.random() * 360;
             wheel.style.transform = `rotate(${spinDegrees}deg)`;
             
             setTimeout(() => {
                 isSpinning = false;
-                const rewards = ['0.25 USDT', '0.50 USDT', '💎 Bonus', '🔥 2x', '⭐ 1 USDT', '🎯 Free Spin'];
+                const rewards = [0.25, 0.50, 1.00, 2.00, 5.00, 0];
                 const reward = rewards[Math.floor(Math.random() * rewards.length)];
-                showToast(`🎰 Won: ${reward}!`, 'success');
                 
-                // Add to activity
-                addActivity('🎰', `Spin reward: ${reward}`, '');
-                createConfetti();
-                triggerHaptic();
+                if (reward > 0) {
+                    updateBalance(reward);
+                    showRewardPopup(reward, '🎡', 'Spin Win!');
+                    createFloatingCoins();
+                    addActivity('🎡', `Won $${reward.toFixed(2)} from spin`, `+$${reward.toFixed(2)}`);
+                    showToast(`🎉 Won $${reward.toFixed(2)} from spin!`, 'success');
+                    
+                    // Add to spin history
+                    const history = document.getElementById('spin-history');
+                    const item = document.createElement('div');
+                    item.className = 'glass card-premium rounded-2xl p-3 flex items-center gap-3';
+                    item.innerHTML = `
+                        <span class="text-2xl">🎉</span>
+                        <div>
+                            <div class="text-sm font-semibold">Won $${reward.toFixed(2)}</div>
+                            <div class="text-xs text-white/40">Just now</div>
+                        </div>
+                        <span class="ml-auto text-success font-bold">+$${reward.toFixed(2)}</span>
+                    `;
+                    history.insertBefore(item, history.firstChild);
+                } else {
+                    showToast('😅 Try again!', 'info');
+                }
             }, 4500);
         }
 
-        // ==================== REFERRAL FUNCTIONS ====================
+        // ==================== MYSTERY BOX ====================
+        let mysteryBoxes = 1;
+
+        function openMysteryBox() {
+            if (mysteryBoxes <= 0) {
+                showToast('No mystery boxes left! 📦', 'warning');
+                return;
+            }
+            
+            mysteryBoxes--;
+            document.getElementById('mystery-box-count').textContent = `${mysteryBoxes} available`;
+            
+            const rewards = [1.00, 2.00, 5.00, 0.50];
+            const reward = rewards[Math.floor(Math.random() * rewards.length)];
+            
+            updateBalance(reward);
+            showRewardPopup(reward, '📦', 'Mystery Box Reward!');
+            createFloatingCoins();
+            createConfetti();
+            addActivity('📦', 'Opened mystery box', `+$${reward.toFixed(2)}`);
+            showToast(`📦 Won $${reward.toFixed(2)} from mystery box!`, 'success');
+        }
+
+        // ==================== REFERRAL ====================
         function copyReferral() {
             const input = document.getElementById('referral-link');
             input.select();
             document.execCommand('copy');
-            showToast('Referral link copied!', 'success');
-            triggerHaptic();
+            showToast('Referral link copied! 📋', 'success');
+            if (navigator.vibrate) navigator.vibrate(10);
         }
 
         function shareReferral() {
             if (navigator.share) {
                 navigator.share({
-                    title: 'Join me on this app!',
-                    text: 'Use my referral link to earn rewards!',
+                    title: 'Join me on Premium Earn!',
+                    text: 'Earn USDT rewards with me! Use my referral link:',
                     url: document.getElementById('referral-link').value
                 }).catch(() => {});
             } else {
@@ -1548,104 +1895,140 @@
             }
         }
 
-        // ==================== MYSTERY BOX ====================
-        function openMysteryBox() {
-            if (state.mysteryBoxes <= 0) {
-                showToast('No mystery boxes available!', 'warning');
-                return;
-            }
-            
-            state.mysteryBoxes--;
-            document.getElementById('mystery-box-count').textContent = `${state.mysteryBoxes} available`;
-            
-            const rewards = ['1.00 USDT', '2.00 USDT', '🔥 2x Bonus', '⭐ 5 USDT', '🎯 Free Ad'];
-            const reward = rewards[Math.floor(Math.random() * rewards.length)];
-            
-            showToast(`📦 Mystery Box: ${reward}!`, 'success');
-            createConfetti();
-            createFloatingCoins();
-            triggerHaptic();
-            
-            addActivity('📦', `Mystery box: ${reward}`, '');
+        // ==================== WITHDRAW ====================
+        function showWithdrawModal() {
+            document.getElementById('withdraw-modal').classList.add('show');
         }
 
-        // ==================== WITHDRAW ====================
-        function withdrawFunds() {
-            if (state.balance < 10) {
-                showToast('Minimum withdrawal is $10 USDT', 'warning');
+        function closeWithdrawModal() {
+            document.getElementById('withdraw-modal').classList.remove('show');
+        }
+
+        function submitWithdraw() {
+            const amount = parseFloat(document.getElementById('withdraw-amount').value);
+            const address = document.getElementById('withdraw-address').value;
+            
+            if (!amount || amount < 10) {
+                showToast('Minimum withdrawal is $10 USDT', 'error');
                 return;
             }
             
-            const amount = prompt('Enter withdrawal amount (min $10):', '10.00');
-            if (!amount) return;
-            
-            const numAmount = parseFloat(amount);
-            if (isNaN(numAmount) || numAmount < 10) {
-                showToast('Invalid amount. Minimum $10.', 'error');
+            if (!address || address.length < 10) {
+                showToast('Please enter a valid wallet address', 'error');
                 return;
             }
             
-            if (numAmount > state.balance) {
+            if (amount > currentBalance) {
                 showToast('Insufficient balance!', 'error');
                 return;
             }
             
-            state.balance -= numAmount;
-            state.walletBalance -= numAmount;
-            state.walletAvailable -= numAmount;
+            closeWithdrawModal();
+            showToast('💸 Withdrawal request submitted!', 'success');
+            addActivity('💸', 'Withdrawal request', `-$${amount.toFixed(2)}`);
             
-            updateBalanceUI();
-            showToast(`💸 Withdrawal of $${numAmount.toFixed(2)} submitted!`, 'success');
-            triggerHaptic();
-            
-            // Add to transaction history
-            const history = document.getElementById('transaction-history');
+            // Update balance
+            updateBalance(-amount);
+        }
+
+        // ==================== BALANCE ====================
+        let currentBalance = 2450.50;
+
+        function updateBalance(amount) {
+            currentBalance += amount;
+            document.getElementById('home-balance').textContent = `$${currentBalance.toFixed(2)}`;
+            document.getElementById('wallet-balance').textContent = `$${currentBalance.toFixed(2)}`;
+            document.getElementById('wallet-available').textContent = `$${(currentBalance - 300).toFixed(2)}`;
+        }
+
+        // ==================== ACTIVITY ====================
+        function addActivity(icon, text, amount) {
+            const timeline = document.getElementById('activity-timeline');
             const item = document.createElement('div');
-            item.className = 'glass card rounded-2xl p-3 flex items-center gap-3';
+            item.className = 'timeline-item';
             item.innerHTML = `
-                <div class="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-400">💸</div>
-                <div>
-                    <div class="text-sm font-semibold">Withdrawal</div>
-                    <div class="text-xs text-white/40">Processing</div>
-                </div>
-                <div class="ml-auto text-sm text-yellow-400 font-semibold">-$${numAmount.toFixed(2)}</div>
+                <span class="time">Just now</span>
+                <span>${icon} ${text}</span>
+                <span class="ml-auto ${amount.startsWith('+') ? 'text-success' : 'text-red-400'} text-sm font-semibold">${amount}</span>
             `;
-            history.insertBefore(item, history.firstChild);
+            timeline.insertBefore(item, timeline.firstChild);
+            
+            while (timeline.children.length > 5) {
+                timeline.removeChild(timeline.lastChild);
+            }
+        }
+
+        // ==================== TOAST ====================
+        function showToast(message, type = 'info') {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+            
+            const colors = {
+                success: 'bg-success/90',
+                error: 'bg-red-500/90',
+                warning: 'bg-warning/90',
+                info: 'bg-primary/90'
+            };
+            
+            const toast = document.createElement('div');
+            toast.className = `toast fixed top-4 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-2xl text-white text-sm font-medium ${colors[type] || colors.info} z-[9999] backdrop-blur-lg border border-white/10`;
+            toast.textContent = message;
+            toast.style.animation = 'slideDown 0.4s ease-out';
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(-50%) translateY(-20px)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
 
         // ==================== LEADERBOARD TABS ====================
         function switchLeaderboardTab(btn) {
-            document.querySelectorAll('#page-leaderboard .glass.card.rounded-xl').forEach(b => {
+            document.querySelectorAll('#page-leaderboard .glass.card-premium.rounded-xl').forEach(b => {
                 b.classList.remove('text-white/80');
                 b.classList.add('text-white/40');
             });
             btn.classList.remove('text-white/40');
             btn.classList.add('text-white/80');
-            
             showToast(`Showing ${btn.textContent} rankings`, 'info');
         }
 
-        // ==================== INIT ====================
-        // Initialize UI
-        updateBalanceUI();
-        updateDailyGoalUI();
-        updateAdsWatchedUI();
-        
-        // Live earnings counter simulation
-        setInterval(() => {
-            const increment = (Math.random() * 0.005 + 0.001);
-            state.totalEarnings += increment;
-            document.getElementById('live-earnings').textContent = increment.toFixed(3);
-            document.getElementById('total-earnings').textContent = `$${state.totalEarnings.toFixed(2)}`;
-        }, 3000);
+        // ==================== NOTIFICATIONS ====================
+        function showNotifications() {
+            showToast('📬 No new notifications', 'info');
+        }
 
-        // Auto-start ad cooldown demo
-        setTimeout(() => {
-            startAdCooldown(15);
+        // ==================== INIT ====================
+        // Simulate live stats updates
+        setInterval(() => {
+            document.getElementById('online-users').textContent = `${Math.floor(1000 + Math.random() * 500)}`;
         }, 5000);
 
-        console.log('🚀 Premium Telegram App Loaded!');
-        console.log('📺 Ad SDK Zone: 10892289');
+        // Simulate earnings update
+        setInterval(() => {
+            const increment = Math.random() * 0.01;
+            currentBalance += increment;
+            document.getElementById('home-balance').textContent = `$${currentBalance.toFixed(2)}`;
+        }, 3000);
+
+        console.log('🚀 Premium Earn App Loaded!');
+        console.log('📱 Version 1.0.0');
+
+        // Add toast styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .toast {
+                animation: slideDown 0.4s ease-out;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            }
+            @keyframes slideDown {
+                from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+                to { opacity: 1; transform: translateX(-50%) translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
-  </html>
+    </html>

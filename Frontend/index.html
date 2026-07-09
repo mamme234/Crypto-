@@ -25,7 +25,6 @@
                     animation: {
                         'float': 'float 3s ease-in-out infinite',
                         'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
-                        'spin-slow': 'spin 3s linear infinite',
                     },
                     keyframes: {
                         float: {
@@ -611,23 +610,6 @@
             box-shadow: 0 0 30px rgba(59,130,246,0.3);
             z-index: 10;
         }
-
-        .retry-btn {
-            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
-            border: none;
-            padding: 16px 48px;
-            border-radius: 16px;
-            font-weight: 700;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
-            margin-top: 20px;
-        }
-
-        .retry-btn:active {
-            transform: scale(0.97);
-        }
     </style>
 </head>
 <body>
@@ -644,7 +626,6 @@
         <div style="font-size: 14px; color: rgba(255,255,255,0.4); margin-top: 4px; font-weight: 500;">Premium Earn</div>
         <div class="splash-loader"></div>
         <div class="splash-status" id="splash-status" style="font-size: 14px; color: rgba(255,255,255,0.4); margin-top: 20px; font-weight: 500;">Connecting to server...</div>
-        <button class="retry-btn" id="retry-btn" style="display:none;" onclick="retryConnection()">🔄 Retry Connection</button>
     </div>
 
     <!-- ===== APP ===== -->
@@ -652,10 +633,8 @@
 
         <!-- ===== HOME ===== -->
         <div id="page-home" class="page active">
-            <!-- Header -->
             <div class="flex items-center gap-3 pt-4 pb-3">
                 <div class="relative">
-                    <img id="user-avatar" src="" class="w-10 h-10 rounded-full border-2 border-white/10 object-cover" style="display:none;" />
                     <div id="user-avatar-placeholder" class="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-sm font-bold border-2 border-white/10">
                         ?
                     </div>
@@ -669,15 +648,11 @@
                     <div id="user-username" class="text-xs text-white/40">@username</div>
                 </div>
                 <div class="ml-auto flex items-center gap-3">
-                    <div class="relative">
-                        <button class="text-xl text-white/40 hover:text-white/60 transition" onclick="showNotifications()">🔔</button>
-                        <div class="w-2 h-2 bg-red-500 rounded-full absolute top-0 right-0" id="notification-dot" style="display:none;"></div>
-                    </div>
+                    <button class="text-xl text-white/40 hover:text-white/60 transition" onclick="showNotifications()">🔔</button>
                     <button class="text-xl text-white/40 hover:text-white/60 transition" onclick="navigateTo('page-profile')">⚡</button>
                 </div>
             </div>
 
-            <!-- Hero Card -->
             <div class="glass rounded-3xl p-6 mb-4 relative overflow-hidden" style="background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2)); border: 1px solid rgba(59,130,246,0.15);">
                 <div class="relative z-10">
                     <div class="flex justify-between items-start">
@@ -712,7 +687,6 @@
                 </div>
             </div>
 
-            <!-- Quick Actions -->
             <div class="grid grid-cols-4 gap-2 mb-4">
                 <button class="glass card-premium rounded-2xl p-3 text-center haptic hover:scale-105 transition" onclick="navigateTo('page-earn')">
                     <div class="text-2xl">🎥</div>
@@ -732,14 +706,12 @@
                 </button>
             </div>
 
-            <!-- Watch Ad Button -->
             <button class="watch-ad-btn mb-4" id="watch-ad-btn" onclick="watchAd()">
                 <span>📺</span>
                 Watch Ad & Earn
                 <span class="reward-amount" id="ad-reward-display">+$0.50</span>
             </button>
 
-            <!-- Live Stats -->
             <div class="grid grid-cols-4 gap-2 mb-4">
                 <div class="glass card-premium rounded-2xl p-3 text-center">
                     <div class="text-xs text-white/40">Online</div>
@@ -759,7 +731,6 @@
                 </div>
             </div>
 
-            <!-- Recent Activity -->
             <div class="flex justify-between items-center mb-3">
                 <span class="text-sm font-semibold text-white/60">📋 Recent Activity</span>
                 <button class="text-xs text-primary hover:text-secondary transition" onclick="navigateTo('page-wallet')">View All →</button>
@@ -784,10 +755,10 @@
                 <div class="flex items-center gap-3">
                     <span class="text-3xl">⚡</span>
                     <div>
-                        <div class="font-semibold" id="bonus-status">Weekend Boost Active!</div>
-                        <div class="text-sm text-white/60" id="bonus-multiplier">2x rewards on all earnings</div>
+                        <div class="font-semibold">Weekend Boost Active!</div>
+                        <div class="text-sm text-white/60">2x rewards on all earnings</div>
                     </div>
-                    <span class="ml-auto badge-premium" id="bonus-live">LIVE</span>
+                    <span class="ml-auto badge-premium">LIVE</span>
                 </div>
             </div>
 
@@ -835,7 +806,7 @@
                 <button class="glass card-premium rounded-2xl p-4 text-center haptic hover:scale-105 transition" onclick="openMysteryBox()">
                     <div class="text-3xl mb-2">📦</div>
                     <div class="text-sm font-semibold">Mystery Box</div>
-                    <div class="text-xs text-white/40" id="mystery-box-count">0 available</div>
+                    <div class="text-xs text-white/40" id="mystery-box-count">1 available</div>
                 </button>
                 <button class="glass card-premium rounded-2xl p-4 text-center haptic hover:scale-105 transition" onclick="navigateTo('page-tasks')">
                     <div class="text-3xl mb-2">📋</div>
@@ -929,9 +900,7 @@
                     <span class="text-sm font-semibold text-white/60">📅 Daily Calendar</span>
                     <span class="text-xs text-white/40" id="calendar-day">Day 0 of 30</span>
                 </div>
-                <div class="calendar-grid" id="calendar-grid">
-                    <!-- Rendered by JS -->
-                </div>
+                <div class="calendar-grid" id="calendar-grid"></div>
                 <button class="btn-primary w-full mt-4 py-2 text-sm" onclick="claimDailyReward()">🔥 Claim Daily Reward</button>
             </div>
 
@@ -939,7 +908,7 @@
                 <button class="glass card-premium rounded-2xl p-4 text-center haptic hover:scale-105 transition" onclick="openMysteryBox()">
                     <div class="text-4xl mb-2">📦</div>
                     <div class="text-sm font-semibold">Mystery Box</div>
-                    <div class="text-xs text-white/40" id="mystery-box-count-2">0 available</div>
+                    <div class="text-xs text-white/40" id="mystery-box-count-2">1 available</div>
                 </button>
                 <button class="glass card-premium rounded-2xl p-4 text-center haptic hover:scale-105 transition" onclick="navigateTo('page-profile')">
                     <div class="text-4xl mb-2">🏅</div>
@@ -1036,7 +1005,6 @@
 
             <div class="glass card-premium rounded-3xl p-6 mb-4 text-center">
                 <div class="relative inline-block">
-                    <img id="profile-avatar" src="" class="w-20 h-20 rounded-full border-4 border-white/10 object-cover mx-auto" style="display:none;" />
                     <div id="profile-avatar-placeholder" class="w-20 h-20 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-3xl font-bold mx-auto border-4 border-white/10">
                         ?
                     </div>
@@ -1144,10 +1112,7 @@
     <script>
         // ==================== CONFIGURATION ====================
         const API_URL = 'https://crypto-4bbj.onrender.com/api';
-        let isConnected = false;
-        let retryCount = 0;
-        const maxRetries = 3;
-
+        
         // ==================== PARTICLES ====================
         const canvas = document.getElementById('particles-canvas');
         const ctx = canvas.getContext('2d');
@@ -1229,12 +1194,11 @@
             achievements: [],
             tasks: [],
             leaderboard: [],
-            notifications: [],
             user: null,
             wallet: null,
         };
 
-        // ==================== API CLIENT ====================
+        // ==================== API HELPERS ====================
         async function apiCall(method, endpoint, data = null) {
             const url = `${API_URL}${endpoint}`;
             const options = {
@@ -1271,13 +1235,9 @@
         async function authenticateUser() {
             try {
                 const statusEl = document.getElementById('splash-status');
-                const retryBtn = document.getElementById('retry-btn');
-                retryBtn.style.display = 'none';
-                statusEl.style.color = 'rgba(255,255,255,0.4)';
                 statusEl.textContent = 'Connecting to server...';
 
                 if (!tg) {
-                    // Fallback for testing
                     userData = {
                         id: '123456789',
                         username: 'testuser',
@@ -1293,7 +1253,7 @@
                     }
                 }
 
-                statusEl.textContent = 'Authenticating with Telegram...';
+                statusEl.textContent = 'Authenticating...';
 
                 const response = await apiCall('/auth/telegram', 'POST', {
                     telegramId: String(userData.id),
@@ -1308,18 +1268,16 @@
                 token = response.token;
                 appState.user = response.user;
                 appState.wallet = response.wallet;
-                isConnected = true;
 
                 statusEl.textContent = 'Loading your data...';
 
-                // Load all data
                 await Promise.all([
                     fetchProfile(),
                     fetchWallet(),
                     fetchTransactions(),
                     fetchReferrals(),
                     fetchTasks(),
-                    fetchLeaderboard('daily'),
+                    fetchLeaderboard('daily')
                 ]);
 
                 statusEl.textContent = 'Welcome to Alpha Pro! 🚀';
@@ -1334,24 +1292,11 @@
 
             } catch (error) {
                 console.error('Auth error:', error);
-                isConnected = false;
                 const statusEl = document.getElementById('splash-status');
-                const retryBtn = document.getElementById('retry-btn');
-                
-                statusEl.textContent = '❌ Failed to connect. Please try again.';
+                statusEl.textContent = '❌ ' + error.message;
                 statusEl.style.color = '#EF4444';
-                retryBtn.style.display = 'block';
-                
-                if (retryCount < maxRetries) {
-                    retryCount++;
-                    setTimeout(retryConnection, 3000);
-                }
+                setTimeout(authenticateUser, 3000);
             }
-        }
-
-        function retryConnection() {
-            retryCount = 0;
-            authenticateUser();
         }
 
         // ==================== API CALLS ====================
@@ -1436,11 +1381,6 @@
 
         // ==================== ACTIONS ====================
         async function watchAd() {
-            if (!isConnected) {
-                showToast('⚠️ Please check your connection', 'error');
-                return;
-            }
-
             const btn = document.getElementById('watch-ad-btn');
             btn.disabled = true;
             btn.innerHTML = '<span>⏳</span> Watching Ad...';
@@ -1463,15 +1403,6 @@
             } catch (error) {
                 console.error('Watch ad error:', error);
                 showToast(error.message || 'Failed to watch ad', 'error');
-                // Local fallback
-                const reward = 0.50;
-                appState.balance += reward;
-                appState.adsToday += 1;
-                appState.dailyEarned += reward;
-                showRewardPopup(reward, '🎉', 'Offline Reward!');
-                createFloatingCoins();
-                addActivity('📺', 'Watched ad (offline)', `+$${reward.toFixed(2)}`);
-                updateUI();
             }
 
             btn.disabled = false;
@@ -1483,11 +1414,6 @@
         }
 
         async function claimDailyReward() {
-            if (!isConnected) {
-                showToast('⚠️ Please check your connection', 'error');
-                return;
-            }
-
             try {
                 const response = await apiCall('POST', '/rewards/daily');
                 const reward = response.reward;
@@ -1516,27 +1442,6 @@
             const spinDegrees = 360 * (5 + Math.random() * 5) + Math.random() * 360;
             wheel.style.transform = `rotate(${spinDegrees}deg)`;
 
-            if (!isConnected) {
-                // Offline spin
-                setTimeout(() => {
-                    const rewards = [0.25, 0.50, 1.00, 2.00, 5.00, 0];
-                    const reward = rewards[Math.floor(Math.random() * rewards.length)];
-                    appState.spinsToday -= 1;
-                    
-                    if (reward > 0) {
-                        appState.balance += reward;
-                        showRewardPopup(reward, '🎡', 'Offline Spin Win!');
-                        createFloatingCoins();
-                        addActivity('🎡', `Won $${reward.toFixed(2)} from spin`, `+$${reward.toFixed(2)}`);
-                        showToast(`🎉 Won $${reward.toFixed(2)} from spin!`, 'success');
-                    } else {
-                        showToast('😅 Try again!', 'info');
-                    }
-                    updateUI();
-                }, 4500);
-                return;
-            }
-
             try {
                 const response = await apiCall('POST', '/rewards/spin');
                 const reward = response.reward;
@@ -1562,21 +1467,6 @@
         async function openMysteryBox() {
             if (appState.mysteryBoxes <= 0) {
                 showToast('No mystery boxes left! 📦', 'warning');
-                return;
-            }
-
-            if (!isConnected) {
-                // Offline mystery box
-                const rewards = [1.00, 2.00, 5.00, 0.50];
-                const reward = rewards[Math.floor(Math.random() * rewards.length)];
-                appState.mysteryBoxes -= 1;
-                appState.balance += reward;
-                showRewardPopup(reward, '📦', 'Offline Mystery Box!');
-                createFloatingCoins();
-                createConfetti();
-                addActivity('📦', 'Opened mystery box', `+$${reward.toFixed(2)}`);
-                showToast(`📦 Won $${reward.toFixed(2)} from mystery box!`, 'success');
-                updateUI();
                 return;
             }
 
@@ -1612,11 +1502,6 @@
                 return;
             }
 
-            if (!isConnected) {
-                showToast('⚠️ Please check your connection', 'error');
-                return;
-            }
-
             try {
                 const response = await apiCall('POST', '/wallet/withdraw', { amount, walletAddress: address });
                 closeWithdrawModal();
@@ -1643,15 +1528,6 @@
             document.getElementById('user-username').textContent = `@${username}`;
             document.getElementById('profile-name').textContent = name;
             document.getElementById('profile-username').textContent = `@${username}`;
-
-            if (user.avatar) {
-                document.getElementById('user-avatar').src = user.avatar;
-                document.getElementById('user-avatar').style.display = 'block';
-                document.getElementById('user-avatar-placeholder').style.display = 'none';
-                document.getElementById('profile-avatar').src = user.avatar;
-                document.getElementById('profile-avatar').style.display = 'block';
-                document.getElementById('profile-avatar-placeholder').style.display = 'none';
-            }
 
             document.getElementById('user-vip').style.display = user.isVerified ? 'inline' : 'none';
 
@@ -1687,8 +1563,8 @@
             document.getElementById('referral-badge').style.display = appState.referrals > 0 ? 'block' : 'none';
 
             document.getElementById('spins-today').textContent = `${appState.spinsToday || 0} / ${appState.maxSpins}`;
-            document.getElementById('mystery-box-count').textContent = `${appState.mysteryBoxes || 0} available`;
-            document.getElementById('mystery-box-count-2').textContent = `${appState.mysteryBoxes || 0} available`;
+            document.getElementById('mystery-box-count').textContent = `${appState.mysteryBoxes || 1} available`;
+            document.getElementById('mystery-box-count-2').textContent = `${appState.mysteryBoxes || 1} available`;
             document.getElementById('achievement-count').textContent = `${appState.achievements?.length || 0}/25`;
             document.getElementById('profile-badges').textContent = appState.achievements?.length || 0;
 
@@ -1786,7 +1662,7 @@
                                     ${completed ? '<span class="text-success">✅ Completed</span>' : ''}
                                 </div>
                             </div>
-                            ${!completed ? `<button class="btn-primary px-4 py-1 text-xs" onclick="completeTask('${task._id}')">Start</button>` : ''}
+                            ${!completed ? `<button class="btn-primary px-4 py-1 text-xs" onclick="completeTask('${task.id}')">Start</button>` : ''}
                         </div>
                     </div>
                 `;
@@ -1796,11 +1672,6 @@
         }
 
         async function completeTask(taskId) {
-            if (!isConnected) {
-                showToast('⚠️ Please check your connection', 'error');
-                return;
-            }
-
             try {
                 const response = await apiCall('POST', `/tasks/${taskId}/complete`);
                 showToast('Task completed! 🎉', 'success');
@@ -2093,7 +1964,7 @@
 
         // Refresh data periodically
         setInterval(() => {
-            if (token && isConnected) {
+            if (token) {
                 fetchProfile();
                 fetchWallet();
             }
@@ -2124,4 +1995,4 @@
         console.log('📱 Connected to Telegram Mini App');
     </script>
 </body>
-                    </html>
+    </html>

@@ -26,7 +26,7 @@ const io = socketIO(server, { cors: { origin: '*' } });
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
 const BOT_TOKEN = process.env.BOT_TOKEN || 'your_telegram_bot_token';
-const MONGO_URL = process.env.MONGO_URL || 'mongodb://localhost:27017/telegram_app';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/telegram_app';
 
 // ==================== MIDDLEWARE ====================
 app.use(helmet());

@@ -610,6 +610,17 @@
             box-shadow: 0 0 30px rgba(59,130,246,0.3);
             z-index: 10;
         }
+
+        /* Confetti animation */
+        @keyframes confettiFall {
+            0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+            100% { transform: translateY(-100px) rotate(720deg) scale(0); opacity: 0; }
+        }
+
+        @keyframes coinFloat {
+            0% { transform: translateY(0) scale(0.5) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-200px) scale(1.5) rotate(360deg); opacity: 0; }
+        }
     </style>
 </head>
 <body>
@@ -631,7 +642,7 @@
     <!-- ===== APP ===== -->
     <div id="app">
 
-        <!-- ===== HOME ===== -->
+        <!-- HOME PAGE -->
         <div id="page-home" class="page active">
             <div class="flex items-center gap-3 pt-4 pb-3">
                 <div class="relative">
@@ -648,7 +659,7 @@
                     <div id="user-username" class="text-xs text-white/40">@username</div>
                 </div>
                 <div class="ml-auto flex items-center gap-3">
-                    <button class="text-xl text-white/40 hover:text-white/60 transition" onclick="showNotifications()">🔔</button>
+                    <button class="text-xl text-white/40 hover:text-white/60 transition" onclick="showToast('📬 No new notifications', 'info')">🔔</button>
                     <button class="text-xl text-white/40 hover:text-white/60 transition" onclick="navigateTo('page-profile')">⚡</button>
                 </div>
             </div>
@@ -715,15 +726,15 @@
             <div class="grid grid-cols-4 gap-2 mb-4">
                 <div class="glass card-premium rounded-2xl p-3 text-center">
                     <div class="text-xs text-white/40">Online</div>
-                    <div class="text-sm font-bold text-success" id="online-users">0</div>
+                    <div class="text-sm font-bold text-success" id="online-users">1.2k</div>
                 </div>
                 <div class="glass card-premium rounded-2xl p-3 text-center">
                     <div class="text-xs text-white/40">Payouts</div>
-                    <div class="text-sm font-bold" id="total-payouts">$0</div>
+                    <div class="text-sm font-bold" id="total-payouts">$45.2k</div>
                 </div>
                 <div class="glass card-premium rounded-2xl p-3 text-center">
                     <div class="text-xs text-white/40">Users</div>
-                    <div class="text-sm font-bold" id="total-users">0</div>
+                    <div class="text-sm font-bold" id="total-users">12.4k</div>
                 </div>
                 <div class="glass card-premium rounded-2xl p-3 text-center">
                     <div class="text-xs text-white/40">Ads Today</div>
@@ -744,7 +755,7 @@
             </div>
         </div>
 
-        <!-- ===== EARN ===== -->
+        <!-- EARN PAGE -->
         <div id="page-earn" class="page">
             <div class="flex items-center gap-3 pt-4 pb-4">
                 <button class="text-2xl text-white/40 hover:text-white/60 transition" onclick="navigateTo('page-home')">←</button>
@@ -811,12 +822,12 @@
                 <button class="glass card-premium rounded-2xl p-4 text-center haptic hover:scale-105 transition" onclick="navigateTo('page-tasks')">
                     <div class="text-3xl mb-2">📋</div>
                     <div class="text-sm font-semibold">Tasks</div>
-                    <div class="text-xs text-white/40" id="task-count">0 available</div>
+                    <div class="text-xs text-white/40" id="task-count">4 available</div>
                 </button>
             </div>
         </div>
 
-        <!-- ===== SPIN ===== -->
+        <!-- SPIN PAGE -->
         <div id="page-spin" class="page">
             <div class="flex items-center gap-3 pt-4 pb-4">
                 <button class="text-2xl text-white/40 hover:text-white/60 transition" onclick="navigateTo('page-home')">←</button>
@@ -849,7 +860,7 @@
             </div>
         </div>
 
-        <!-- ===== REFERRAL ===== -->
+        <!-- REFERRAL PAGE -->
         <div id="page-referral" class="page">
             <div class="flex items-center gap-3 pt-4 pb-4">
                 <button class="text-2xl text-white/40 hover:text-white/60 transition" onclick="navigateTo('page-home')">←</button>
@@ -888,7 +899,7 @@
             </div>
         </div>
 
-        <!-- ===== REWARDS ===== -->
+        <!-- REWARDS PAGE -->
         <div id="page-rewards" class="page">
             <div class="flex items-center gap-3 pt-4 pb-4">
                 <button class="text-2xl text-white/40 hover:text-white/60 transition" onclick="navigateTo('page-home')">←</button>
@@ -918,7 +929,7 @@
             </div>
         </div>
 
-        <!-- ===== TASKS ===== -->
+        <!-- TASKS PAGE -->
         <div id="page-tasks" class="page">
             <div class="flex items-center gap-3 pt-4 pb-4">
                 <button class="text-2xl text-white/40 hover:text-white/60 transition" onclick="navigateTo('page-home')">←</button>
@@ -929,7 +940,7 @@
             </div>
         </div>
 
-        <!-- ===== LEADERBOARD ===== -->
+        <!-- LEADERBOARD PAGE -->
         <div id="page-leaderboard" class="page">
             <div class="flex items-center gap-3 pt-4 pb-4">
                 <button class="text-2xl text-white/40 hover:text-white/60 transition" onclick="navigateTo('page-home')">←</button>
@@ -951,7 +962,7 @@
             </div>
         </div>
 
-        <!-- ===== WALLET ===== -->
+        <!-- WALLET PAGE -->
         <div id="page-wallet" class="page">
             <div class="flex items-center gap-3 pt-4 pb-4">
                 <button class="text-2xl text-white/40 hover:text-white/60 transition" onclick="navigateTo('page-home')">←</button>
@@ -996,7 +1007,7 @@
             </div>
         </div>
 
-        <!-- ===== PROFILE ===== -->
+        <!-- PROFILE PAGE -->
         <div id="page-profile" class="page">
             <div class="flex items-center gap-3 pt-4 pb-4">
                 <button class="text-2xl text-white/40 hover:text-white/60 transition" onclick="navigateTo('page-home')">←</button>
@@ -1110,9 +1121,12 @@
     </div>
 
     <script>
-        // ==================== CONFIGURATION ====================
+        // ==================== API URL ====================
+        // *** THIS IS YOUR BACKEND URL ***
         const API_URL = 'https://crypto-4bbj.onrender.com/api';
         
+        console.log('🔗 API URL:', API_URL);
+
         // ==================== PARTICLES ====================
         const canvas = document.getElementById('particles-canvas');
         const ctx = canvas.getContext('2d');
@@ -1200,7 +1214,10 @@
 
         // ==================== API HELPERS ====================
         async function apiCall(method, endpoint, data = null) {
+            // Fix: Use full URL with API_URL
             const url = `${API_URL}${endpoint}`;
+            console.log(`📡 ${method} ${url}`);
+            
             const options = {
                 method,
                 headers: {
@@ -1255,7 +1272,7 @@
 
                 statusEl.textContent = 'Authenticating...';
 
-                const response = await apiCall('/auth/telegram', 'POST', {
+                const response = await apiCall('POST', '/auth/telegram', {
                     telegramId: String(userData.id),
                     username: userData.username || 'user',
                     firstName: userData.first_name || 'User',
@@ -1730,7 +1747,7 @@
                         </div>
                         <div>
                             <div class="text-sm font-semibold">${entry.userId?.firstName || 'User'}</div>
-                            <div class="text-xs text-white/40">${entry.earnings?.toFixed(2) || 0} earned</div>
+                            <div class="text-xs text-white/40">$${entry.earnings?.toFixed(2) || 0} earned</div>
                         </div>
                         <div class="ml-auto text-sm font-bold">$${entry.earnings?.toFixed(0) || 0}</div>
                     </div>
@@ -1905,7 +1922,7 @@
                     width: ${Math.random() * 8 + 4}px;
                     height: ${Math.random() * 8 + 4}px;
                     border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
-                    animation: confetti ${Math.random() * 1 + 1}s ease-out forwards;
+                    animation: confettiFall ${Math.random() * 1 + 1}s ease-out forwards;
                     animation-delay: ${Math.random() * 0.5}s;
                 `;
                 container.appendChild(piece);
@@ -1952,11 +1969,6 @@
             }
         }
 
-        // ==================== NOTIFICATIONS ====================
-        function showNotifications() {
-            showToast('📬 No new notifications', 'info');
-        }
-
         // ==================== INIT ====================
         document.addEventListener('DOMContentLoaded', () => {
             authenticateUser();
@@ -1970,28 +1982,8 @@
             }
         }, 30000);
 
-        // Live stats updates
-        setInterval(() => {
-            document.getElementById('online-users').textContent = Math.floor(1000 + Math.random() * 500);
-            document.getElementById('total-users').textContent = Math.floor(10000 + Math.random() * 5000);
-        }, 5000);
-
-        // Add CSS animations
-        const styleSheet = document.createElement('style');
-        styleSheet.textContent = `
-            @keyframes confetti {
-                0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
-                100% { transform: translateY(-100px) rotate(720deg) scale(0); opacity: 0; }
-            }
-            @keyframes coinFloat {
-                0% { transform: translateY(0) scale(0.5) rotate(0deg); opacity: 1; }
-                100% { transform: translateY(-200px) scale(1.5) rotate(360deg); opacity: 0; }
-            }
-        `;
-        document.head.appendChild(styleSheet);
-
         console.log('⚡ Alpha Pro v2.0 - Premium Earn App');
-        console.log(`🔗 API: ${API_URL}`);
+        console.log(`🔗 API URL: ${API_URL}`);
         console.log('📱 Connected to Telegram Mini App');
     </script>
 </body>

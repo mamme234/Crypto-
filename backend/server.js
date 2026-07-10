@@ -1,5 +1,5 @@
 // ==================== ALPHA PRO BACKEND ====================
-// Complete working backend with updated reward rates
+// Complete working backend with fixed async issues
 
 require('dotenv').config();
 const express = require('express');
@@ -21,21 +21,19 @@ const BOT_TOKEN = process.env.BOT_TOKEN || 'YOUR_BOT_TOKEN_HERE';
 
 // ==================== REWARD CONFIGURATION ====================
 const REWARDS = {
-    AD_REWARD: 0.05,           // $0.05 per ad
-    DAILY_BONUS: 0.10,         // $0.10 daily bonus
-    REFERRAL_BONUS: 0.30,      // $0.30 per referral
-    SPIN_MIN: 0.03,            // $0.03 minimum spin
-    SPIN_MAX: 0.50,            // $0.50 maximum spin
-    WEEKEND_BONUS: 0.60,       // $0.60 weekend bonus
-    MYSTERY_MIN: 0.05,         // $0.05 minimum mystery box
-    MYSTERY_MAX: 0.50,         // $0.50 maximum mystery box
+    AD_REWARD: 0.05,
+    DAILY_BONUS: 0.10,
+    REFERRAL_BONUS: 0.30,
+    SPIN_MIN: 0.03,
+    SPIN_MAX: 0.50,
+    WEEKEND_BONUS: 0.60,
 };
 
 // ==================== WITHDRAWAL RULES ====================
 const WITHDRAWAL_RULES = {
-    MIN_AMOUNT: 10,            // Minimum $10 to withdraw
-    MIN_REFERRALS: 10,         // Must have 10 referrals
-    MIN_ADS_WATCHED: 500,      // Must watch 500 ads
+    MIN_AMOUNT: 10,
+    MIN_REFERRALS: 10,
+    MIN_ADS_WATCHED: 500,
 };
 
 // ==================== MIDDLEWARE ====================
@@ -267,18 +265,17 @@ if (BOT_TOKEN && BOT_TOKEN !== 'YOUR_BOT_TOKEN_HERE') {
     // ==================== BOT COMMANDS ====================
     
     // /start command
-    bot.onText(/\/start/, async (msg) => {
+    bot.onText(/\/start/, (msg) => {
         const chatId = msg.chat.id;
-        const referralCode = msg.text?.split(' ')[1] || '';
         
         const welcomeMessage = `
 🚀 *Welcome to Alpha Pro!*
 
 🎉 *Welcome to Ultimate Earn!*
 
-💰 Watch rewarded ads
-🎁 Claim daily bonuses
-👥 Invite friends
+💰 Watch rewarded ads ($0.05 each)
+🎁 Claim daily bonuses ($0.10)
+👥 Invite friends ($0.30 each)
 🏆 Climb the leaderboard
 
 Tap the button below to start your journey.
@@ -289,8 +286,7 @@ Tap the button below to start your journey.
                 inline_keyboard: [
                     [{ text: '🚀 Open Mini App', url: APP_URL }],
                     [{ text: '🎁 Claim Bonus', callback_data: 'claim_bonus' }],
-                    [{ text: '👥 Invite Friends', callback_data: 'invite_friends' }],
-                    [{ text: '🏆 Leaderboard', callback_data: 'leaderboard' }]
+                    [{ text: '👥 Invite Friends', callback_data: 'invite_friends' }]
                 ]
             },
             parse_mode: 'Markdown'
@@ -300,10 +296,10 @@ Tap the button below to start your journey.
     });
 
     // /daily command
-    bot.onText(/\/daily/, async (msg) => {
+    bot.onText(/\/daily/, (msg) => {
         const chatId = msg.chat.id;
         const message = `
-🎁 *Daily Bonus*
+🎁 *Daily Bonus ($0.10)*
 
 🔥 Your Daily Bonus is Ready!
 
@@ -315,8 +311,7 @@ Don't lose your streak.
         const options = {
             reply_markup: {
                 inline_keyboard: [
-                    [{ text: '🎁 Claim Bonus', url: APP_URL }],
-                    [{ text: '📊 Check Balance', callback_data: 'balance' }]
+                    [{ text: '🎁 Claim Bonus', url: APP_URL }]
                 ]
             },
             parse_mode: 'Markdown'
@@ -326,10 +321,10 @@ Don't lose your streak.
     });
 
     // /earn command
-    bot.onText(/\/earn/, async (msg) => {
+    bot.onText(/\/earn/, (msg) => {
         const chatId = msg.chat.id;
         const message = `
-💰 *Earn Reminder*
+💰 *Earn Reminder ($0.05 per ad)*
 
 💸 Ready to earn?
 
@@ -341,8 +336,7 @@ Complete today's tasks and grow your balance.
         const options = {
             reply_markup: {
                 inline_keyboard: [
-                    [{ text: '💰 Start Earning', url: APP_URL }],
-                    [{ text: '📋 View Tasks', callback_data: 'tasks' }]
+                    [{ text: '💰 Start Earning', url: APP_URL }]
                 ]
             },
             parse_mode: 'Markdown'
@@ -359,7 +353,7 @@ Complete today's tasks and grow your balance.
         const refLink = `${APP_URL}?start=ref_${refCode}`;
         
         const message = `
-👥 *Referral Campaign*
+👥 *Referral Campaign ($0.30 per referral)*
 
 👥 Invite Friends & Earn Together!
 
@@ -373,8 +367,7 @@ Share your referral link:
         const options = {
             reply_markup: {
                 inline_keyboard: [
-                    [{ text: '👥 Invite Now', url: `https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=Join%20Alpha%20Pro%20and%20earn%20USDT%20rewards!` }],
-                    [{ text: '📊 My Stats', callback_data: 'referral_stats' }]
+                    [{ text: '👥 Invite Now', url: `https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=Join%20Alpha%20Pro%20and%20earn%20USDT%20rewards!` }]
                 ]
             },
             parse_mode: 'Markdown'
@@ -384,7 +377,7 @@ Share your referral link:
     });
 
     // /leaderboard command
-    bot.onText(/\/leaderboard/, async (msg) => {
+    bot.onText(/\/leaderboard/, (msg) => {
         const chatId = msg.chat.id;
         const message = `
 🏆 *Weekly Leaderboard*
@@ -407,10 +400,10 @@ Complete tasks, stay active, and see your name among the best users.
     });
 
     // /spin command
-    bot.onText(/\/spin/, async (msg) => {
+    bot.onText(/\/spin/, (msg) => {
         const chatId = msg.chat.id;
         const message = `
-🎡 *Lucky Spin*
+🎡 *Lucky Spin ($0.03 - $0.50)*
 
 🎡 Your Lucky Spin Awaits!
 
@@ -421,7 +414,7 @@ Try your luck today and see what reward you unlock.
             reply_markup: {
                 inline_keyboard: [
                     [{ text: '🎡 Spin Now', url: APP_URL }]
-                ]
+            ]
             },
             parse_mode: 'Markdown'
         };
@@ -430,7 +423,7 @@ Try your luck today and see what reward you unlock.
     });
 
     // /withdraw command
-    bot.onText(/\/withdraw/, async (msg) => {
+    bot.onText(/\/withdraw/, (msg) => {
         const chatId = msg.chat.id;
         const message = `
 💳 *Withdrawal Update*
@@ -450,45 +443,7 @@ Submit your withdrawal request directly from the Mini App.
         const options = {
             reply_markup: {
                 inline_keyboard: [
-                    [{ text: '💳 Withdraw Now', url: APP_URL }],
-                    [{ text: '📊 Check Balance', callback_data: 'balance' }]
-                ]
-            },
-            parse_mode: 'Markdown'
-        };
-        
-        bot.sendMessage(chatId, message, options);
-    });
-
-    // /help command
-    bot.onText(/\/help/, async (msg) => {
-        const chatId = msg.chat.id;
-        const message = `
-📚 *Available Commands*
-
-/start - Welcome message
-/balance - Check your balance
-/daily - Claim daily reward
-/refer - Get referral link
-/earn - Start earning
-/spin - Lucky spin
-/tasks - Available tasks
-/leaderboard - Top earners
-/withdraw - Request withdrawal
-/help - This message
-
-📱 *Open App:* ${APP_URL}
-
-🌟 *Premium Features*
-Join our community to unlock more rewards!
-        `;
-        
-        const options = {
-            reply_markup: {
-                inline_keyboard: [
-                    [{ text: '🚀 Open Mini App', url: APP_URL }],
-                    [{ text: '👥 Invite Friends', callback_data: 'invite_friends' }],
-                    [{ text: '📞 Support', callback_data: 'support' }]
+                    [{ text: '💳 Withdraw Now', url: APP_URL }]
                 ]
             },
             parse_mode: 'Markdown'
@@ -515,11 +470,10 @@ Join our community to unlock more rewards!
 Balance: $${wallet?.balance.toFixed(2) || '0.00'} USDT
 Pending: $${wallet?.pendingBalance.toFixed(2) || '0.00'} USDT
 Total Earned: $${wallet?.totalEarned.toFixed(2) || '0.00'} USDT
-Total Withdrawn: $${wallet?.totalWithdrawn.toFixed(2) || '0.00'} USDT
 
 📊 *Stats*
-Referrals: ${referralsCount}
-Ads Watched: ${user?.totalAdsWatched || 0}
+Referrals: ${referralsCount} / ${WITHDRAWAL_RULES.MIN_REFERRALS}
+Ads Watched: ${user?.totalAdsWatched || 0} / ${WITHDRAWAL_RULES.MIN_ADS_WATCHED}
 Level: ${user?.level || 1}
 Streak: ${user?.streak || 0} days
         `;
@@ -527,36 +481,7 @@ Streak: ${user?.streak || 0} days
         const options = {
             reply_markup: {
                 inline_keyboard: [
-                    [{ text: '💳 Wallet', url: APP_URL }],
-                    [{ text: '📊 Transaction History', callback_data: 'history' }]
-                ]
-            },
-            parse_mode: 'Markdown'
-        };
-        
-        bot.sendMessage(chatId, message, options);
-    });
-
-    // /tasks command
-    bot.onText(/\/tasks/, async (msg) => {
-        const chatId = msg.chat.id;
-        const message = `
-📋 *Available Tasks*
-
-Complete tasks to earn rewards!
-
-1️⃣ Join Telegram Channel - $0.10
-2️⃣ Invite 5 Friends - $0.50
-3️⃣ Watch 100 Ads - $1.00
-4️⃣ Daily Login (7 days) - $0.20
-
-Open the Mini App to start completing tasks!
-        `;
-        
-        const options = {
-            reply_markup: {
-                inline_keyboard: [
-                    [{ text: '📋 View Tasks', url: APP_URL }]
+                    [{ text: '💳 Wallet', url: APP_URL }]
                 ]
             },
             parse_mode: 'Markdown'
@@ -570,7 +495,6 @@ Open the Mini App to start completing tasks!
         const chatId = callbackQuery.message.chat.id;
         const data = callbackQuery.data;
         
-        // Answer callback
         bot.answerCallbackQuery(callbackQuery.id);
         
         switch(data) {
@@ -591,63 +515,9 @@ Open the Mini App to start completing tasks!
                 bot.sendMessage(chatId, `👥 Share your referral link:\n\n${refLink}`, {
                     reply_markup: {
                         inline_keyboard: [
-                            [{ text: '📤 Share', url: `https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=Join%20Alpha%20Pro%20and%20earn%20USDT%20rewards!` }],
-                            [{ text: '📋 Copy Link', callback_data: 'copy_link' }]
+                            [{ text: '📤 Share', url: `https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=Join%20Alpha%20Pro%20and%20earn%20USDT%20rewards!` }]
                         ]
                     }
-                });
-                break;
-                
-            case 'copy_link':
-                const user2 = Object.values(users).find(u => u.telegramId === String(chatId));
-                const code = user2?.referralCode || chatId;
-                bot.sendMessage(chatId, `Your referral link: ${APP_URL}?start=ref_${code}`);
-                break;
-                
-            case 'leaderboard':
-                bot.sendMessage(chatId, '🏆 Open the Mini App to view the leaderboard!', {
-                    reply_markup: {
-                        inline_keyboard: [
-                            [{ text: '🏆 View Leaderboard', url: APP_URL }]
-                        ]
-                    }
-                });
-                break;
-                
-            case 'balance':
-                bot.sendMessage(chatId, '💰 Use /balance to check your balance');
-                break;
-                
-            case 'tasks':
-                bot.sendMessage(chatId, '📋 Use /tasks to view available tasks');
-                break;
-                
-            case 'referral_stats':
-                const user3 = Object.values(users).find(u => u.telegramId === String(chatId));
-                if (!user3) {
-                    bot.sendMessage(chatId, 'Please start the app first using /start');
-                    return;
-                }
-                const referralsCount = (referrals[user3.id] || []).length;
-                const wallet = getWallet(user3.id);
-                bot.sendMessage(chatId, `📊 *Your Referral Stats*\n\nTotal Referrals: ${referralsCount}\nReferral Earnings: $${wallet.referralEarnings.toFixed(2)}`, {
-                    parse_mode: 'Markdown'
-                });
-                break;
-                
-            case 'history':
-                bot.sendMessage(chatId, '📊 Open the Mini App to view your transaction history!', {
-                    reply_markup: {
-                        inline_keyboard: [
-                            [{ text: '💳 View History', url: APP_URL }]
-                        ]
-                    }
-                });
-                break;
-                
-            case 'support':
-                bot.sendMessage(chatId, '📞 *Support*\n\nFor any issues or questions, please contact:\n\n📧 Email: support@alphapro.com\n🐦 Telegram: @AlphaProSupport\n\nWe\'re here to help! 💪', {
-                    parse_mode: 'Markdown'
                 });
                 break;
                 
@@ -672,7 +542,7 @@ Open the Mini App to start completing tasks!
             for (const user of allUsers) {
                 try {
                     await bot.sendMessage(user.telegramId, `
-🎁 *Daily Bonus*
+🎁 *Daily Bonus ($0.10)*
 
 🔥 Your Daily Bonus is Ready!
 
@@ -703,7 +573,7 @@ Don't lose your streak.
             for (const user of allUsers) {
                 try {
                     await bot.sendMessage(user.telegramId, `
-💰 *Earn Reminder*
+💰 *Earn Reminder ($0.05 per ad)*
 
 💸 Ready to earn?
 
@@ -752,8 +622,6 @@ Complete tasks, stay active, and see your name among the best users.
     }, 60000);
 
     console.log('🤖 Bot commands and auto-messages initialized');
-    console.log('📅 Daily reminders set for 9:00 AM, 12:00 PM');
-    console.log('📅 Weekly leaderboard reminder set for Monday 10:00 AM');
 }
 
 // ==================== AUTH ROUTE ====================
@@ -936,7 +804,6 @@ app.post('/api/wallet/withdraw', auth, (req, res) => {
         const wallet = getWallet(req.userId);
         const referralsCount = (referrals[req.userId] || []).length;
         
-        // Check withdrawal rules
         if (amount < WITHDRAWAL_RULES.MIN_AMOUNT) {
             return res.status(400).json({ 
                 error: `Minimum withdrawal is $${WITHDRAWAL_RULES.MIN_AMOUNT} USDT`,
@@ -967,17 +834,15 @@ app.post('/api/wallet/withdraw', auth, (req, res) => {
             return res.status(400).json({ error: 'Insufficient balance' });
         }
         
-        // Process withdrawal
         wallet.balance -= amount;
         wallet.pendingBalance += amount;
         wallet.totalWithdrawn += amount;
         
         addTransaction(req.userId, 'withdrawal', -amount, `Withdrawal of $${amount.toFixed(2)} USDT to ${walletAddress}`, 'pending');
         
-        // Notify admin or user
         if (bot) {
             try {
-                await bot.sendMessage(user.telegramId, 
+                bot.sendMessage(user.telegramId, 
                     `💸 Withdrawal request submitted!\nAmount: $${amount.toFixed(2)} USDT\nAddress: ${walletAddress}\nStatus: Pending`
                 );
             } catch (e) {}
@@ -1028,14 +893,13 @@ app.post('/api/rewards/watch-ad', auth, (req, res) => {
             }
         }
         
-        // Weekend bonus
         const isWeekend = [0, 6].includes(moment().day());
         let reward = adReward;
         let multiplier = 1;
         
         if (isWeekend) {
             reward = REWARDS.WEEKEND_BONUS;
-            multiplier = 2;
+            multiplier = 12;
         }
         
         wallet.balance += reward;
@@ -1108,7 +972,6 @@ app.post('/api/rewards/spin', auth, (req, res) => {
             return res.status(400).json({ error: `Daily spin limit reached (${maxSpins} spins/day)` });
         }
         
-        // Spin wheel - rewards between $0.03 and $0.50
         const reward = Math.round((REWARDS.SPIN_MIN + Math.random() * (REWARDS.SPIN_MAX - REWARDS.SPIN_MIN)) * 100) / 100;
         
         if (reward > 0) {
@@ -1144,7 +1007,6 @@ app.post('/api/rewards/mystery', auth, (req, res) => {
             return res.status(400).json({ error: 'Mystery box already claimed today' });
         }
         
-        // Mystery box - rewards between $0.05 and $0.50
         const reward = Math.round((REWARDS.MYSTERY_MIN + Math.random() * (REWARDS.MYSTERY_MAX - REWARDS.MYSTERY_MIN)) * 100) / 100;
         
         if (reward > 0) {
